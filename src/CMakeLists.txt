@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.10)
+
+file(GLOB_RECURSE SRC_FILES "./*.cpp" "./*.c" "./*.cc")
+add_library(bianbuai SHARED ${SRC_FILES})
+target_include_directories(bianbuai PUBLIC "${HOME_ROOTDIR}/include")
+target_include_directories(bianbuai PUBLIC "${HOME_ROOTDIR}/include/core")
+target_include_directories(bianbuai PUBLIC "${HOME_ROOTDIR}/include/data")
+target_include_directories(bianbuai PUBLIC "${HOME_ROOTDIR}/include/processor")
+target_include_directories(bianbuai PUBLIC "${HOME_ROOTDIR}/include/task")
+target_include_directories(bianbuai PUBLIC "${HOME_ROOTDIR}/include/utils")
+target_include_directories(bianbuai PUBLIC "${HOME_ROOTDIR}/include/configs")

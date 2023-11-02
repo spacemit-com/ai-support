@@ -1,10 +1,9 @@
 #include "detection_postprocessor.h"
+#include <iostream>
 
-void DetectionPostprocessor::Postprocess(const YoloXScaleParams &scale_params,
-                                         std::vector<Ort::Value> output_tensors,
+void DetectionPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors,
                                          std::vector<Boxf> &detected_boxes,
                                          std::vector<int64_t>& input_dims,
-                                         std::vector<int64_t>& output_dims,
                                          int img_height,
                                          int img_width,
                                          float score_threshold, 
@@ -12,79 +11,96 @@ void DetectionPostprocessor::Postprocess(const YoloXScaleParams &scale_params,
                                          unsigned int topk, 
                                          unsigned int nms_type)
 {
+  std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
   std::vector<Boxf> bbox_collection;
-  const unsigned int num_anchors = output_dims.at(1); // n = ?
-  const unsigned int num_classes = output_dims.at(2) - 5;
+  Ort::Value &pred = output_tensors.at(0); // batch*13*13*3*85
+  auto outputInfo = pred.GetTensorTypeAndShapeInfo();
+  auto pred_dims = outputInfo.GetShape();
+
+  const unsigned int num_classes = pred_dims.at(4) - 5; // 20
   const float input_height = static_cast<float>(input_dims.at(2)); // e.g 640
-  const float input_width = static_cast<float>(input_dims.at(3)); // e.g 640
-
-  std::vector<YoloXAnchor> anchors;
-  std::vector<int> strides = {8, 16, 32}; // might have stride=64
-  generate_anchors(input_height, input_width, strides, anchors);
-
-  float r_ = scale_params.r;
-  int dw_ = scale_params.dw;
-  int dh_ = scale_params.dh;
+  //std::cout<<"input_height "<<input_height<<std::endl;
+  const float input_width = static_cast<float>(input_dims.at(1)); // e.g 640
+  //std::cout<<"input_width "<<input_width<<std::endl;
+  //std::cout<<"img_height "<<img_height<<std::endl;
+  //std::cout<<"img_width "<<img_width<<std::endl;
+  const float scale_height = img_height / input_height;
+  //std::cout<<"scale_height "<<scale_height<<std::endl;
+  const float scale_width = img_width / input_width;
+  //std::cout<<"scale_width"<<scale_width<<std::endl;
 
   bbox_collection.clear();
   unsigned int count = 0;
-  for (unsigned int i = 0; i < num_anchors; ++i)
+  //std::cout<<"output_size"<<pred_dims[1]<<std::endl;
+  for (unsigned int i = 0; i < pred_dims[1]; ++i)
   {
-    float obj_conf = output_tensors[0].At<float>({0, i, 4});
-    if (obj_conf < score_threshold) continue; // filter first.
-
-    float cls_conf = output_tensors[0].At<float>({0, i, 5});
-    unsigned int label = 0;
-    for (unsigned int j = 0; j < num_classes; ++j)
+    for (unsigned int j = 0; j < pred_dims[2]; ++j)
     {
-      float tmp_conf = output_tensors[0].At<float>({0, i, j + 5});
-      if (tmp_conf > cls_conf)
+      int grid_x=(416/52)*j;
+      //std::cout<<"grid_x"<<grid_x<<std::endl;
+      int grid_y=(416/52)*i;      
+      //std::cout<<"grid_y"<<grid_y<<std::endl;
+      for (unsigned int k = 0; k < pred_dims[3]; ++k)
       {
-        cls_conf = tmp_conf;
-        label = j;
+          float obj_conf = pred.At<float>({0, i, j, k, 4});
+          //std::cout<<obj_conf<<std::endl;
+          //std::cout<<score_threshold<<std::endl;
+          if (obj_conf < score_threshold) continue; // filter first.
+
+          float cls_conf = pred.At<float>({0, i, j, k, 5});
+          unsigned int label = 0;
+          for (unsigned int h = 0; h < num_classes; ++h)
+          {
+            float tmp_conf = pred.At<float>({0, i, j, k, h + 5});
+            if (tmp_conf > cls_conf)
+            {
+              cls_conf = tmp_conf;
+              label = h;
+            }
+          }
+          float conf = obj_conf * cls_conf; // cls_conf (0.,1.)
+          if (conf < score_threshold) continue; // filter
+
+          float cx = sigmoid(pred.At<float>({0, i, j, k, 0})) + grid_x;
+          //std::cout<<"cx "<<cx<<std::endl;
+          float cy = sigmoid(pred.At<float>({0, i, j, k, 1})) + grid_y;
+          //std::cout<<"cy "<<cy<<std::endl;
+          float w = exp(pred.At<float>({0, i, j, k, 2}))*36;
+          //std::cout<<"w "<<w<<std::endl;
+          float h = exp(pred.At<float>({0, i, j, k, 3}))*75;
+          //std::cout<<"h "<<h<<std::endl;
+
+          Boxf box;
+          box.x1 = (cx - w / 2.f) * scale_width;
+          //std::cout<<"box.x1 "<<box.x1<<std::endl;
+          box.y1 = (cy - h / 2.f) * scale_height;
+          //std::cout<<"box.y1 "<<box.y1<<std::endl;
+          box.x2 = (cx + w / 2.f) * scale_width;
+          //std::cout<<"box.x2 "<<box.x2<<std::endl;
+          box.y2 = (cy + h / 2.f) * scale_height;
+          //std::cout<<"box.y2 "<<box.y2<<std::endl;
+          box.score = conf;
+          //std::cout<<"box.score"<<box.score<<std::endl;
+          box.label = label;
+          box.label_text = class_names[label];
+          box.flag = true;
+          bbox_collection.push_back(box);
+          //std::cout<<"box.label_text "<<box.label_text<<std::endl;
+          count += 1; // limit boxes for nms.
+          if (count > max_nms)
+            break;
       }
-    } // argmax
-    float conf = obj_conf * cls_conf; // cls_conf (0.,1.)
-    if (conf < score_threshold) continue; // filter
-
-    const int grid0 = anchors.at(i).grid0;
-    const int grid1 = anchors.at(i).grid1;
-    const int stride = anchors.at(i).stride;
-
-    float dx = output_tensors[0].At<float>({0, i, 0});
-    float dy = output_tensors[0].At<float>({0, i, 1});
-    float dw = output_tensors[0].At<float>({0, i, 2});
-    float dh = output_tensors[0].At<float>({0, i, 3});
-
-    float cx = (dx + (float) grid0) * (float) stride;
-    float cy = (dy + (float) grid1) * (float) stride;
-    float w = std::exp(dw) * (float) stride;
-    float h = std::exp(dh) * (float) stride;
-    float x1 = ((cx - w / 2.f) - (float) dw_) / r_;
-    float y1 = ((cy - h / 2.f) - (float) dh_) / r_;
-    float x2 = ((cx + w / 2.f) - (float) dw_) / r_;
-    float y2 = ((cy + h / 2.f) - (float) dh_) / r_;
-
-    Boxf box;
-    box.x1 = std::max(0.f, x1);
-    box.y1 = std::max(0.f, y1);
-    box.x2 = std::min(x2, (float) img_width - 1.f);
-    box.y2 = std::min(y2, (float) img_height - 1.f);
-    box.score = conf;
-    box.label = label;
-    box.label_text = class_names[label];
-    box.flag = true;
-    bbox_collection.push_back(box);
-
-    count += 1; // limit boxes for nms.
-    if (count > max_nms)
-      break;
+    }
   }
-  std::cout << "detected num_anchors: " << num_anchors << "\n";
-  std::cout << "generate_bboxes num: " << bbox_collection.size() << "\n";
+  //std::cout << "generate_bboxes num: " << bbox_collection.size() << "\n";
   // 4. hard|blend|offset nms with topk.
   nms(bbox_collection, detected_boxes, iou_threshold, topk, nms_type);
-  std::cout << "detected_bboxes num: " << detected_boxes[0].label_text << "\n";
+  //std::cout << "detected_bboxes num: " << detected_boxes.size()<< "\n";
+  std::chrono::steady_clock::time_point end =
+  std::chrono::steady_clock::now();
+  std::cout << "postprocess including inference Latency: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
+              << " ms" << std::endl;
 }
 
 void DetectionPostprocessor::generate_anchors(const int target_height,

@@ -1,8 +1,3 @@
-#include <string>
-#include <vector>
-#include <iostream>
-#include <cmath>
-
 #include "ort_wrapper.h"
 
 void OrtWrapper::Init(std::string instanceName, std::string modelFilepath)
@@ -24,20 +19,36 @@ void OrtWrapper::Init(std::string instanceName, std::string modelFilepath)
     // ORT_ENABLE_ALL -> To Enable All possible optimizations
     sessionOptions_.SetGraphOptimizationLevel(
         GraphOptimizationLevel::ORT_DISABLE_ALL);
+}
 
-    Ort::TypeInfo inputTypeInfo = session_->GetInputTypeInfo(0);
-    auto inputTensorInfo = inputTypeInfo.GetTensorTypeAndShapeInfo();
-    inputDims_ = inputTensorInfo.GetShape();
-    inputDims_[0] = abs(inputDims_[0]);
+std::vector<int64_t> OrtWrapper::GetInputDims()
+{    
+    Ort::TypeInfo type_info = session_->GetInputTypeInfo(0);
+    auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
+    auto input_node_dims = tensor_info.GetShape();
+    input_node_dims[0]=abs(input_node_dims[0]);
+    return input_node_dims;
+}
 
-    Ort::TypeInfo outputTypeInfo = session_->GetOutputTypeInfo(0);
-    auto outputTensorInfo = outputTypeInfo.GetTensorTypeAndShapeInfo();
-    outputDims_ = outputTensorInfo.GetShape();
-    outputDims_[0] = abs(outputDims_[0]);
+std::vector<std::vector<int64_t>> OrtWrapper::GetOutputDims()
+{    
+    int num_outputs = session_->GetOutputCount();
+    std::vector<std::vector<int64_t>> output_node_dims;
+    output_node_dims.resize(num_outputs);
+    for (unsigned int i = 0; i < num_outputs; ++i)
+    {
+        Ort::TypeInfo output_type_info = session_->GetOutputTypeInfo(i);
+        auto output_tensor_info = output_type_info.GetTensorTypeAndShapeInfo();
+        auto output_dims = output_tensor_info.GetShape();
+        output_node_dims[i]=(output_dims);
+    }
+    return output_node_dims;
 }
 
 std::vector<Ort::Value> OrtWrapper::Invoke(std::vector<float>& input_tensor_values)
 {
+    std::chrono::steady_clock::time_point begin =
+    std::chrono::steady_clock::now();
     //Run Inference
 
     /* To run inference using ONNX Runtime, the user is responsible for creating and managing the 
@@ -56,55 +67,38 @@ std::vector<Ort::Value> OrtWrapper::Invoke(std::vector<float>& input_tensor_valu
     input_node_names[0] = input_name;
  
     // input node dims and input dims
-    Ort::TypeInfo type_info = session_->GetInputTypeInfo(0);
-    auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
-    std::vector<std::vector<int64_t>> input_node_dims;
-    auto input_dims = tensor_info.GetShape();
-    input_dims[0]=abs(input_dims[0]);
-    input_node_dims.push_back(input_dims);
+    auto input_node_dims = GetInputDims();
 
     //input tensor size
     int input_tensor_size = 1;
-    for (unsigned int i = 0; i < input_dims.size(); ++i)
-        input_tensor_size *= input_dims.at(i);
+    for (unsigned int i = 0; i < input_node_dims.size(); ++i)
+        input_tensor_size *= input_node_dims.at(i);
 
-    //output names
+
+    //output names initial and build
     std::vector<const char *> output_node_names;
+    std::vector<std::string> output_names;
     int num_outputs = session_->GetOutputCount();
-    auto output_name = session_->GetOutputNameAllocated(0, allocator);
     output_node_names.resize(num_outputs);
-    output_node_names[0] = output_name.get();
-
-    //output dims
-    std::vector<std::vector<int64_t>> output_node_dims;
-    output_node_names.resize(num_outputs);
+    for (int i = 0; i < num_outputs; i++) {
+        output_names.push_back(std::string(""));
+    }
+    
     for (unsigned int i = 0; i < num_outputs; ++i)
     {
-        Ort::TypeInfo output_type_info = session_->GetOutputTypeInfo(i);
-        auto output_tensor_info = output_type_info.GetTensorTypeAndShapeInfo();
-        auto output_dims = output_tensor_info.GetShape();
-        output_dims[0]=abs(output_dims[0]);
-        output_node_dims.push_back(output_dims);
+        auto out_name = session_->GetOutputNameAllocated(i, allocator);
+        output_names[i].append(out_name.get());
+        output_node_names[i] = output_names[i].c_str();
     }
 
-    //init output tensor values
-    int output_tensor_size = vectorProduct(output_node_dims[0]);
-    std::vector<float> output_tensor_values(output_tensor_size);
-
-    //init input tensors and output tensors
+    //init and build input tensors
     std::vector<Ort::Value> input_tensors;
-    std::vector<Ort::Value> output_tensors;
     Ort::MemoryInfo memoryInfo = Ort::MemoryInfo::CreateCpu(
         OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
 
-    //build input tensors and output tensors
     input_tensors.push_back(Ort::Value::CreateTensor<float>(
-        memoryInfo, input_tensor_values.data(), input_tensor_size, input_node_dims[0].data(),
-        input_node_dims[0].size()));
-
-    output_tensors.push_back(Ort::Value::CreateTensor<float>(
-        memoryInfo, output_tensor_values.data(), output_tensor_size,
-        output_node_dims[0].data(), output_node_dims[0].size()));
+        memoryInfo, input_tensor_values.data(), input_tensor_size, input_node_dims.data(),
+        input_node_dims.size()));
 
     //run model
     auto outputTensors = session_->Run(Ort::RunOptions{nullptr}, 
@@ -113,6 +107,11 @@ std::vector<Ort::Value> OrtWrapper::Invoke(std::vector<float>& input_tensor_valu
                  1, 
                  output_node_names.data(),
                  num_outputs);
-                 
+
+    std::chrono::steady_clock::time_point end =
+    std::chrono::steady_clock::now();
+    std::cout << "infer tensor Latency: "
+        << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
+        << " ms" << std::endl;             
     return outputTensors;
 }

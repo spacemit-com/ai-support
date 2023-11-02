@@ -10,6 +10,8 @@ float ClassificationPostprocessor::division(float num, float den)
 
 void ClassificationPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors, std::vector<std::string> labels)
 {
+    std::chrono::steady_clock::time_point begin =
+    std::chrono::steady_clock::now();
     int predId = 0;
     float activation = 0;
     float maxActivation = std::numeric_limits<float>::lowest();
@@ -25,7 +27,11 @@ void ClassificationPostprocessor::Postprocess(std::vector<Ort::Value> output_ten
             maxActivation = activation;
         }
     }
-    std::cout << "Predicted Label ID: " << predId << std::endl;
+    std::chrono::steady_clock::time_point end =
+    std::chrono::steady_clock::now();
+    std::cout << "postprocess Latency: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
+              << " ms" << std::endl;
     std::cout << "Predicted Label: " << labels.at(predId) << std::endl;
     float result;
     try {

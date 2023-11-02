@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <iostream>
 #include <stdexcept>
 
 #include "image_preprocessor.h"
@@ -9,47 +10,12 @@
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/imgproc.hpp"
 
-
-// Function to validate the input image file extension.
-bool ImagePreprocessor::imageFileExtension(std::string str)
+void ImagePreprocessor::Preprocess(cv::Mat &imageBGR, std::vector<int64_t> inputDims, std::vector<float>& input_tensors)
 {
-  // is empty throw error
-  if (str.empty())
-    throw std::runtime_error("[ ERROR ] The image File path is empty");
-
-  size_t pos = str.rfind('.');
-  if (pos == std::string::npos)
-    return false;
-
-  std::string ext = str.substr(pos+1);
-
-  if (ext == "jpg" || ext == "jpeg" || ext == "gif" || ext == "png" || ext == "jfif" || 
-        ext == "JPG" || ext == "JPEG" || ext == "GIF" || ext == "PNG" || ext == "JFIF") {
-            return true;
-  }
-
-  return false;
-}
-
-void ImagePreprocessor::Preprocess(const std::string imageFilepath, std::vector<int64_t>& inputDims, std::vector<float>& input_tensors)
-{
-    // Validate ImageFilePath
-    imageFileExtension(imageFilepath);
-    if(!imageFileExtension(imageFilepath)) {
-        throw std::runtime_error("[ ERROR ] The imageFilepath doesn't have correct image extension. Choose from jpeg, jpg, gif, png, PNG, jfif");
-    }
-    std::ifstream f(imageFilepath.c_str());
-    if(!f.good()) {
-        throw std::runtime_error("[ ERROR ] The imageFilepath is not set correctly or doesn't exist");
-    }
-    //pre-processing the Image
-    // step 1: Read an image in HWC BGR UINT8 format.
-    cv::Mat imageBGR = cv::imread(imageFilepath, cv::ImreadModes::IMREAD_COLOR);
-
-    // step 2: Resize the image.
     cv::Mat resizedImageBGR, resizedImageRGB, resizedImage, preprocessedImage;
+    //std::cout<<inputDims[3]<<std::endl;
     cv::resize(imageBGR, resizedImageBGR,
-            cv::Size(inputDims.at(3), inputDims.at(2)),
+            cv::Size(inputDims[3], inputDims[2]),
             cv::InterpolationFlags::INTER_CUBIC);
 
     // step 3: Convert the image to HWC RGB UINT8 format.
@@ -81,7 +47,5 @@ void ImagePreprocessor::Preprocess(const std::string imageFilepath, std::vector<
     std::vector<float> inputTensorValues(inputTensorSize);
     inputTensorValues.assign(preprocessedImage.begin<float>(),
                             preprocessedImage.end<float>());
-
     input_tensors = inputTensorValues;
-
 }

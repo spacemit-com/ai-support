@@ -44,7 +44,7 @@ class BaseTaskApi : public BaseUntypedTaskApi{
 
     protected:
         // Subclasses need to populate input_tensors from api_inputs.
-        virtual void Preprocess(std::string& imageFilepath, std::vector<float> &input_tensors) = 0;  
+        virtual void Preprocess(cv::Mat &img_raw, std::vector<float> &input_tensors) = 0;  
         // Subclasses need to construct OutputType object from output_tensors.
         // Original inputs are also provided as they may be needed.
         virtual void Postprocess() = 0; 

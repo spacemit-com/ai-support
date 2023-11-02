@@ -17,6 +17,7 @@
 #include "engine.h"
 #include "label_map_utils.h"
 #include "base_vision_task_api.h"
+#include "task_api_factory.h"
 
 #include "opencv2/dnn/dnn.hpp"
 #include "opencv2/imgcodecs.hpp"
@@ -29,19 +30,19 @@ class ImageClassify : public BaseVisionTaskApi
         : BaseVisionTaskApi{std::move(engine)} {}
 
     ~ImageClassify() {};
-    void Classify();
+    void Classify(std::string instanceName, std::string modelFilepath, cv::Mat &img_raw, std::string labelFilepath);
 
     protected:
     bool checkModelExtension(const std::string& filename);
     void Postprocess() override;
 
     private:
-    void Init();
+    void Init(std::string instanceName, std::string modelFilepath, cv::Mat &img_raw, std::string labelFilepath);
     void InitCheck();
     ClassificationPostprocessor postprocessor_;
     std::string instanceName_;
     std::string modelFilepath_;
-    std::string imageFilepath_;
+    cv::Mat img_raw_;
     std::string labelFilepath_;
     std::vector<std::string> labels_;
     std::vector<Ort::Value> output_tensors_;

@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <cmath>
 
 #include "types.h"
 #include "nms_utils.h"
@@ -12,19 +13,22 @@ class DetectionPostprocessor : public Postprocessor{
     public:
     DetectionPostprocessor() {};
 
-    void Postprocess(const YoloXScaleParams &scale_params,
-                    std::vector<Ort::Value> output_tensors,
+    void Postprocess(std::vector<Ort::Value> output_tensors,
                     std::vector<Boxf> &detected_boxes,
                     std::vector<int64_t>& input_dims,
-                    std::vector<int64_t>& output_dims,
                     int img_height,
                     int img_width,
                     float score_threshold = 0.25f, 
-                    float iou_threshold = 0.45f, 
+                    float iou_threshold = 0.25f, 
                     unsigned int topk = 100, 
-                    unsigned int nms_type = OFFSET);
+                    unsigned int nms_type = OFFSET
+                    );
 
-    private:   
+    private: 
+    float sigmoid(float x)
+    {
+        return (1 / (1 + exp(-x)));
+    }  
     void generate_anchors(const int target_height,
                         const int target_width,
                         std::vector<int> &strides,

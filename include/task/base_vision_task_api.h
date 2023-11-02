@@ -21,11 +21,12 @@ class BaseVisionTaskApi : public BaseTaskApi{
         BaseVisionTaskApi& operator=(const BaseVisionTaskApi&) = delete;
 
     protected:
-        void Preprocess(std::string& imageFilepath, std::vector<float> &input_tensors) override{
-            std::vector<int64_t> inputDims = GetEngine()->GetInputDims();
-            preprocessor_->Preprocess(imageFilepath, inputDims, input_tensors);
+        void Preprocess(cv::Mat &img_raw, std::vector<float> &input_tensors) override{
+            auto inputDims = GetEngine()->GetInputDims();
+            preprocessor_->Preprocess(img_raw, inputDims, input_tensors);
         }
         std::vector<Ort::Value> Infer(std::vector<float>& input_tensors) override{
+            
             return GetEngine()->Interpreter(input_tensors);
         }
     

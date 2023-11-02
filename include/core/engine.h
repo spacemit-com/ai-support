@@ -18,7 +18,7 @@ class Engine
     {return ortwrapper_.GetOutputCount();}
     std::vector<int64_t> GetInputDims()
     {return ortwrapper_.GetInputDims();}
-    std::vector<int64_t> GetOutputDims()
+    std::vector<std::vector<int64_t>> GetOutputDims()
     {return ortwrapper_.GetOutputDims();}
     std::vector<Ort::Value> Interpreter(std::vector<float> &input_values_handler);
     protected:

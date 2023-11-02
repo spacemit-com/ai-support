@@ -25,7 +25,6 @@ void hard_nms(std::vector<Boxf> &input, std::vector<Boxf> &output,
       if (merged[j]) continue;
 
       float iou = static_cast<float>(input[i].iou_of(input[j]));
-
       if (iou > iou_threshold)
       {
         merged[j] = 1;
@@ -140,7 +139,6 @@ void offset_nms(std::vector<Boxf> &input, std::vector<Boxf> &output,
       if (merged[j]) continue;
 
       float iou = static_cast<float>(input[i].iou_of(input[j]));
-
       if (iou > iou_threshold)
       {
         merged[j] = 1;

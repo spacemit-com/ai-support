@@ -1,34 +1,36 @@
 #include "object_detection.h"
 
-void ObjectDetection::Detect()
+std::vector<Boxf> ObjectDetection::Detect(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img)
 {
-    Init();
+    Init(instanceName, modelFilepath, raw_img);
     Postprocess();
+    return detected_boxes_;
 }
 
 void ObjectDetection::Postprocess()
 {
-    std::cout<<"postprocess"<<std::endl;
     std::vector<int64_t> inputDims = GetEngine()->GetInputDims();
-    std::vector<int64_t> outputDims = GetEngine()->GetOutputDims();
-    postprocessor_.Postprocess(scaleparams_, 
-                               Infer(input_tensors_), 
+    postprocessor_.Postprocess(Infer(input_tensors_), 
                                detected_boxes_, 
                                inputDims, 
-                               outputDims, 
                                img_height_, 
                                img_width_);
 }
 
-void ObjectDetection::Init()
+void ObjectDetection::Init(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img)
 {
-    instanceName_="object-detection-inference";
-    modelFilepath_="/home/gexy5/Documents/BianbuAI/data/models/yolox_tiny.onnx";
-
-    imageFilepath_="/home/gexy5/Documents/BianbuAI/data/imgs/4.jpg";
-    labelFilepath_="/home/gexy5/Documents/BianbuAI/data/labels/synset.txt";
-    labels_ = readLabels(labelFilepath_);
+    instanceName_= instanceName;
+    modelFilepath_= modelFilepath;
+    img_height_ = raw_img.rows;
+    img_width_ = raw_img.cols;
     GetEngine()->Init(instanceName_, modelFilepath_);
-    std::vector<int64_t> inputDims = GetEngine()->GetInputDims();
-    processor_.Preprocess(imageFilepath_, inputDims, input_tensors_, scaleparams_, CHW, img_height_, img_width_);
+    auto inputDims = GetEngine()->GetInputDims();
+    std::chrono::steady_clock::time_point begin =
+    std::chrono::steady_clock::now();
+    processor_.Preprocess(raw_img, inputDims, input_tensors_, CHW, img_height_, img_width_);
+    std::chrono::steady_clock::time_point end =
+    std::chrono::steady_clock::now();
+    std::cout << "preprocess Latency: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
+              << " ms" << std::endl;
 }

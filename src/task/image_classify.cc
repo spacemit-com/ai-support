@@ -1,22 +1,12 @@
-#include <iostream>
-#include <memory>
-#include <vector>
-#include <string>
-#include <stdexcept> // To use runtime_error
-
 #include "image_classify.h"
-#include "task_api_factory.h"
 
-#include "opencv2/dnn/dnn.hpp"
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/imgproc.hpp"
 
-void ImageClassify::Init()
+void ImageClassify::Init(std::string instanceName, std::string modelFilepath, cv::Mat &img_raw, std::string labelFilepath)
 {
-    instanceName_="image-classification-inference";
-    modelFilepath_="/home/gexy5/Documents/BianbuAI/data/models/squeezenet1.1-7.onnx";
-    imageFilepath_="/home/gexy5/Documents/BianbuAI/data/imgs/demo.jpeg";
-    labelFilepath_="/home/gexy5/Documents/BianbuAI/data/labels/synset.txt";
+    instanceName_=instanceName;
+    modelFilepath_=modelFilepath;
+    img_raw_ = img_raw;
+    labelFilepath_=labelFilepath;
     InitCheck();
     labels_ = readLabels(labelFilepath_);
     GetEngine()->Init(instanceName_, modelFilepath_);
@@ -27,10 +17,17 @@ void ImageClassify::Postprocess()
     postprocessor_.Postprocess(Infer(input_tensors_), labels_);
 }
 
-void ImageClassify::Classify()
-{
-    Init();
-    Preprocess(imageFilepath_, input_tensors_);
+void ImageClassify::Classify(std::string instanceName, std::string modelFilepath, cv::Mat &img_raw, std::string labelFilepath)
+{   
+    Init(instanceName, modelFilepath, img_raw, labelFilepath);
+    std::chrono::steady_clock::time_point begin =
+    std::chrono::steady_clock::now();
+    Preprocess(img_raw_, input_tensors_);
+    std::chrono::steady_clock::time_point end =
+    std::chrono::steady_clock::now();
+    std::cout << "preprocess Latency: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
+              << " ms" << std::endl;
     Postprocess();
 }
 

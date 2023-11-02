@@ -4,6 +4,9 @@
 #include <vector>
 #include <string>
 #include <numeric>
+#include <chrono>
+#include <iostream>
+#include <cmath>
 
 #include "opencv2/dnn/dnn.hpp"
 #include "opencv2/imgcodecs.hpp"
@@ -21,10 +24,8 @@ class OrtWrapper
     {return session_->GetInputCount();}
     size_t GetOutputCount()   
     {return session_->GetOutputCount();}
-    std::vector<int64_t> GetInputDims()
-    {return inputDims_;}
-    std::vector<int64_t> GetOutputDims()
-    {return outputDims_;}
+    std::vector<int64_t> GetInputDims();
+    std::vector<std::vector<int64_t>> GetOutputDims();
 
     template <typename T>
     T vectorProduct(const std::vector<T>& v)
@@ -35,8 +36,6 @@ class OrtWrapper
     std::vector<Ort::Value> Invoke(std::vector<float> &input_values_handler);
     protected:
     private:
-    std::vector<int64_t> inputDims_;
-    std::vector<int64_t> outputDims_;
     std::unique_ptr<Ort::Env> env_;
     Ort::SessionOptions sessionOptions_;
     std::unique_ptr<Ort::Session> session_;

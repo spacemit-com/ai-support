@@ -14,8 +14,8 @@ set(CMAKE_CXX_STANDARD 11)
 # via the command line or GUI
 find_package(OpenCV REQUIRED)
 
-set(HOME_ROOTDIR "/home/gexy5/Documents/BianbuAI")
-set(ONNXRUNTIME_ROOTDIR "/home/gexy5/Downloads/onnxruntime-linux-x64-1.15.1")
+set(HOME_ROOTDIR "${ROOT_DIR}/support")
+set(ONNXRUNTIME_ROOTDIR "${ORT_ROOT_DIR}")
 
 
 # Add OpenCV headers location to your include paths

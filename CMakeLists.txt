@@ -29,7 +29,7 @@ link_libraries(onnxruntime)
 link_libraries(${OpenCV_LIBS})
 
 add_subdirectory(${HOME_ROOTDIR}/src)
-option(Demo "option for Demo" OFF)
+option(Demo "option for Demo" ON)
 if (Demo)
    add_subdirectory(${HOME_ROOTDIR}/demo)
 endif()

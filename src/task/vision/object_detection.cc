@@ -3,11 +3,10 @@
 std::vector<Boxf> ObjectDetection::Detect(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img)
 {
     Init(instanceName, modelFilepath, raw_img);
-    Postprocess();
-    return detected_boxes_;
+    return Postprocess();
 }
 
-void ObjectDetection::Postprocess()
+std::vector<Boxf> ObjectDetection::Postprocess()
 {
     std::vector<int64_t> inputDims = GetEngine()->GetInputDims();
     postprocessor_.Postprocess(Infer(input_tensors_), 
@@ -15,6 +14,7 @@ void ObjectDetection::Postprocess()
                                inputDims, 
                                img_height_, 
                                img_width_);
+    return detected_boxes_;
 }
 
 void ObjectDetection::Init(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img)

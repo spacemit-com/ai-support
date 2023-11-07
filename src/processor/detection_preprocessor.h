@@ -7,7 +7,6 @@
 #include "processor.h"
 #include "cv2_utils.h"
 #include "nms_utils.h"
-#include "yolox_config.h"
 
 #include <chrono>
 

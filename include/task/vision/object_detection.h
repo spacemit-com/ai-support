@@ -9,14 +9,15 @@
 #include "opencv2/core.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgproc.hpp"
-#include "yolox_config.h"
+
+#include "types.h"
 #include "base_vision_task_api.h"
 #include "engine.h"
 #include "label_map_utils.h"
 #include "detection_preprocessor.h"
 #include "detection_postprocessor.h"
 
-class ObjectDetection : public BaseVisionTaskApi
+class ObjectDetection : public BaseVisionTaskApi<std::vector<Boxf>>
 {
     public:
     explicit ObjectDetection(std::unique_ptr<Engine> engine)
@@ -25,7 +26,7 @@ class ObjectDetection : public BaseVisionTaskApi
     std::vector<Boxf> Detect(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img);
 
     protected:
-    void Postprocess() override;
+    std::vector<Boxf> Postprocess() override;
 
     private:
     void Init(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img);

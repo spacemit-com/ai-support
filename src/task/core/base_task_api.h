@@ -32,6 +32,7 @@ class BaseUntypedTaskApi {
         std::unique_ptr<Engine> engine_;
 };
 
+template <class OutputType, class... InputTypes>
 class BaseTaskApi : public BaseUntypedTaskApi{
     public:
         explicit BaseTaskApi(std::unique_ptr<Engine> engine)
@@ -39,16 +40,23 @@ class BaseTaskApi : public BaseUntypedTaskApi{
         // BaseTaskApi is neither copyable nor movable.
         BaseTaskApi(const BaseTaskApi&) = delete;
         BaseTaskApi& operator=(const BaseTaskApi&) = delete;
-
+        std::vector<int64_t> GetInputShape()
+        {
+            return GetEngine()->GetInputDims();
+        }
         void Cancel() {};
 
     protected:
         // Subclasses need to populate input_tensors from api_inputs.
-        virtual void Preprocess(cv::Mat &img_raw, std::vector<float> &input_tensors) = 0;  
+        virtual void Preprocess(std::vector<float>& input_tensors,
+        InputTypes... api_inputs) = 0;  
         // Subclasses need to construct OutputType object from output_tensors.
         // Original inputs are also provided as they may be needed.
-        virtual void Postprocess() = 0; 
-        virtual std::vector<Ort::Value> Infer(std::vector<float>& input_tensors) = 0; 
+        virtual OutputType Postprocess() = 0; 
+        std::vector<Ort::Value> Infer(std::vector<float>& input_tensors) {
+            
+            return GetEngine()->Interpreter(input_tensors);
+        }
 };
 
 #endif

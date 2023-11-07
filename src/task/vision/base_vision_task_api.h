@@ -11,23 +11,21 @@
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/imgproc.hpp"
 
-class BaseVisionTaskApi : public BaseTaskApi{
+template <class OutputType>
+class BaseVisionTaskApi : public BaseTaskApi<OutputType, cv::Mat&>{
     public:
         explicit BaseVisionTaskApi(std::unique_ptr<Engine> engine)
-        : BaseTaskApi(std::move(engine)) {}
+        : BaseTaskApi<OutputType, cv::Mat&>(std::move(engine)) {}
         ~BaseVisionTaskApi() {};
         // BaseVisionTaskApi is neither copyable nor movable.
         BaseVisionTaskApi(const BaseVisionTaskApi&) = delete;
         BaseVisionTaskApi& operator=(const BaseVisionTaskApi&) = delete;
 
     protected:
-        void Preprocess(cv::Mat &img_raw, std::vector<float> &input_tensors) override{
-            auto inputDims = GetEngine()->GetInputDims();
+        void Preprocess(std::vector<float> &input_tensors,
+                        cv::Mat& img_raw) override{
+            auto inputDims = GetInputShape();
             preprocessor_->Preprocess(img_raw, inputDims, input_tensors);
-        }
-        std::vector<Ort::Value> Infer(std::vector<float>& input_tensors) override{
-            
-            return GetEngine()->Interpreter(input_tensors);
         }
     
     private:

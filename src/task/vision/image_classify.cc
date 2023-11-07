@@ -12,23 +12,23 @@ void ImageClassify::Init(std::string instanceName, std::string modelFilepath, cv
     GetEngine()->Init(instanceName_, modelFilepath_);
 }
 
-void ImageClassify::Postprocess()
+std::string ImageClassify::Postprocess()
 {
-    postprocessor_.Postprocess(Infer(input_tensors_), labels_);
+    return postprocessor_.Postprocess(Infer(input_tensors_), labels_);
 }
 
-void ImageClassify::Classify(std::string instanceName, std::string modelFilepath, cv::Mat &img_raw, std::string labelFilepath)
+std::string ImageClassify::Classify(std::string instanceName, std::string modelFilepath, cv::Mat &img_raw, std::string labelFilepath)
 {   
     Init(instanceName, modelFilepath, img_raw, labelFilepath);
     std::chrono::steady_clock::time_point begin =
     std::chrono::steady_clock::now();
-    Preprocess(img_raw_, input_tensors_);
+    Preprocess(input_tensors_, img_raw_);
     std::chrono::steady_clock::time_point end =
     std::chrono::steady_clock::now();
     std::cout << "preprocess Latency: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
               << " ms" << std::endl;
-    Postprocess();
+    return Postprocess();
 }
 
 void ImageClassify::InitCheck()

@@ -4,6 +4,8 @@
 ## Getting started
 
 ### install dependence
+gcc version: 11
+
 prepare opencv (at least version 4.2.0)
 ```bash
 sudo apt-get install libopencv-dev

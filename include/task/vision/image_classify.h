@@ -13,31 +13,36 @@
 #include <vector>
 #include <stdexcept> // To use runtime_error
 
-#include "classification_postprocessor.h"
 #include "engine.h"
 #include "label_map_utils.h"
 #include "base_vision_task_api.h"
-#include "task_api_factory.h"
+#include "classification_postprocessor.h"
 
 #include "opencv2/dnn/dnn.hpp"
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/imgproc.hpp"
 
-class ImageClassify : public BaseVisionTaskApi
+class ImageClassify : public BaseVisionTaskApi<std::string> 
 {
     public:
     explicit ImageClassify(std::unique_ptr<Engine> engine)
         : BaseVisionTaskApi{std::move(engine)} {}
 
     ~ImageClassify() {};
-    void Classify(std::string instanceName, std::string modelFilepath, cv::Mat &img_raw, std::string labelFilepath);
+    std::string Classify(std::string instanceName, 
+                         std::string modelFilepath, 
+                         cv::Mat &img_raw, 
+                         std::string labelFilepath);
 
     protected:
     bool checkModelExtension(const std::string& filename);
-    void Postprocess() override;
+    std::string Postprocess() override;
 
     private:
-    void Init(std::string instanceName, std::string modelFilepath, cv::Mat &img_raw, std::string labelFilepath);
+    void Init(std::string instanceName, 
+              std::string modelFilepath, 
+              cv::Mat &img_raw, 
+              std::string labelFilepath);
     void InitCheck();
     ClassificationPostprocessor postprocessor_;
     std::string instanceName_;

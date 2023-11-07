@@ -8,14 +8,14 @@ PROJECT(bianbuai)
 set(CMAKE_BUILD_TYPE "Debug" )
 #c++标准
 set(CMAKE_CXX_STANDARD 11)
-
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fpermissive -g")
 # Find OpenCV, you may need to set OpenCV_DIR variable
 # to the absolute path to the directory containing OpenCVConfig.cmake file
 # via the command line or GUI
 find_package(OpenCV REQUIRED)
 
-set(HOME_ROOTDIR "${ROOT_DIR}/support")
-set(ONNXRUNTIME_ROOTDIR "${ORT_ROOT_DIR}")
+set(HOME_ROOTDIR "/home/gexy5/Documents/bianbu-support")
+set(ONNXRUNTIME_ROOTDIR "/home/gexy5/Downloads/onnxruntime-linux-x64-1.15.1")
 
 
 # Add OpenCV headers location to your include paths

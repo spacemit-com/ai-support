@@ -8,7 +8,7 @@ float ClassificationPostprocessor::division(float num, float den)
    return (num / den);
 }
 
-void ClassificationPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors, std::vector<std::string> labels)
+std::string ClassificationPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors, std::vector<std::string> labels)
 {
     std::chrono::steady_clock::time_point begin =
     std::chrono::steady_clock::now();
@@ -32,13 +32,12 @@ void ClassificationPostprocessor::Postprocess(std::vector<Ort::Value> output_ten
     std::cout << "postprocess Latency: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
               << " ms" << std::endl;
-    std::cout << "Predicted Label: " << labels.at(predId) << std::endl;
     float result;
     try {
       result = division(std::exp(maxActivation), expSum);
-      std::cout << "Uncalibrated Confidence: " << result << std::endl;
     }
     catch (std::runtime_error& e) {
       std::cout << "Exception occurred" << std::endl << e.what();
     }
+    return labels.at(predId);
 }

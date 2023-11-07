@@ -40,7 +40,7 @@ std::vector<std::vector<int64_t>> OrtWrapper::GetOutputDims()
         Ort::TypeInfo output_type_info = session_->GetOutputTypeInfo(i);
         auto output_tensor_info = output_type_info.GetTensorTypeAndShapeInfo();
         auto output_dims = output_tensor_info.GetShape();
-        output_node_dims[i]=(output_dims);
+        output_node_dims[i]=output_dims;
     }
     return output_node_dims;
 }

@@ -1,11 +1,11 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <algorithm>
 
 #include "types.h"
 #include "nms_utils.h"
 #include "processor.h"
-#include "yolox_config.h"
 
 #include "onnxruntime_cxx_api.h"
 
@@ -19,7 +19,7 @@ class DetectionPostprocessor : public Postprocessor{
                     int img_height,
                     int img_width,
                     float score_threshold = 0.25f, 
-                    float iou_threshold = 0.25f, 
+                    float iou_threshold = 0.45f, 
                     unsigned int topk = 100, 
                     unsigned int nms_type = OFFSET
                     );
@@ -28,14 +28,16 @@ class DetectionPostprocessor : public Postprocessor{
     float sigmoid(float x)
     {
         return (1 / (1 + exp(-x)));
-    }  
-    void generate_anchors(const int target_height,
-                        const int target_width,
-                        std::vector<int> &strides,
-                        std::vector<YoloXAnchor> &anchors);
+    }
 
     void nms(std::vector<Boxf> &input, std::vector<Boxf> &output,
                 float iou_threshold, unsigned int topk, unsigned int nms_type);
+    
+    int STRIDES[3] = {8, 16, 32};
+    float XYSCALE[3] = {1.2, 1.1, 1.05};
+    int anchors[3][3][2]= {{{12,16}, {19,36}, {40,28}}, 
+                           {{36,75}, {76,55}, {72,146}}, 
+                           {{142,110}, {192,243}, {459,401}}};
     
     const char *class_names[80] = {
     "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",

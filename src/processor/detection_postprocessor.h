@@ -2,10 +2,11 @@
 #include <string>
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 
-#include "types.h"
-#include "nms_utils.h"
-#include "processor.h"
+#include "core/types.h"
+#include "src/utils/nms_utils.h"
+#include "src/processor/processor.h"
 
 #include "onnxruntime_cxx_api.h"
 
@@ -14,7 +15,7 @@ class DetectionPostprocessor : public Postprocessor{
     DetectionPostprocessor() {};
 
     void Postprocess(std::vector<Ort::Value> output_tensors,
-                    std::vector<Boxf> &detected_boxes,
+                    std::vector<Boxi> &result_boxes,
                     std::vector<int64_t>& input_dims,
                     int img_height,
                     int img_width,

@@ -1,14 +1,5 @@
-#include <string>
-#include <vector>
-#include <fstream>
-#include <iostream>
-#include <stdexcept>
+#include "src/processor/image_preprocessor.h"
 
-#include "image_preprocessor.h"
-
-#include "opencv2/dnn/dnn.hpp"
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/imgproc.hpp"
 
 void ImagePreprocessor::Preprocess(cv::Mat &imageBGR, std::vector<int64_t> inputDims, std::vector<float>& input_tensors)
 {

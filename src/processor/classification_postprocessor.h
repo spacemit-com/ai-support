@@ -8,8 +8,10 @@
 #include <cmath>
 #include <stdexcept> // To use runtime_error
 
-#include "processor.h"
 #include "onnxruntime_cxx_api.h"
+
+#include "src/processor/processor.h"
+
 
 class ClassificationPostprocessor : public Postprocessor{
     public:

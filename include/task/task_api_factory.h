@@ -3,8 +3,8 @@
 
 #include <memory>
 
-#include "base_task_api.h"
-#include "engine.h"
+#include "src/task/core/base_task_api.h"
+#include "src/core/engine.h"
 
 template <typename T>
 using EnableIfBaseUntypedTaskApiSubclass = typename std::enable_if<

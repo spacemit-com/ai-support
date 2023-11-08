@@ -3,16 +3,13 @@
 
 #include <vector>
 #include <string>
-
-#include "processor.h"
-#include "cv2_utils.h"
-#include "nms_utils.h"
-
 #include <chrono>
 
-#include "opencv2/dnn/dnn.hpp"
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/imgproc.hpp"
+#include "utils/cv2_utils.h"
+#include "src/utils/nms_utils.h"
+#include "src/processor/processor.h"
+
+#include "opencv2/opencv.hpp"
 
 class DetectionPreprocessor : public Preprocessor{
     public:

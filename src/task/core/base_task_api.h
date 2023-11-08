@@ -4,12 +4,9 @@
 #include <memory>
 #include <vector>
 
-#include "engine.h"
+#include "src/core/engine.h"
 
-#include "opencv2/dnn/dnn.hpp"
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/imgproc.hpp"
-
+#include "opencv2/opencv.hpp"
 #include "onnxruntime_cxx_api.h"
 
 

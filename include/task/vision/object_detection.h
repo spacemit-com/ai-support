@@ -6,27 +6,24 @@
 #include <iostream>
 #include <chrono>
 
-#include "opencv2/core.hpp"
-#include "opencv2/highgui.hpp"
-#include "opencv2/imgproc.hpp"
+#include "opencv2/opencv.hpp"
 
-#include "types.h"
-#include "base_vision_task_api.h"
-#include "engine.h"
-#include "label_map_utils.h"
-#include "detection_preprocessor.h"
-#include "detection_postprocessor.h"
+#include "core/types.h"
+#include "src/core/engine.h"
+#include "src/task/vision/base_vision_task_api.h"
+#include "src/processor/detection_preprocessor.h"
+#include "src/processor/detection_postprocessor.h"
 
-class ObjectDetection : public BaseVisionTaskApi<std::vector<Boxf>>
+class ObjectDetection : public BaseVisionTaskApi<std::vector<Boxi>>
 {
     public:
     explicit ObjectDetection(std::unique_ptr<Engine> engine)
         : BaseVisionTaskApi{std::move(engine)} {}
     ~ObjectDetection() {};
-    std::vector<Boxf> Detect(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img);
+    std::vector<Boxi> Detect(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img);
 
     protected:
-    std::vector<Boxf> Postprocess() override;
+    std::vector<Boxi> Postprocess() override;
 
     private:
     void Init(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img);
@@ -37,7 +34,7 @@ class ObjectDetection : public BaseVisionTaskApi<std::vector<Boxf>>
     std::vector<float> input_tensors_;
     DetectionPreprocessor processor_;
     DetectionPostprocessor postprocessor_;
-    std::vector<Boxf> detected_boxes_;
+    std::vector<Boxi> result_boxes_;
     int img_height_;
     int img_width_;
 };

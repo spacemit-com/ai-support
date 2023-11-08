@@ -5,11 +5,9 @@
 #include <stdexcept>
 #include <iostream>
 
-#include "types.h"
+#include "core/types.h"
 
-#include "opencv2/dnn/dnn.hpp"
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/imgproc.hpp"
+#include "opencv2/opencv.hpp"
 
 enum
 {
@@ -26,6 +24,6 @@ extern void normalize_inplace(cv::Mat &mat_inplace, float mean, float scale);
 
 extern void normalize_inplace(cv::Mat &mat_inplace, const float mean[3], const float scale[3]);
 
-extern void draw_boxes_inplace(cv::Mat &mat_inplace, const std::vector<Boxf> &boxes);
+extern void draw_boxes_inplace(cv::Mat &mat_inplace, const std::vector<Boxi> &boxes);
 
 #endif

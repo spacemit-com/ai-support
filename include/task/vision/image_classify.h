@@ -13,14 +13,12 @@
 #include <vector>
 #include <stdexcept> // To use runtime_error
 
-#include "engine.h"
-#include "label_map_utils.h"
-#include "base_vision_task_api.h"
-#include "classification_postprocessor.h"
+#include "src/core/engine.h"
+#include "src/utils/label_map_utils.h"
+#include "src/task/vision/base_vision_task_api.h"
+#include "src/processor/classification_postprocessor.h"
 
-#include "opencv2/dnn/dnn.hpp"
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/imgproc.hpp"
+#include "opencv2/opencv.hpp"
 
 class ImageClassify : public BaseVisionTaskApi<std::string> 
 {

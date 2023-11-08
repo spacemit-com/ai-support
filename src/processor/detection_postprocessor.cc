@@ -1,8 +1,7 @@
-#include "detection_postprocessor.h"
-#include <iostream>
+#include "src/processor/detection_postprocessor.h"
 
 void DetectionPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors,
-                                         std::vector<Boxf> &detected_boxes,
+                                         std::vector<Boxi> &result_boxes,
                                          std::vector<int64_t>& input_dims,
                                          int img_height,
                                          int img_width,
@@ -104,11 +103,28 @@ void DetectionPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors,
       }
     }
   }
+  std::vector<Boxf> detected_boxes;
   //std::cout << "generate_bboxes num: " << bbox_collection.size() << "\n";
   // 4. hard|blend|offset nms with topk.
   nms(bbox_collection, detected_boxes, iou_threshold, topk, nms_type);
   //std::cout<<detected_boxes.size()<<std::endl;
   //std::cout << "detected_bboxes num: " << detected_boxes.size()<< "\n";
+  int detected_boxes_num = detected_boxes.size();
+  for(int i = 0; i < detected_boxes_num; i++)
+  {
+    Boxi result_box;
+    result_box.x1 = int(detected_boxes[i].x1);
+    result_box.y1 = int(detected_boxes[i].y1);
+    result_box.x2 = int(detected_boxes[i].x2);
+    result_box.y2 = int(detected_boxes[i].y2);
+    result_box.label = detected_boxes[i].label;
+    result_box.score = detected_boxes[i].score;
+    result_box.label_text = detected_boxes[i].label_text;
+    result_box.flag = detected_boxes[i].flag;
+    result_boxes.push_back(result_box);
+  }
+  //std::cout<<detected_boxes.size()<<std::endl;
+  //std::cout<<result_boxes.size()<<std::endl;
   std::chrono::steady_clock::time_point end =
   std::chrono::steady_clock::now();
   std::cout << "postprocess including inference Latency: "

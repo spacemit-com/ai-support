@@ -1,4 +1,4 @@
-#include "image_classify.h"
+#include "task/vision/image_classify.h"
 
 
 void ImageClassify::Init(std::string instanceName, std::string modelFilepath, cv::Mat &img_raw, std::string labelFilepath)

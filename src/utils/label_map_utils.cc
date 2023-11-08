@@ -1,7 +1,4 @@
-#include <string>
-#include <vector>
-#include <fstream>
-#include <stdexcept> // To use runtime_error
+#include "src/utils/label_map_utils.h"
 
 bool checkLabelFileExtension(const std::string& filename)
 {

@@ -1,4 +1,4 @@
-#include "cv2_utils.h"
+#include "utils/cv2_utils.h"
 
 
 cv::Mat normalize(const cv::Mat &mat, float mean, float scale)
@@ -54,7 +54,7 @@ void normalize_inplace(cv::Mat &mat_inplace, const float *mean, const float *sca
   }
 }
 
-void draw_boxes_inplace(cv::Mat &mat_inplace, const std::vector<Boxf> &boxes)
+void draw_boxes_inplace(cv::Mat &mat_inplace, const std::vector<Boxi> &boxes)
 {
   if (boxes.empty()) return;
   for (const auto &box: boxes)

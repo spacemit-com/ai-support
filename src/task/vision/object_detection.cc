@@ -1,20 +1,20 @@
-#include "object_detection.h"
+#include "task/vision/object_detection.h"
 
-std::vector<Boxf> ObjectDetection::Detect(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img)
+std::vector<Boxi> ObjectDetection::Detect(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img)
 {
     Init(instanceName, modelFilepath, raw_img);
     return Postprocess();
 }
 
-std::vector<Boxf> ObjectDetection::Postprocess()
+std::vector<Boxi> ObjectDetection::Postprocess()
 {
     std::vector<int64_t> inputDims = GetEngine()->GetInputDims();
     postprocessor_.Postprocess(Infer(input_tensors_), 
-                               detected_boxes_, 
+                               result_boxes_, 
                                inputDims, 
                                img_height_, 
                                img_width_);
-    return detected_boxes_;
+    return result_boxes_;
 }
 
 void ObjectDetection::Init(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img)

@@ -1,15 +1,17 @@
 #ifndef _IMAGE_PREPROCESSOR_H_
 #define _IMAGE_PREPROCESSOR_H_
 
-#include <vector>
 #include <string>
 #include <numeric>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
 
-#include "processor.h"
+#include "src/processor/processor.h"
 
-#include "opencv2/dnn/dnn.hpp"
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/imgproc.hpp"
+#include "opencv2/opencv.hpp"
 
 class ImagePreprocessor : public Preprocessor{
     public:

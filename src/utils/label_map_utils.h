@@ -2,6 +2,9 @@
 #define _LABEL_MAP_UTILS_
 
 #include <string>
+#include <vector>
+#include <fstream>
+#include <stdexcept> // To use runtime_error
 
 // Function to validate the Label file extension.
 extern bool checkLabelFileExtension(const std::string& filename);

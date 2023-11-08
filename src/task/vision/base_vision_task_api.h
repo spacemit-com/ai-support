@@ -4,12 +4,10 @@
 #include <string>
 #include <vector>
 
-#include "base_task_api.h"
-#include "image_preprocessor.h"
+#include "src/task/core/base_task_api.h"
+#include "src/processor/image_preprocessor.h"
 
-#include "opencv2/dnn/dnn.hpp"
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/imgproc.hpp"
+#include "opencv2/opencv.hpp"
 
 template <class OutputType>
 class BaseVisionTaskApi : public BaseTaskApi<OutputType, cv::Mat&>{

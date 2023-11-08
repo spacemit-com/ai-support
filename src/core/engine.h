@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "ort_wrapper.h"
+#include "src/core/ort_wrapper.h"
 
 class Engine
 {

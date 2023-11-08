@@ -6,6 +6,8 @@
 
 #include "src/core/ort_wrapper.h"
 
+#include "opencv2/opencv.hpp"
+
 class Engine
 {
     public:

@@ -1,11 +1,4 @@
-#include <string>
-#include <vector>
-
 #include "src/core/engine.h"
-
-#include "opencv2/dnn/dnn.hpp"
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/imgproc.hpp"
 
 void Engine::Init(std::string instanceName, std::string modelFilepath)
 {

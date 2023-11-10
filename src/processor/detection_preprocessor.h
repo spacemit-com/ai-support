@@ -5,7 +5,7 @@
 #include <string>
 #include <chrono>
 
-#include "utils/cv2_utils.h"
+#include "src/utils/cv2_utils.h"
 #include "src/utils/nms_utils.h"
 #include "src/processor/processor.h"
 

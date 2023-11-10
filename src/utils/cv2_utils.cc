@@ -1,4 +1,4 @@
-#include "utils/cv2_utils.h"
+#include "src/utils/cv2_utils.h"
 
 
 cv::Mat normalize(const cv::Mat &mat, float mean, float scale)
@@ -50,26 +50,6 @@ void normalize_inplace(cv::Mat &mat_inplace, const float *mean, const float *sca
       p[j][0] = (p[j][0] - mean[0]) * scale[0];
       p[j][1] = (p[j][1] - mean[1]) * scale[1];
       p[j][2] = (p[j][2] - mean[2]) * scale[2];
-    }
-  }
-}
-
-void draw_boxes_inplace(cv::Mat &mat_inplace, const std::vector<Boxi> &boxes)
-{
-  if (boxes.empty()) return;
-  for (const auto &box: boxes)
-  {
-    if (box.flag)
-    {
-      cv::rectangle(mat_inplace, box.rect(), cv::Scalar(255, 255, 0), 2);
-      if (box.label_text)
-      {
-        std::string label_text(box.label_text);
-        label_text = label_text + ":" + std::to_string(box.score).substr(0, 4);
-        cv::putText(mat_inplace, label_text, box.tl(), cv::FONT_HERSHEY_SIMPLEX,
-                    0.6f, cv::Scalar(0, 255, 0), 2);
-
-      }
     }
   }
 }

@@ -1,35 +1,35 @@
 #要求的Cmake最低版本
-CMAKE_MINIMUM_REQUIRED( VERSION 3.10)
+cmake_minimum_required(VERSION 3.10)
  
 #工程名称
-PROJECT(bianbuai)
+project(bianbuai)
 
 #设置编译器编译模式：
 set(CMAKE_BUILD_TYPE "Debug" )
+
 #c++标准
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fpermissive -g")
+
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -g")
 # Find OpenCV, you may need to set OpenCV_DIR variable
 # to the absolute path to the directory containing OpenCVConfig.cmake file
 # via the command line or GUI
 find_package(OpenCV REQUIRED)
 
-set(HOME_ROOTDIR "/home/gexy5/Documents/bianbu-support")
 set(ONNXRUNTIME_ROOTDIR "/home/gexy5/Downloads/onnxruntime-linux-x64-1.15.1")
 
 
 # Add OpenCV headers location to your include paths
 include_directories(${OpenCV_INCLUDE_DIRS})
-include_directories("${ONNXRUNTIME_ROOTDIR}/include"                           # Pre-built package
-                    "${ONNXRUNTIME_ROOTDIR}/include/onnxruntime"               # Linux local install to /usr/local
-                    "${ONNXRUNTIME_ROOTDIR}/include/onnxruntime/core/session") # Windows local install
+include_directories("${ONNXRUNTIME_ROOTDIR}/include")
 
 link_directories("${ONNXRUNTIME_ROOTDIR}/lib")
 link_libraries(onnxruntime)
 link_libraries(${OpenCV_LIBS})
 
-add_subdirectory(${HOME_ROOTDIR}/src)
+add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 option(Demo "option for Demo" ON)
 if (Demo)
-   add_subdirectory(${HOME_ROOTDIR}/demo)
+   add_subdirectory(${CMAKE_SOURCE_DIR}/demo)
 endif()

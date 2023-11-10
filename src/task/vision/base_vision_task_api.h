@@ -12,8 +12,7 @@
 template <class OutputType>
 class BaseVisionTaskApi : public BaseTaskApi<OutputType, cv::Mat&>{
     public:
-        explicit BaseVisionTaskApi(std::unique_ptr<Engine> engine)
-        : BaseTaskApi<OutputType, cv::Mat&>(std::move(engine)) {}
+        BaseVisionTaskApi():BaseTaskApi<OutputType, cv::Mat&>() {};
         ~BaseVisionTaskApi() {};
         // BaseVisionTaskApi is neither copyable nor movable.
         BaseVisionTaskApi(const BaseVisionTaskApi&) = delete;

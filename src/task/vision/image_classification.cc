@@ -1,7 +1,7 @@
-#include "task/vision/image_classify.h"
+#include "src/task/vision/image_classification.h"
 
 
-void ImageClassify::Init(std::string instanceName, std::string modelFilepath, cv::Mat &img_raw, std::string labelFilepath)
+int imageClassification::Init(std::string instanceName, std::string modelFilepath, cv::Mat &img_raw, std::string labelFilepath)
 {
     instanceName_=instanceName;
     modelFilepath_=modelFilepath;
@@ -9,17 +9,17 @@ void ImageClassify::Init(std::string instanceName, std::string modelFilepath, cv
     labelFilepath_=labelFilepath;
     InitCheck();
     labels_ = readLabels(labelFilepath_);
-    GetEngine()->Init(instanceName_, modelFilepath_);
+    return GetEngine()->Init(instanceName_, modelFilepath_);
 }
 
-std::string ImageClassify::Postprocess()
+std::string imageClassification::Postprocess()
 {
     return postprocessor_.Postprocess(Infer(input_tensors_), labels_);
 }
 
-std::string ImageClassify::Classify(std::string instanceName, std::string modelFilepath, cv::Mat &img_raw, std::string labelFilepath)
+std::string imageClassification::Classify(std::string instanceName, std::string modelFilepath, cv::Mat &img_raw, std::string labelFilepath)
 {   
-    Init(instanceName, modelFilepath, img_raw, labelFilepath);
+    int flag = Init(instanceName, modelFilepath, img_raw, labelFilepath);
     std::chrono::steady_clock::time_point begin =
     std::chrono::steady_clock::now();
     Preprocess(input_tensors_, img_raw_);
@@ -31,7 +31,7 @@ std::string ImageClassify::Classify(std::string instanceName, std::string modelF
     return Postprocess();
 }
 
-void ImageClassify::InitCheck()
+void imageClassification::InitCheck()
 {
     if(!checkModelExtension(modelFilepath_)) {
         throw std::runtime_error("[ ERROR ] The ModelFilepath is not correct. Make sure you are setting the path to an onnx model file (.onnx)");
@@ -43,7 +43,7 @@ void ImageClassify::InitCheck()
     }
 }
 
-bool ImageClassify::checkModelExtension(const std::string& filename)
+bool imageClassification::checkModelExtension(const std::string& filename)
 {
     if(filename.empty())
     {

@@ -7,10 +7,9 @@
 #include <chrono>
 #include <iostream>
 #include <cmath>
+#include <memory>
 
-#include "opencv2/dnn/dnn.hpp"
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/imgproc.hpp"
+#include "opencv2/opencv.hpp"
 
 #include "onnxruntime_cxx_api.h"
 
@@ -19,7 +18,7 @@ class OrtWrapper
     public:
     OrtWrapper() {};
     ~OrtWrapper() {};
-    void Init(std::string instanceName, std::string modelFilepath);
+    int Init(std::string instanceName, std::string modelFilepath);
     size_t GetInputCount()
     {return session_->GetInputCount();}
     size_t GetOutputCount()   
@@ -40,5 +39,4 @@ class OrtWrapper
     Ort::SessionOptions sessionOptions_;
     std::unique_ptr<Ort::Session> session_;
 };
-
 #endif

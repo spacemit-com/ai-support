@@ -20,13 +20,11 @@
 
 #include "opencv2/opencv.hpp"
 
-class ImageClassify : public BaseVisionTaskApi<std::string> 
+class imageClassification : public BaseVisionTaskApi<std::string> 
 {
     public:
-    explicit ImageClassify(std::unique_ptr<Engine> engine)
-        : BaseVisionTaskApi{std::move(engine)} {}
-
-    ~ImageClassify() {};
+    imageClassification():BaseVisionTaskApi<std::string>() {};
+    ~imageClassification() {};
     std::string Classify(std::string instanceName, 
                          std::string modelFilepath, 
                          cv::Mat &img_raw, 
@@ -37,7 +35,7 @@ class ImageClassify : public BaseVisionTaskApi<std::string>
     std::string Postprocess() override;
 
     private:
-    void Init(std::string instanceName, 
+    int Init(std::string instanceName, 
               std::string modelFilepath, 
               cv::Mat &img_raw, 
               std::string labelFilepath);

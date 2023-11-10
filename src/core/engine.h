@@ -11,9 +11,12 @@
 class Engine
 {
     public:
-    Engine() {};
+    Engine()
+    {
+        OrtWrapper ortwrapper_;
+    }
     ~Engine() {};
-    void Init(std::string instanceName, std::string modelFilepath);
+    int Init(std::string instanceName, std::string modelFilepath);
     size_t GetInputCount()
     {return ortwrapper_.GetInputCount();}
     size_t GetOutputCount()   

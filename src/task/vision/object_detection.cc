@@ -1,8 +1,8 @@
-#include "task/vision/object_detection.h"
+#include "src/task/vision/object_detection.h"
 
 std::vector<Boxi> ObjectDetection::Detect(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img)
 {
-    Init(instanceName, modelFilepath, raw_img);
+    int flag = Init(instanceName, modelFilepath, raw_img);
     return Postprocess();
 }
 
@@ -17,13 +17,13 @@ std::vector<Boxi> ObjectDetection::Postprocess()
     return result_boxes_;
 }
 
-void ObjectDetection::Init(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img)
+int ObjectDetection::Init(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img)
 {
     instanceName_= instanceName;
     modelFilepath_= modelFilepath;
     img_height_ = raw_img.rows;
     img_width_ = raw_img.cols;
-    GetEngine()->Init(instanceName_, modelFilepath_);
+    int flag = GetEngine()->Init(instanceName_, modelFilepath_);
     auto inputDims = GetEngine()->GetInputDims();
     std::chrono::steady_clock::time_point begin =
     std::chrono::steady_clock::now();
@@ -33,4 +33,5 @@ void ObjectDetection::Init(std::string &instanceName, std::string &modelFilepath
     std::cout << "preprocess Latency: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
               << " ms" << std::endl;
+    return flag;
 }

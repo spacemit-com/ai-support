@@ -1,11 +1,11 @@
 #include "src/core/ort_wrapper.h"
 
-void OrtWrapper::Init(std::string instanceName, std::string modelFilepath)
+int OrtWrapper::Init(std::string instanceName, std::string modelFilepath)
 {
     std::unique_ptr<Ort::Env> env(new Ort::Env(OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING,
                  instanceName.c_str()));
-    env_= std::move(env);
     //Creation: The Ort::Session is created here
+    env_= std::move(env);
     std::unique_ptr<Ort::Session> session(new Ort::Session(*env_, modelFilepath.c_str(), sessionOptions_));
     session_=std::move(session);
     sessionOptions_.SetIntraOpNumThreads(4);
@@ -19,6 +19,7 @@ void OrtWrapper::Init(std::string instanceName, std::string modelFilepath)
     // ORT_ENABLE_ALL -> To Enable All possible optimizations
     sessionOptions_.SetGraphOptimizationLevel(
         GraphOptimizationLevel::ORT_DISABLE_ALL);
+    return 1;
 }
 
 std::vector<int64_t> OrtWrapper::GetInputDims()

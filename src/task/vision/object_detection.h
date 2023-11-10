@@ -17,8 +17,7 @@
 class ObjectDetection : public BaseVisionTaskApi<std::vector<Boxi>>
 {
     public:
-    explicit ObjectDetection(std::unique_ptr<Engine> engine)
-        : BaseVisionTaskApi{std::move(engine)} {}
+    ObjectDetection(): BaseVisionTaskApi<std::vector<Boxi>>() {};
     ~ObjectDetection() {};
     std::vector<Boxi> Detect(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img);
 
@@ -26,7 +25,7 @@ class ObjectDetection : public BaseVisionTaskApi<std::vector<Boxi>>
     std::vector<Boxi> Postprocess() override;
 
     private:
-    void Init(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img);
+    int Init(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img);
     std::string instanceName_;
     std::string modelFilepath_;
     std::string labelFilepath_;

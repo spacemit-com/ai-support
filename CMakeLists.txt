@@ -3,10 +3,8 @@ cmake_minimum_required(VERSION 3.10)
  
 #工程名称
 project(bianbuai)
-
 #设置编译器编译模式：
-set(CMAKE_BUILD_TYPE "Debug" )
-
+set(CMAKE_BUILD_TYPE ${BUILD_TYPE})
 #c++标准
 set(CMAKE_CXX_STANDARD 11)
 
@@ -17,14 +15,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -g")
 # via the command line or GUI
 find_package(OpenCV REQUIRED)
 
-set(ONNXRUNTIME_ROOTDIR "/home/gexy5/Downloads/onnxruntime-linux-x64-1.15.1")
-
-
 # Add OpenCV headers location to your include paths
 include_directories(${OpenCV_INCLUDE_DIRS})
-include_directories("${ONNXRUNTIME_ROOTDIR}/include")
+include_directories("${ORT_HOME}/include")
 
-link_directories("${ONNXRUNTIME_ROOTDIR}/lib")
+link_directories("${ORT_HOME}/lib")
 link_libraries(onnxruntime)
 link_libraries(${OpenCV_LIBS})
 

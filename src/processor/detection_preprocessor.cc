@@ -50,11 +50,9 @@ void DetectionPreprocessor::resize_unscale(const cv::Mat& mat,
   if (mat.empty()) return;
   int img_height = static_cast<int>(mat.rows);
   int img_width = static_cast<int>(mat.cols);
-  //std::cout<<img_height<<" "<<img_width<<std::endl;
   mat_rs = cv::Mat(target_height, target_width, CV_8UC3,
                    cv::Scalar(128, 128, 128));
   // scale ratio (new / old) new_shape(h,w)
-  //std::cout<<target_width<<" "<<target_height<<std::endl;
   float w_r = (float) target_width / (float) img_width;
   float h_r = (float) target_height / (float) img_height;
   float r = std::min(w_r, h_r);
@@ -71,8 +69,5 @@ void DetectionPreprocessor::resize_unscale(const cv::Mat& mat,
   cv::Mat new_unpad_mat;
   // cv::Mat new_unpad_mat = mat.clone(); // may not need clone.
   cv::resize(mat, new_unpad_mat, cv::Size(new_unpad_w, new_unpad_h));
-  //std::cout<<new_unpad_w<<new_unpad_h<<std::endl;
-  //std::cout<<"new_unpad_mat.rows"<<new_unpad_mat.rows<<std::endl;
-  //std::cout<<"new_unpad_mat.cols"<<new_unpad_mat.cols<<std::endl;
   new_unpad_mat.copyTo(mat_rs(cv::Rect(dw, dh, new_unpad_w, new_unpad_h)));
 }

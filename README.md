@@ -24,6 +24,7 @@ mkdir build
 cd build
 cmake -DORT_HOME = ${ONNXRUNTIME_HOME_ROOT_DIR} -DBUILD_TYPE = ${CMAKE_BUILD_TYPE} ..
 make -j16
+make install
 ```
 
 ### run demo

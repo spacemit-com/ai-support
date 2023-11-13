@@ -28,3 +28,13 @@ option(Demo "option for Demo" ON)
 if (Demo)
    add_subdirectory(${CMAKE_SOURCE_DIR}/demo)
 endif()
+
+# 安装编译产物
+install(TARGETS bianbuai
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+
+# 安装 include 文件
+install(DIRECTORY include/ DESTINATION include/
+        FILES_MATCHING PATTERN "*.h")

@@ -31,5 +31,5 @@ make install
 
 ```bash
 ./detection_demo
-./classify_demo 
+./classification_demo 
 ```

@@ -31,5 +31,6 @@ make install
 
 ```bash
 ./detection_demo
+./detection_stream_demo
 ./classification_demo 
 ```

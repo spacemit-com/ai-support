@@ -22,7 +22,7 @@ change  {SUPPORT_ROOT_PATH}/support/CMakeLists.txt to set {ROOT_DIR} and {ORT_RO
 cd ${SUPPORT_ROOT_PATH}/support
 mkdir build
 cd build
-cmake -DORT_HOME = ${ONNXRUNTIME_HOME_ROOT_DIR} -DBUILD_TYPE = ${CMAKE_BUILD_TYPE} ..
+cmake -DORT_HOME=${ONNXRUNTIME_HOME_ROOT_DIR} -DBUILD_TYPE=${CMAKE_BUILD_TYPE} ..
 make -j16
 make install
 ```

@@ -21,7 +21,7 @@ class BaseVisionTaskApi : public BaseTaskApi<OutputType, cv::Mat&>{
     protected:
         void Preprocess(std::vector<float> &input_tensors,
                         cv::Mat& img_raw) override{
-            auto inputDims = GetInputShape();
+            auto inputDims = this->GetInputShape();
             preprocessor_->Preprocess(img_raw, inputDims, input_tensors);
         }
     

@@ -12,9 +12,10 @@
 
 class BaseUntypedTaskApi {
     public:
-        explicit BaseUntypedTaskApi(std::unique_ptr<Engine> engine)
-            : engine_{std::move(engine)} {}
-
+        BaseUntypedTaskApi()
+        {
+            engine_ = std::unique_ptr<Engine>(new Engine());
+        }
         virtual ~BaseUntypedTaskApi() = default;
 
     protected:
@@ -23,17 +24,18 @@ class BaseUntypedTaskApi {
         // function.
         //
         // Returns a raw pointer to the underlying TfLiteEngine.
-        Engine* GetEngine() { return engine_.get(); }
-
-    private:
-        std::unique_ptr<Engine> engine_;
+        Engine* GetEngine() 
+        { 
+            return engine_.get(); 
+        }
+        std::unique_ptr<Engine> engine_;        
 };
 
 template <class OutputType, class... InputTypes>
 class BaseTaskApi : public BaseUntypedTaskApi{
     public:
-        explicit BaseTaskApi(std::unique_ptr<Engine> engine)
-        : BaseUntypedTaskApi(std::move(engine)) {}
+        BaseTaskApi():BaseUntypedTaskApi() {};
+        ~BaseTaskApi() {};
         // BaseTaskApi is neither copyable nor movable.
         BaseTaskApi(const BaseTaskApi&) = delete;
         BaseTaskApi& operator=(const BaseTaskApi&) = delete;
@@ -50,8 +52,7 @@ class BaseTaskApi : public BaseUntypedTaskApi{
         // Subclasses need to construct OutputType object from output_tensors.
         // Original inputs are also provided as they may be needed.
         virtual OutputType Postprocess() = 0; 
-        std::vector<Ort::Value> Infer(std::vector<float>& input_tensors) {
-            
+        std::vector<Ort::Value> Infer(std::vector<float>& input_tensors) {    
             return GetEngine()->Interpreter(input_tensors);
         }
 };

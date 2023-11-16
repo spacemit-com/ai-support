@@ -5,8 +5,8 @@ int main()
 {
     std::string instanceName="object-detection-inference";
     std::string modelFilepath="/home/gexy5/Documents/bianbu-support/data/models/yolov4.onnx";
-    std::string imageFilepath="/home/gexy5/Documents/bianbu-support/data/imgs/4.jpg";
-    std::string saveImgpath="/home/gexy5/Documents/bianbu-support/data/imgs/4_result.jpg";
+    std::string imageFilepath="/home/gexy5/Documents/bianbu-support/data/imgs/person.jpg";
+    std::string saveImgpath="/home/gexy5/Documents/bianbu-support/data/imgs/person_result.jpg";
     cv::Mat imgRaw = cv::imread(imageFilepath);
     std::vector<Boxi> resultBoxes;
     objectDetectionTask objectdetectiontask;

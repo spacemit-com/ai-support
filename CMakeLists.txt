@@ -27,11 +27,13 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 option(Demo "option for Demo" ON)
 if (Demo)
    add_subdirectory(${CMAKE_SOURCE_DIR}/demo)
-   install(TARGETS detection_demo classification_demo
-      RUNTIME DESTINATION bin
-      LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib)
 endif()
+
+install(TARGETS detection_demo classification_demo detection_stream_demo
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+
 install(TARGETS bianbuai
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib

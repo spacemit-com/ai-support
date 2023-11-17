@@ -1,5 +1,5 @@
 #要求的Cmake最低版本
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.22.1)
  
 #工程名称
 project(bianbuai)

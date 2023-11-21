@@ -6,7 +6,7 @@ project(bianbuai)
 #设置编译器编译模式：
 set(CMAKE_BUILD_TYPE ${BUILD_TYPE})
 #c++标准
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -g")

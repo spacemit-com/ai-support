@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <chrono>
+#include <numeric>
 
 #include "src/utils/cv2_utils.h"
 #include "src/utils/nms_utils.h"
@@ -19,11 +20,14 @@ class DetectionPreprocessor : public Preprocessor{
     void Preprocess(cv::Mat &mat, 
                     std::vector<int64_t>& input_node_dims, 
                     std::vector<float>& input_tensor_value,
-                    unsigned int data_format,
-                    int img_height,
-                    int img_width);
+                    unsigned int data_format);
     
     private:
+    template <typename T>
+    T vectorProduct(const std::vector<T>& v)
+    {
+        return accumulate(v.begin(), v.end(), 1, std::multiplies<T>());
+    }
     void resize_unscale(const cv::Mat& mat, 
                         cv::Mat& mat_rs,
                         int target_height, 

@@ -7,12 +7,14 @@
 class imageClassificationTask
 {
     public:
-    imageClassificationTask() {};
-    ~imageClassificationTask() {};
-    std::string Classify(std::string instanceName, 
-                         std::string modelFilepath, 
-                         cv::Mat &img_raw, 
-                         std::string labelFilepath);
+    imageClassificationTask();
+    ~imageClassificationTask() = default;
+    int Init(std::string modelFilepath,   
+             std::string labelFilepath);
+    std::string Classify(cv::Mat &img_raw);
+    private:
+	class impl;
+	std::shared_ptr<impl> pimpl_;
 };
 
 #endif

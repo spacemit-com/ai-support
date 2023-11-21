@@ -1,11 +1,9 @@
 #include "src/task/vision/image_classification.h"
 
-
-int imageClassification::Init(std::string instanceName, std::string modelFilepath, cv::Mat &img_raw, std::string labelFilepath)
+int imageClassification::Init(std::string modelFilepath, std::string labelFilepath)
 {
-    instanceName_=instanceName;
+    instanceName_="image-classification-inference";
     modelFilepath_=modelFilepath;
-    img_raw_ = img_raw;
     labelFilepath_=labelFilepath;
     InitCheck();
     labels_ = readLabels(labelFilepath_);
@@ -17,9 +15,9 @@ std::string imageClassification::Postprocess()
     return postprocessor_.Postprocess(Infer(input_tensors_), labels_);
 }
 
-std::string imageClassification::Classify(std::string instanceName, std::string modelFilepath, cv::Mat &img_raw, std::string labelFilepath)
+std::string imageClassification::Classify(cv::Mat &img_raw)
 {   
-    int flag = Init(instanceName, modelFilepath, img_raw, labelFilepath);
+    img_raw_ = img_raw;
     std::chrono::steady_clock::time_point begin =
     std::chrono::steady_clock::now();
     Preprocess(input_tensors_, img_raw_);

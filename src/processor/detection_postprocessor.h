@@ -1,7 +1,6 @@
 #include <vector>
 #include <string>
 #include <cmath>
-#include <chrono>
 #include <algorithm>
 #include <iostream>
 
@@ -25,6 +24,13 @@ class DetectionPostprocessor : public Postprocessor{
                     unsigned int topk = 100, 
                     unsigned int nms_type = OFFSET
                     );
+
+    void Postprocess_Yolov6(std::vector<Ort::Value> output_tensors,
+                std::vector<Boxi> &result_boxes,
+                std::vector<int64_t>& input_dims,
+                int img_height,
+                int img_width
+                );
 
     private: 
     float sigmoid(float x)

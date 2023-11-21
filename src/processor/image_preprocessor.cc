@@ -14,7 +14,6 @@ void ImagePreprocessor::Preprocess(cv::Mat &imageBGR, std::vector<int64_t> input
                 cv::ColorConversionCodes::COLOR_BGR2RGB);
     // step 4: Convert the image to HWC RGB float format by dividing each pixel by 255.
     resizedImageRGB.convertTo(resizedImage, CV_32F, 1.0 / 255);
-
     // step 5: Split the RGB channels from the image.   
     cv::Mat channels[3];
     cv::split(resizedImage, channels);
@@ -29,7 +28,6 @@ void ImagePreprocessor::Preprocess(cv::Mat &imageBGR, std::vector<int64_t> input
 
     //step 7: Merge the RGB channels back to the image.
     cv::merge(channels, 3, resizedImage);
-
     // step 8: Convert the image to CHW RGB float format.
     // HWC to CHW
     cv::dnn::blobFromImage(resizedImage, preprocessedImage);

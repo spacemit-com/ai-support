@@ -25,20 +25,14 @@ class imageClassification : public BaseVisionTaskApi<std::string>
     public:
     imageClassification():BaseVisionTaskApi<std::string>() {};
     ~imageClassification() {};
-    std::string Classify(std::string instanceName, 
-                         std::string modelFilepath, 
-                         cv::Mat &img_raw, 
-                         std::string labelFilepath);
+    int Init(std::string modelFilepath, std::string labelFilepath);
+    std::string Classify(cv::Mat &img_raw);
 
     protected:
     bool checkModelExtension(const std::string& filename);
     std::string Postprocess() override;
 
     private:
-    int Init(std::string instanceName, 
-              std::string modelFilepath, 
-              cv::Mat &img_raw, 
-              std::string labelFilepath);
     void InitCheck();
     ClassificationPostprocessor postprocessor_;
     std::string instanceName_;

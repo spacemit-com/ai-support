@@ -8,11 +8,15 @@
 class objectDetectionTask
 {
     public:
-    objectDetectionTask() {};
-    ~objectDetectionTask() {};
-    std::vector<Boxi> Detect(std::string &instanceName, 
-                             std::string &modelFilepath, 
-                             cv::Mat &raw_img);
+    objectDetectionTask();
+    ~objectDetectionTask() = default;
+    int Init(std::string &modelFilepath);
+    std::vector<Boxi> Detect(cv::Mat &raw_img);
+    std::vector<Boxi> Detect_Yolov6(cv::Mat &raw_img);
+
+    private:
+	class impl;
+	std::shared_ptr<impl> pimpl_;
 };
 
 #endif

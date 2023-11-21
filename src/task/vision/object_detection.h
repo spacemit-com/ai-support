@@ -19,15 +19,14 @@ class ObjectDetection : public BaseVisionTaskApi<std::vector<Boxi>>
     public:
     ObjectDetection(): BaseVisionTaskApi<std::vector<Boxi>>() {};
     ~ObjectDetection() {};
-    std::vector<Boxi> Detect(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img);
-    std::vector<Boxi> DetectFrame(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img);
-    int Init(std::string &instanceName, std::string &modelFilepath);
+    std::vector<Boxi> Detect(cv::Mat &raw_img);
+    std::vector<Boxi> Detect_Yolov6(cv::Mat &raw_img);
+    int Init(std::string &modelFilepath);
 
     protected:
     std::vector<Boxi> Postprocess() override;
 
     private:
-    int Init(std::string &instanceName, std::string &modelFilepath, cv::Mat &raw_img);
     std::string instanceName_;
     std::string modelFilepath_;
     std::string labelFilepath_;

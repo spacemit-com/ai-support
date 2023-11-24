@@ -3,9 +3,9 @@
 
 int main()
 {
-    std::string modelFilepath="/home/gexy5/Documents/bianbu-support/data/models/yolov4.onnx";
-    std::string imageFilepath="/home/gexy5/Documents/bianbu-support/data/imgs/4.jpg";
-    std::string saveImgpath="/home/gexy5/Documents/bianbu-support/data/imgs/person_yolov6_result.jpg";
+    std::string modelFilepath="/home/gexy5/Documents/bianbu-support/data/models/nanodet-plus-m_320.onnx";
+    std::string imageFilepath="/home/gexy5/Documents/bianbu-support/data/imgs/3.jpg";
+    std::string saveImgpath="/home/gexy5/Documents/bianbu-support/data/imgs/person_nanodet_result.jpg";
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     cv::Mat imgRaw = cv::imread(imageFilepath);
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
@@ -16,7 +16,7 @@ int main()
     objectDetectionTask objectdetectiontask;
     if(objectdetectiontask.Init(modelFilepath))
     {
-        resultBoxes = objectdetectiontask.Detect(imgRaw);
+        resultBoxes = objectdetectiontask.Detect_NanoDet(imgRaw);
     }
     std::chrono::steady_clock::time_point begin1 = std::chrono::steady_clock::now();
     draw_boxes_inplace(imgRaw , resultBoxes);

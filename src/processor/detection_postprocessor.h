@@ -32,6 +32,12 @@ class DetectionPostprocessor : public Postprocessor{
                 int img_width
                 );
 
+    void Postprocess_NanoDet(std::vector<Ort::Value> output_tensors,
+            std::vector<Boxi> &result_boxes,
+            std::vector<int64_t>& input_dims,
+            int img_height,
+            int img_width);
+
     private: 
     float sigmoid(float x)
     {

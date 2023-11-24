@@ -24,3 +24,13 @@ std::vector<Boxi> objectDetectionTask::Detect(cv::Mat &raw_img)
 {
     return pimpl_->objectdetection_->Detect(raw_img);
 }
+
+std::vector<Boxi> objectDetectionTask::Detect_NanoDet(cv::Mat &raw_img)
+{
+    return pimpl_->objectdetection_->Detect_NanoDet(raw_img);
+}
+
+std::vector<Boxi> objectDetectionTask::Inference(cv::Mat &raw_img)
+{
+    return pimpl_->objectdetection_->Inference(raw_img);
+}

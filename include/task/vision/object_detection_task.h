@@ -13,6 +13,8 @@ class objectDetectionTask
     int Init(std::string &modelFilepath);
     std::vector<Boxi> Detect(cv::Mat &raw_img);
     std::vector<Boxi> Detect_Yolov6(cv::Mat &raw_img);
+    std::vector<Boxi> Detect_NanoDet(cv::Mat &raw_img);
+    std::vector<Boxi> Inference(cv::Mat &raw_img);
 
     private:
 	class impl;

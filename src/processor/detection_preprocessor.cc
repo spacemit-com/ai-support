@@ -44,15 +44,27 @@ void DetectionPreprocessor::Preprocess(cv::Mat &mat,
     const int input_height = input_node_dims.at(2);
     const int input_width = input_node_dims.at(3);
     cv::Mat resizedImageBGR, resizedImageRGB, resizedImage, preprocessedImage;
-    //std::cout<<inputDims[3]<<std::endl;
+    std::chrono::steady_clock::time_point begin0 = std::chrono::steady_clock::now();
     resize_unscale(mat, resizedImageBGR, input_height, input_width);
-
+    std::chrono::steady_clock::time_point end0 = std::chrono::steady_clock::now();
+    std::cout << "resize Latency: "
+                << std::chrono::duration_cast<std::chrono::milliseconds>(end0 - begin0).count()
+                << " ms" << std::endl;
+    std::chrono::steady_clock::time_point begin1 = std::chrono::steady_clock::now();
     // step 3: Convert the image to HWC RGB UINT8 format.
     cv::cvtColor(resizedImageBGR, resizedImageRGB, cv::COLOR_BGR2RGB);
-    // step 4: Convert the image to HWC RGB float format by dividing each pixel by 255.
-    resizedImageRGB.convertTo(resizedImage, CV_32F, 1.0 / 255);
-    /*
-    // step 5: Split the RGB channels from the image.   
+    std::chrono::steady_clock::time_point end1 = std::chrono::steady_clock::now();
+    std::cout << "cv::cvtColor Latency: "
+                << std::chrono::duration_cast<std::chrono::milliseconds>(end1 - begin1).count()
+                << " ms" << std::endl;
+    std::chrono::steady_clock::time_point begin2 = std::chrono::steady_clock::now();
+    resizedImageRGB.convertTo(resizedImage, CV_32F, 1.0);
+    std::chrono::steady_clock::time_point end2 = std::chrono::steady_clock::now();
+    std::cout << "to fp32 Latency: "
+                << std::chrono::duration_cast<std::chrono::milliseconds>(end2 - begin2).count()
+                << " ms" << std::endl;
+    // step 5: Split the BGR channels from the image. 
+    std::chrono::steady_clock::time_point begin3 = std::chrono::steady_clock::now();
     cv::Mat channels[3];
     cv::split(resizedImage, channels);
 
@@ -60,21 +72,36 @@ void DetectionPreprocessor::Preprocess(cv::Mat &mat,
     // Normalization per channel
     // Normalization parameters obtained from
     // https://github.com/onnx/models/tree/master/vision/classification/squeezenet
-    channels[0] = (channels[0] - 0.485) / 0.229;
-    channels[1] = (channels[1] - 0.456) / 0.224;
-    channels[2] = (channels[2] - 0.406) / 0.225;
 
+    const float mean_vals[3] = {116.28f, 116.28f, 116.28f};
+    const float scale_vals[3] = {0.017429f, 0.017429f, 0.017429f};
+    int channel = 3;
+    for(int i=0;i<channel;i++)
+    {
+      channels[i] = (channels[i] - mean_vals[i]) * scale_vals[i];
+    }
     //step 7: Merge the RGB channels back to the image.
     cv::merge(channels, 3, resizedImage);
-    // step 8: Convert the image to CHW RGB float format.
-    // HWC to CHW
-    */
+    std::chrono::steady_clock::time_point end3 = std::chrono::steady_clock::now();
+    std::cout << "normalize Latency: "
+                << std::chrono::duration_cast<std::chrono::milliseconds>(end3 - begin3).count()
+                << " ms" << std::endl;
+
+    std::chrono::steady_clock::time_point begin4 = std::chrono::steady_clock::now();
     cv::dnn::blobFromImage(resizedImage, preprocessedImage);
-  
+    std::chrono::steady_clock::time_point end4 = std::chrono::steady_clock::now();
+    std::cout << "cv::dnn::blobFromImage Latency: "
+                << std::chrono::duration_cast<std::chrono::milliseconds>(end4 - begin4).count()
+                << " ms" << std::endl;  
+    std::chrono::steady_clock::time_point begin5 = std::chrono::steady_clock::now();
     size_t inputTensorSize = vectorProduct(input_node_dims);
     input_tensor_value.resize(inputTensorSize);
     input_tensor_value.assign(preprocessedImage.begin<float>(),
                             preprocessedImage.end<float>());
+    std::chrono::steady_clock::time_point end5 = std::chrono::steady_clock::now();
+    std::cout << "cv::Mat to std::vector Latency: "
+                << std::chrono::duration_cast<std::chrono::milliseconds>(end5 - begin5).count()
+                << " ms" << std::endl;  
   }
 }
 
@@ -88,7 +115,7 @@ void DetectionPreprocessor::resize_unscale(const cv::Mat& mat,
   int img_width = static_cast<int>(mat.cols);
   //std::cout<<img_height<<" "<<img_width<<std::endl;
   mat_rs = cv::Mat(target_height, target_width, CV_8UC3,
-                   cv::Scalar(128, 128, 128));
+                   cv::Scalar(0, 0, 0));
   // scale ratio (new / old) new_shape(h,w)
   //std::cout<<target_width<<" "<<target_height<<std::endl;
   float w_r = (float) target_width / (float) img_width;

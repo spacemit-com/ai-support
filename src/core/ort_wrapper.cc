@@ -9,6 +9,7 @@ int OrtWrapper::Init(std::string instanceName, std::string modelFilepath)
     std::unique_ptr<Ort::Session> session(new Ort::Session(*env_, modelFilepath.c_str(), sessionOptions_));
     session_=std::move(session);
     sessionOptions_.SetIntraOpNumThreads(4);
+    sessionOptions_.EnableProfiling(ORT_TSTR("xxx"));
     
     // Sets graph optimization level
     // Available levels are

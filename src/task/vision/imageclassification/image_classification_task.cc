@@ -1,5 +1,5 @@
 #include "task/vision/image_classification_task.h"
-#include "src/task/vision/image_classification.h"
+#include "src/task/vision/imageclassification/image_classification.h"
 
 class imageClassificationTask::impl {
     public:
@@ -15,7 +15,7 @@ int imageClassificationTask::Init(std::string modelFilepath,
     return pimpl_->imageclassification_->Init(modelFilepath, labelFilepath);
 }
 
-std::string imageClassificationTask::Classify(cv::Mat &img_raw)
+ImageClassificationResult imageClassificationTask::Classify(cv::Mat &img_raw)
 {    
     return pimpl_->imageclassification_->Classify(img_raw);
 }

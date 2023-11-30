@@ -1,4 +1,4 @@
-#include "src/task/vision/image_classification.h"
+#include "src/task/vision/imageclassification/image_classification.h"
 
 int imageClassification::Init(std::string modelFilepath, std::string labelFilepath)
 {
@@ -10,22 +10,35 @@ int imageClassification::Init(std::string modelFilepath, std::string labelFilepa
     return GetEngine()->Init(instanceName_, modelFilepath_);
 }
 
-std::string imageClassification::Postprocess()
+void imageClassification::Preprocess(std::vector<float> &input_tensors,
+            cv::Mat& img_raw)
+{
+    auto input_dims = GetInputShape();
+    preprocessor_.Preprocess(img_raw_, input_dims, input_tensors_);
+}
+
+ImageClassificationResult imageClassification::Postprocess()
 {
     return postprocessor_.Postprocess(Infer(input_tensors_), labels_);
 }
 
-std::string imageClassification::Classify(cv::Mat &img_raw)
+
+
+ImageClassificationResult imageClassification::Classify(cv::Mat &img_raw)
 {   
     img_raw_ = img_raw;
+#ifdef DEBUG
     std::chrono::steady_clock::time_point begin =
     std::chrono::steady_clock::now();
+#endif
     Preprocess(input_tensors_, img_raw_);
+#ifdef DEBUG
     std::chrono::steady_clock::time_point end =
     std::chrono::steady_clock::now();
     std::cout << "preprocess Latency: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
               << " ms" << std::endl;
+#endif
     return Postprocess();
 }
 

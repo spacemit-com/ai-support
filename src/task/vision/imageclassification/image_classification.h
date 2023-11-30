@@ -13,27 +13,31 @@
 #include <vector>
 #include <stdexcept> // To use runtime_error
 
+#include "core/types.h"
 #include "src/core/engine.h"
 #include "src/utils/label_map_utils.h"
 #include "src/task/vision/base_vision_task_api.h"
 #include "src/processor/classification_postprocessor.h"
+#include "src/processor/classification_preprocessor.h"
 
 #include "opencv2/opencv.hpp"
 
-class imageClassification : public BaseVisionTaskApi<std::string> 
+class imageClassification : public BaseVisionTaskApi<ImageClassificationResult> 
 {
     public:
-    imageClassification():BaseVisionTaskApi<std::string>() {};
+    imageClassification():BaseVisionTaskApi<ImageClassificationResult>() {};
     ~imageClassification() {};
     int Init(std::string modelFilepath, std::string labelFilepath);
-    std::string Classify(cv::Mat &img_raw);
+    void Preprocess(std::vector<float> &input_tensors,
+                cv::Mat& img_raw) override;
+    ImageClassificationResult Classify(cv::Mat &img_raw);
 
     protected:
     bool checkModelExtension(const std::string& filename);
-    std::string Postprocess() override;
-
+    ImageClassificationResult Postprocess() override;
     private:
     void InitCheck();
+    ClassificationPreprocessor preprocessor_;
     ClassificationPostprocessor postprocessor_;
     std::string instanceName_;
     std::string modelFilepath_;

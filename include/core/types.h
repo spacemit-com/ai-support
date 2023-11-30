@@ -2,9 +2,9 @@
 #define _TYPES_H_
 
 #include <type_traits>
+#include <string>
 
 #include "opencv2/opencv.hpp"
-
 
 template<typename _T1 = float, typename _T2 = float>
 static inline void __assert_type()
@@ -149,5 +149,19 @@ BoundingBoxType<T1, T2>::area() const
   __assert_type<value_type, score_type>();
   return std::abs<value_type>(width() * height());
 }
+
+struct ImageClassificationResult
+{
+  std::string label_text;
+  int label;
+  float score;
+  int timestamp;
+};
+
+struct ObjectDetectionResult
+{
+  std::vector<Boxi> result_bboxes;
+  int timestamp;
+};
 
 #endif

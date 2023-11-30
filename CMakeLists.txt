@@ -8,8 +8,14 @@ set(CMAKE_BUILD_TYPE ${BUILD_TYPE})
 #c++标准
 set(CMAKE_CXX_STANDARD 14)
 
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -g")
+
+
+if(DEBUG)
+    message("DEBUG is On")
+    add_definitions(-DDEBUG)
+endif()
+
 # Find OpenCV, you may need to set OpenCV_DIR variable
 # to the absolute path to the directory containing OpenCVConfig.cmake file
 # via the command line or GUI
@@ -18,6 +24,7 @@ find_package(OpenCV REQUIRED)
 # Add OpenCV headers location to your include paths
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories("${ORT_HOME}/include")
+#include_directories("${ORT_HOME}/include/onnxruntime/core/session")
 
 link_directories("${ORT_HOME}/lib")
 link_libraries(onnxruntime)

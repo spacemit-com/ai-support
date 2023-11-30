@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "src/task/core/base_task_api.h"
-#include "src/processor/image_preprocessor.h"
 
 #include "opencv2/opencv.hpp"
 
@@ -19,14 +18,9 @@ class BaseVisionTaskApi : public BaseTaskApi<OutputType, cv::Mat&>{
         BaseVisionTaskApi& operator=(const BaseVisionTaskApi&) = delete;
 
     protected:
-        void Preprocess(std::vector<float> &input_tensors,
-                        cv::Mat& img_raw) override{
-            auto inputDims = this->GetInputShape();
-            preprocessor_->Preprocess(img_raw, inputDims, input_tensors);
-        }
+        virtual void Preprocess(std::vector<float> &input_tensors,
+                        cv::Mat& img_raw) override{}
     
-    private:
-        std::unique_ptr<ImagePreprocessor> preprocessor_ = nullptr;
 };
 
 #endif

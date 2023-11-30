@@ -3,7 +3,10 @@
 
 #include <string>
 #include "core/types.h"
+#include "utils/json.hpp"
 #include "opencv2/opencv.hpp"
+
+using json=nlohmann::json;
 
 class objectDetectionTask
 {
@@ -11,6 +14,7 @@ class objectDetectionTask
     objectDetectionTask();
     ~objectDetectionTask() = default;
     int Init(std::string &modelFilepath);
+    int Init(json config);
     std::vector<Boxi> Detect(cv::Mat &raw_img);
     std::vector<Boxi> Detect_Yolov6(cv::Mat &raw_img);
     std::vector<Boxi> Detect_NanoDet(cv::Mat &raw_img);

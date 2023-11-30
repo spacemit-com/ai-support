@@ -2,6 +2,7 @@
 #define _IMAGE_CLASSIFICATION_TASK_H_
 
 #include <string>
+#include "core/types.h"
 #include "opencv2/opencv.hpp"
 
 class imageClassificationTask
@@ -11,7 +12,7 @@ class imageClassificationTask
     ~imageClassificationTask() = default;
     int Init(std::string modelFilepath,   
              std::string labelFilepath);
-    std::string Classify(cv::Mat &img_raw);
+    ImageClassificationResult Classify(cv::Mat &img_raw);
     private:
 	class impl;
 	std::shared_ptr<impl> pimpl_;

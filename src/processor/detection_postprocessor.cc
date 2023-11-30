@@ -10,7 +10,10 @@ void DetectionPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors,
                                          unsigned int topk, 
                                          unsigned int nms_type)
 {
+#ifdef DEBUG
   std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+#endif
+
   std::vector<Boxf> bbox_collection;
   bbox_collection.clear();
   unsigned int count = 0;
@@ -56,13 +59,13 @@ void DetectionPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors,
             float dw = (input_width - resize_ratio * img_width) / 2;
             float dh = (input_height - resize_ratio * img_height) / 2;
             box.x1 = (cx - w / 2.f - dw)/resize_ratio;
-            if(box.x1<0) box.x1=0;
+            box.x1 = std::max(box.x1,.0f);
             box.y1 = (cy - h / 2.f - dh)/resize_ratio;
-            if(box.y1<0) box.y1=0;
+            box.y1 = std::max(box.y1,.0f);
             box.x2 = (cx + w / 2.f - dw)/resize_ratio;
-            if(box.x2>img_width) box.x2=img_width;
+            box.x2 = std::min(box.x2,float(img_width-1));
             box.y2 = (cy + h / 2.f - dh)/resize_ratio;
-            if(box.y2>img_height) box.y2=img_height;
+            box.y2 = std::min(box.y2,float(img_height-1));
             box.score = conf;
             box.label = label;
             box.label_text = class_names[label];
@@ -94,12 +97,13 @@ void DetectionPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors,
     result_box.flag = detected_boxes[i].flag;
     result_boxes.push_back(result_box);
   }
-
+#ifdef DEBUG
   std::chrono::steady_clock::time_point end =
   std::chrono::steady_clock::now();
   std::cout << "postprocess including inference Latency: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
               << " ms" << std::endl;
+#endif
 }
 
 void DetectionPostprocessor::Postprocess_Yolov6(std::vector<Ort::Value> output_tensors,
@@ -108,7 +112,9 @@ void DetectionPostprocessor::Postprocess_Yolov6(std::vector<Ort::Value> output_t
             int img_height,
             int img_width)
 {
+#ifdef DEBUG
   std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+#endif
   std::vector<Boxf> bbox_collection;
   bbox_collection.clear();
   unsigned int count = 0;
@@ -120,15 +126,17 @@ void DetectionPostprocessor::Postprocess_Yolov6(std::vector<Ort::Value> output_t
   Ort::Value &pred2 = output_tensors.at(2);
   auto outputInfo = pred0.GetTensorTypeAndShapeInfo();
   auto pred_dims = outputInfo.GetShape();
+  float dw = (input_width - resize_ratio * img_width) / 2;
+  float dh = (input_height - resize_ratio * img_height) / 2;
 
   int num = pred_dims[1];
   for(int i=0;i<num;i++)
   {
     Boxi result_box;
-    result_box.x1 = int(pred0.At<float>({0,i,0}))/resize_ratio;
-    result_box.y1 = int(pred0.At<float>({0,i,1}))/resize_ratio;
-    result_box.x2 = int(pred0.At<float>({0,i,2}))/resize_ratio;
-    result_box.y2 = int(pred0.At<float>({0,i,3}))/resize_ratio;
+    result_box.x1 = int((pred0.At<float>({0,i,0}) - dw)/resize_ratio);
+    result_box.y1 = int((pred0.At<float>({0,i,1}) - dh)/resize_ratio);
+    result_box.x2 = int((pred0.At<float>({0,i,2}) - dw)/resize_ratio);
+    result_box.y2 = int((pred0.At<float>({0,i,3}) - dh)/resize_ratio);
     if(pred1.At<int>({0,i})<0)
     {
       continue;
@@ -139,10 +147,12 @@ void DetectionPostprocessor::Postprocess_Yolov6(std::vector<Ort::Value> output_t
     result_box.flag = true;
     result_boxes.push_back(result_box);
   }
+#ifdef DEBUG
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   std::cout << "postprocess including inference Latency: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
               << " ms" << std::endl;
+#endif
 }
 
 void DetectionPostprocessor::Postprocess_NanoDet(std::vector<Ort::Value> output_tensors,
@@ -151,10 +161,11 @@ void DetectionPostprocessor::Postprocess_NanoDet(std::vector<Ort::Value> output_
             int img_height,
             int img_width)
 { 
+#ifdef DEBUG
   std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+#endif
   std::vector<Boxf> bbox_collection;
   bbox_collection.clear();
-  unsigned int count = 0;
   const int cls_num = 80;
   const float input_height = static_cast<float>(input_dims.at(2)); // e.g 640
   const float input_width = static_cast<float>(input_dims.at(3)); // e.g 640
@@ -172,15 +183,14 @@ void DetectionPostprocessor::Postprocess_NanoDet(std::vector<Ort::Value> output_
       for (unsigned int x = 0; x < hw[i]; x++)
       {
         num++;
-        int ct_x = x + 0.5;
-        int ct_y = y + 0.5; 
+        int ct_x = x;
+        int ct_y = y;
         float cls_conf = pred.At<float>({0, num, 0});
         float tmp_conf;
         unsigned int label = 0;
         for (unsigned int h = 0; h < cls_num; h++)
         {
           tmp_conf = pred.At<float>({0, num, h});
-          //std::cout<<tmp_conf<<std::endl;
           if (tmp_conf > cls_conf)
           {
             cls_conf = tmp_conf;
@@ -189,19 +199,26 @@ void DetectionPostprocessor::Postprocess_NanoDet(std::vector<Ort::Value> output_
         }
  
         
-        if(cls_conf<0.45f) continue;
-        
-        std::vector<float> dis_pred(4,0);
+        if(cls_conf<0.30f) continue;
+        std::vector<float> dis_pred(4,.0);
         for(int s=0;s<4;s++)
         {
+          float alptha = .0;
+          int cur_num = cls_num + s*8;
+          std::vector<float> dst(8);
+          for(int j=0;j<8;j++)
+          {
+            alptha = std::max(alptha, pred.At<float>({0, num, cur_num +j}));
+          }
           float sum = .0f;
           for(int j=0;j<8;j++)
           {
-            sum = sum + exp(pred.At<float>({0, num, cls_num+j}));
+            dst[j] =  fast_exp(pred.At<float>({0, num, cur_num+j}) - alptha);
+            sum = sum + dst[j];
           }
           for(int j=0;j<8;j++)
           {
-            dis_pred[s] = dis_pred[s] + j*(exp(pred.At<float>({0, num, cls_num+j}))/sum);
+            dis_pred[s] = dis_pred[s] + j*(dst[j]/sum);
           }
         }
         
@@ -227,7 +244,7 @@ void DetectionPostprocessor::Postprocess_NanoDet(std::vector<Ort::Value> output_
   std::vector<Boxf> detected_boxes;
 
   // 4. hard|blend|offset nms with topk.
-  nms(bbox_collection, detected_boxes, 0.15f, 100, OFFSET);
+  nms(bbox_collection, detected_boxes, 0.30f, 100, OFFSET);
 
   int detected_boxes_num = detected_boxes.size();
   for(int i = 0; i < detected_boxes_num; i++)
@@ -244,11 +261,13 @@ void DetectionPostprocessor::Postprocess_NanoDet(std::vector<Ort::Value> output_
     result_boxes.push_back(result_box);
   }
 
+#ifdef DEBUG
   std::chrono::steady_clock::time_point end =
   std::chrono::steady_clock::now();
-  std::cout << "postprocess including inference Latency: "
+  std::cout << "|-- postprocess: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
               << " ms" << std::endl;
+#endif
 }
 
 void DetectionPostprocessor::nms(std::vector<Boxf>& input, std::vector<Boxf>& output,

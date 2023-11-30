@@ -1,5 +1,5 @@
-#ifndef _IMAGE_PREPROCESSOR_H_
-#define _IMAGE_PREPROCESSOR_H_
+#ifndef _CLASSIFICATION_PREPROCESSOR_H_
+#define _CLASSIFICATION_PREPROCESSOR_H_
 
 #include <string>
 #include <numeric>
@@ -13,10 +13,10 @@
 
 #include "opencv2/opencv.hpp"
 
-class ImagePreprocessor : public Preprocessor{
+class ClassificationPreprocessor : public Preprocessor{
     public:
-    ImagePreprocessor() {};
-    ~ImagePreprocessor() {};
+    ClassificationPreprocessor() {};
+    ~ClassificationPreprocessor() {};
     void Preprocess(cv::Mat &imageBGR, std::vector<int64_t> inputDims, std::vector<float>& input_tensors);
     template <typename T>
     T vectorProduct(const std::vector<T>& v)

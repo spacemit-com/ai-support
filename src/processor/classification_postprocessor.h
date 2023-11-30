@@ -8,6 +8,7 @@
 #include <cmath>
 #include <stdexcept> // To use runtime_error
 
+#include "core/types.h"
 #include "onnxruntime_cxx_api.h"
 
 #include "src/processor/processor.h"
@@ -18,7 +19,7 @@ class ClassificationPostprocessor : public Postprocessor{
     ClassificationPostprocessor() {};
     ~ClassificationPostprocessor() {};
     // Function to validate the input image file extension.
-    std::string Postprocess(std::vector<Ort::Value> output_tensors, std::vector<std::string> labels);
+    ImageClassificationResult Postprocess(std::vector<Ort::Value> output_tensors, std::vector<std::string> labels);
 
     //Handling divide by zero
     float division(float num, float den);

@@ -1,3 +1,6 @@
+#ifndef _DETECTION_POSTPROCESSOR_H_
+#define _DETECTION_POSTPROCESSOR_H_
+
 #include <vector>
 #include <string>
 #include <cmath>
@@ -44,6 +47,17 @@ class DetectionPostprocessor : public Postprocessor{
         return (1 / (1 + exp(-x)));
     }
 
+    float fast_exp(float x)
+    {
+        union
+        {
+            uint32_t i;
+            float f;
+        } v{};
+        v.i = (1 << 23) * (1.4426950409 * x + 126.93490512f);
+        return v.f;
+    }
+
     void nms(std::vector<Boxf> &input, std::vector<Boxf> &output,
                 float iou_threshold, unsigned int topk, unsigned int nms_type);
     
@@ -65,3 +79,5 @@ class DetectionPostprocessor : public Postprocessor{
     "scissors", "teddy bear", "hair drier", "toothbrush"
     };
 };
+
+#endif

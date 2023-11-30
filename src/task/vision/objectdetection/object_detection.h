@@ -24,6 +24,8 @@ class ObjectDetection : public BaseVisionTaskApi<std::vector<Boxi>>
     std::vector<Boxi> Detect_NanoDet(cv::Mat &raw_img);
     std::vector<Boxi> Inference(cv::Mat &raw_img);
     int Init(std::string &modelFilepath);
+    void Preprocess(std::vector<float> &input_tensors,
+            cv::Mat& img_raw) override;
 
     protected:
     std::vector<Boxi> Postprocess() override;

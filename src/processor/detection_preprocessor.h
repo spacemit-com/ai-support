@@ -21,7 +21,10 @@ class DetectionPreprocessor : public Preprocessor{
                     std::vector<int64_t>& input_node_dims, 
                     std::vector<float>& input_tensor_value,
                     unsigned int data_format);
-    
+    void Preprocess_NanoDet(cv::Mat &mat, 
+                    std::vector<int64_t>& input_node_dims, 
+                    std::vector<float>& input_tensor_value);
+
     private:
     template <typename T>
     T vectorProduct(const std::vector<T>& v)
@@ -32,6 +35,7 @@ class DetectionPreprocessor : public Preprocessor{
                         cv::Mat& mat_rs,
                         int target_height, 
                         int target_width);
+
     const float mean_vals[3] = {0.485, 0.456, 0.406};
     const float scale_vals[3] = {0.229, 0.224, 0.225};
 

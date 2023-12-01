@@ -1,6 +1,7 @@
 #ifndef _IMAGE_CLASSIFICATION_TASK_H_
 #define _IMAGE_CLASSIFICATION_TASK_H_
 
+#include <memory>
 #include <string>
 #include "core/types.h"
 #include "opencv2/opencv.hpp"

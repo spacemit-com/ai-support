@@ -8,10 +8,8 @@
 class imageClassificationTask
 {
     public:
-    imageClassificationTask();
+    imageClassificationTask(std::string& filePath, std::string& labelFilepath);
     ~imageClassificationTask() = default;
-    int Init(std::string modelFilepath,   
-             std::string labelFilepath);
     ImageClassificationResult Classify(const cv::Mat &img_raw);
     private:
 	class impl;

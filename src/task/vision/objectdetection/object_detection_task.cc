@@ -6,13 +6,18 @@ class objectDetectionTask::impl {
     std::unique_ptr<ObjectDetection> objectdetection_;
 };
 
-objectDetectionTask::objectDetectionTask() : pimpl_(std::make_unique<impl>()) {}
-
-int objectDetectionTask::Init(std::string &modelFilepath, std::string &labelFilepath)
+objectDetectionTask::objectDetectionTask(std::string &filePath, std::string& labelFilepath) : pimpl_(std::make_unique<impl>()) 
 {
     pimpl_->objectdetection_ = std::unique_ptr<ObjectDetection>(new ObjectDetection());
-    int flag = pimpl_->objectdetection_->Init(modelFilepath, labelFilepath);
-    return flag;
+    std::string suffixStr = filePath.substr(filePath.find_last_of('.') + 1);
+    if(strcmp(suffixStr.c_str(), "onnx") == 0)
+    {
+        int flag = pimpl_->objectdetection_->Initfromcommand(filePath, labelFilepath);
+    }
+    else if(strcmp(suffixStr.c_str(), "json") == 0)
+    {
+        int flag = pimpl_->objectdetection_->Initfromconfig(filePath);
+    }
 }
 
 ObjectDetectionResult objectDetectionTask::Detect_Yolov6(const cv::Mat &raw_img)

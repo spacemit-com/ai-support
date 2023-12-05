@@ -24,7 +24,7 @@ class ObjectDetection : public BaseVisionTaskApi<ObjectDetectionResult>
     ObjectDetectionResult Detect(const cv::Mat &raw_img);
     ObjectDetectionResult Detect_Yolov6(const cv::Mat &raw_img);
     ObjectDetectionResult Detect_NanoDet(const cv::Mat &raw_img);
-    int Init(std::string &modelFilepath, std::string &labelFilepath);
+    int Initfromcommand(std::string &modelFilepath, std::string &labelFilepath);
     int Initfromconfig(std::string &configFilepath);
     void Preprocess(std::vector<float> &input_tensors,
            const cv::Mat& img_raw) override;

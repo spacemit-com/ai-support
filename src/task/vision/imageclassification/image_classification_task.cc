@@ -6,13 +6,10 @@ class imageClassificationTask::impl {
     std::unique_ptr<imageClassification> imageclassification_;
 };
 
-imageClassificationTask::imageClassificationTask() : pimpl_(std::make_unique<impl>()) {}
-
-int imageClassificationTask::Init(std::string modelFilepath,
-                                  std::string labelFilepath)
+imageClassificationTask::imageClassificationTask(std::string& filePath, std::string& labelFilepath) : pimpl_(std::make_unique<impl>())
 {
     pimpl_->imageclassification_ = std::unique_ptr<imageClassification>(new imageClassification());
-    return pimpl_->imageclassification_->Init(modelFilepath, labelFilepath);
+    int flag = pimpl_->imageclassification_->Init(filePath, labelFilepath);
 }
 
 ImageClassificationResult imageClassificationTask::Classify(const cv::Mat &img_raw)

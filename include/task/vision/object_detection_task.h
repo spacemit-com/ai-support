@@ -8,9 +8,8 @@
 class objectDetectionTask
 {
     public:
-    objectDetectionTask();
+    objectDetectionTask(std::string &filePath, std::string& labelFilepath);
     ~objectDetectionTask() = default;
-    int Init(std::string &modelFilepath, std::string &labelFilepath);
     ObjectDetectionResult Detect(const cv::Mat &raw_img);
     ObjectDetectionResult Detect_Yolov6(const cv::Mat &raw_img);
     ObjectDetectionResult Detect_NanoDet(const cv::Mat &raw_img);

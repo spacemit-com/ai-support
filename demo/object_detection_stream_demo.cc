@@ -6,8 +6,8 @@
 
 int DetectVideo(std::string &modelFilepath, std::string &labelFilepath, std::string videoPath)
 {
-    objectDetectionTask objectdetectiontask;
-    int flag = objectdetectiontask.Init(modelFilepath, labelFilepath);
+    std::string filePath = "/home/gexy5/Documents/bianbu-support/data/config/nanodet.json";
+    std::unique_ptr<objectDetectionTask> objectdetectiontask = std::unique_ptr<objectDetectionTask>(new objectDetectionTask(filePath, labelFilepath));
     std::string save_name = "/home/gexy5/Documents/bianbu-support/data/imgs/saved.avi";
     cv::VideoCapture capture(videoPath);
     int width = 1920;
@@ -18,7 +18,7 @@ int DetectVideo(std::string &modelFilepath, std::string &labelFilepath, std::str
 	{
 		cv::Mat frame;
 		capture >> frame;
-        std::vector<Boxi> resultBoxes = objectdetectiontask.Detect(frame).result_bboxes;
+        std::vector<Boxi> resultBoxes = objectdetectiontask->Detect(frame).result_bboxes;
         draw_boxes_inplace(frame , resultBoxes);
         //out.write(frame);
 		//imshow("Detection", frame);

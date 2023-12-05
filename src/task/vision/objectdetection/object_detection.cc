@@ -114,21 +114,26 @@ ObjectDetectionResult ObjectDetection::Postprocess()
     return result_;
 }
 
-int ObjectDetection::Init(std::string &modelFilepath, std::string &labelFilepath)
+int ObjectDetection::Initfromcommand(std::string &modelFilepath, std::string &labelFilepath)
 {
-    instanceName_= "object-detection-inference";
-    modelFilepath_= modelFilepath;
-    labelFilepath_=labelFilepath;
+    instanceName_ = "object-detection-inference";
+    modelFilepath_ = modelFilepath;
+    labelFilepath_ = labelFilepath;
     int flag = GetEngine()->Init(instanceName_, modelFilepath_);
     inputDims_ = GetEngine()->GetInputDims();
     labels_ = readLabels(labelFilepath_);
     return flag;
 }
 
-int Initfromconfig(std::string &configFilepath)
+int ObjectDetection::Initfromconfig(std::string &configFilepath)
 {
     std::ifstream f(configFilepath);
     json config = json::parse(f);
-    int flag = 0;
+    instanceName_ = config["instance_name"];
+    modelFilepath_ = config["model_path"];
+    labelFilepath_ = config["label_path"];
+    int flag = GetEngine()->Init(instanceName_, modelFilepath_);
+    inputDims_ = GetEngine()->GetInputDims();
+    labels_ = readLabels(labelFilepath_);
     return flag;
 }

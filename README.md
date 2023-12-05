@@ -29,7 +29,9 @@ make install
 ### run demo
 
 ```bash
-./detection_demo
+./classification_demo
 ./detection_stream_demo
-./classification_demo 
+./detection_demo <modelFilepath> <imageFilepath> <saveImgpath> <labelFilepath> 
+or 
+./detection_demo <configFilepath> <imageFilepath> <saveImgpath> <labelFilepath>
 ```

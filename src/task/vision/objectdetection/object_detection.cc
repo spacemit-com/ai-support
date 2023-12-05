@@ -129,10 +129,8 @@ int ObjectDetection::Initfromconfig(std::string &configFilepath)
 {
     std::ifstream f(configFilepath);
     json config = json::parse(f);
-    instanceName_ = config["instance_name"];
-    modelFilepath_ = config["model_path"];
+    int flag = GetEngine()->Init(config);
     labelFilepath_ = config["label_path"];
-    int flag = GetEngine()->Init(instanceName_, modelFilepath_);
     inputDims_ = GetEngine()->GetInputDims();
     labels_ = readLabels(labelFilepath_);
     return flag;

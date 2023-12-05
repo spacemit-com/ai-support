@@ -5,6 +5,11 @@ int Engine::Init(std::string instanceName, std::string modelFilepath)
     return ortwrapper_.Init(instanceName, modelFilepath);
 }
 
+int Engine::Init(json config)
+{
+    return ortwrapper_.Init(config);
+}
+
 std::vector<Ort::Value> Engine::Interpreter(std::vector<float> &input_values_handler)
 {
     return ortwrapper_.Invoke(input_values_handler);

@@ -8,6 +8,8 @@
 
 #include "opencv2/opencv.hpp"
 
+#include "src/utils/json.hpp"
+using json = nlohmann::json;
 class Engine
 {
     public:
@@ -17,6 +19,7 @@ class Engine
     }
     ~Engine() {};
     int Init(std::string instanceName, std::string modelFilepath);
+    int Init(json config);
     size_t GetInputCount()
     {return ortwrapper_.GetInputCount();}
     size_t GetOutputCount()   

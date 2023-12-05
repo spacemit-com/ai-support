@@ -23,6 +23,47 @@ int OrtWrapper::Init(std::string instanceName, std::string modelFilepath)
     return 1;
 }
 
+int OrtWrapper::Init(json config)
+{
+    std::string instanceName = config["instance_name"];
+    std::string modelFilepath = config["model_path"];
+    std::unique_ptr<Ort::Env> env(new Ort::Env(OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING,
+                 instanceName.c_str()));
+    //Creation: The Ort::Session is created here
+    env_= std::move(env);
+    std::unique_ptr<Ort::Session> session(new Ort::Session(*env_, modelFilepath.c_str(), sessionOptions_));
+    session_=std::move(session);
+    int intraThreadsnum = config["intra_threads_num"]; 
+    sessionOptions_.SetIntraOpNumThreads(intraThreadsnum);
+    if(config["enable_profiling"])
+    {
+        sessionOptions_.EnableProfiling(ORT_TSTR("xxx"));
+    }
+    // Sets graph optimization level
+    // Available levels are
+    // ORT_DISABLE_ALL -> To disable all optimizations
+    // ORT_ENABLE_BASIC -> To enable basic optimizations (Such as redundant node
+    // removals) ORT_ENABLE_EXTENDED -> To enable extended optimizations
+    // (Includes level 1 + more complex optimizations like node fusions)
+    // ORT_ENABLE_ALL -> To Enable All possible optimizations
+    if(config["graph_optimization_level"] == "ort_disable_all")
+    {
+        sessionOptions_.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_DISABLE_ALL);
+    }
+    else if(config["graph_optimization_level"] == "ort_enable_basic")
+    {
+        sessionOptions_.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_BASIC);        
+    }
+    else if(config["graph_optimization_level"] == "ort_enable_extended")
+    {
+        sessionOptions_.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);        
+    }
+    else{
+        sessionOptions_.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);             
+    }
+    return 1;
+}
+
 std::vector<int64_t> OrtWrapper::GetInputDims()
 {    
     Ort::TypeInfo type_info = session_->GetInputTypeInfo(0);

@@ -49,8 +49,9 @@ std::vector<std::vector<int64_t>> OrtWrapper::GetOutputDims()
 
 std::vector<Ort::Value> OrtWrapper::Invoke(std::vector<float>& input_tensor_values)
 {
-    std::chrono::steady_clock::time_point begin =
-    std::chrono::steady_clock::now();
+#ifdef DEBUG
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+#endif
     //Run Inference
 
     /* To run inference using ONNX Runtime, the user is responsible for creating and managing the 
@@ -110,10 +111,12 @@ std::vector<Ort::Value> OrtWrapper::Invoke(std::vector<float>& input_tensor_valu
                  output_node_names.data(),
                  num_outputs);
 
+#ifdef DEBUG
     std::chrono::steady_clock::time_point end =
     std::chrono::steady_clock::now();
-    std::cout << "infer tensor Latency: "
+    std::cout << "|-- infer tensor Latency: "
         << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
-        << " ms" << std::endl;             
+        << " ms" << std::endl;      
+#endif       
     return outputTensors;
 }

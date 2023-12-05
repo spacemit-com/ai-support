@@ -15,7 +15,7 @@ int imageClassificationTask::Init(std::string modelFilepath,
     return pimpl_->imageclassification_->Init(modelFilepath, labelFilepath);
 }
 
-ImageClassificationResult imageClassificationTask::Classify(cv::Mat &img_raw)
+ImageClassificationResult imageClassificationTask::Classify(const cv::Mat &img_raw)
 {    
     return pimpl_->imageclassification_->Classify(img_raw);
 }

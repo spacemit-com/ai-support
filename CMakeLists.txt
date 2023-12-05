@@ -36,6 +36,12 @@ if (Demo)
    add_subdirectory(${CMAKE_SOURCE_DIR}/demo)
 endif()
 
+option(TEST "option for Test" ON)
+
+if (TEST)
+   add_subdirectory(${CMAKE_SOURCE_DIR}/src/tests)
+endif()
+
 install(TARGETS detection_demo classification_demo detection_stream_demo
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib

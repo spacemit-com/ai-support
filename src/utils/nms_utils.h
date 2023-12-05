@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "core/types.h"
+#include "task/vision/object_detection_types.h"
 
 enum
 {

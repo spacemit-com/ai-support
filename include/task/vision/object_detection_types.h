@@ -1,8 +1,7 @@
-#ifndef _TYPES_H_
-#define _TYPES_H_
+#ifndef _OBJECT_DETECTION_TYPES_H_
+#define _OBJECT_DETECTION_TYPES_H_
 
 #include <type_traits>
-#include <string>
 
 #include "opencv2/opencv.hpp"
 
@@ -149,14 +148,6 @@ BoundingBoxType<T1, T2>::area() const
   __assert_type<value_type, score_type>();
   return std::abs<value_type>(width() * height());
 }
-
-struct ImageClassificationResult
-{
-  std::string label_text;
-  int label;
-  float score;
-  int timestamp;
-};
 
 struct ObjectDetectionResult
 {

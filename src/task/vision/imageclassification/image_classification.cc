@@ -11,7 +11,7 @@ int imageClassification::Init(std::string modelFilepath, std::string labelFilepa
 }
 
 void imageClassification::Preprocess(std::vector<float> &input_tensors,
-            cv::Mat& img_raw)
+          const cv::Mat& img_raw)
 {
     auto input_dims = GetInputShape();
     preprocessor_.Preprocess(img_raw_, input_dims, input_tensors_);
@@ -24,7 +24,7 @@ ImageClassificationResult imageClassification::Postprocess()
 
 
 
-ImageClassificationResult imageClassification::Classify(cv::Mat &img_raw)
+ImageClassificationResult imageClassification::Classify(const cv::Mat &img_raw)
 {   
     img_raw_ = img_raw;
 #ifdef DEBUG

@@ -13,7 +13,7 @@
 #include <vector>
 #include <stdexcept> // To use runtime_error
 
-#include "core/types.h"
+#include "task/vision/image_classification_types.h"
 #include "src/core/engine.h"
 #include "src/utils/label_map_utils.h"
 #include "src/task/vision/base_vision_task_api.h"
@@ -29,8 +29,8 @@ class imageClassification : public BaseVisionTaskApi<ImageClassificationResult>
     ~imageClassification() {};
     int Init(std::string modelFilepath, std::string labelFilepath);
     void Preprocess(std::vector<float> &input_tensors,
-                cv::Mat& img_raw) override;
-    ImageClassificationResult Classify(cv::Mat &img_raw);
+              const cv::Mat& img_raw) override;
+    ImageClassificationResult Classify(const cv::Mat &img_raw);
 
     protected:
     bool checkModelExtension(const std::string& filename);

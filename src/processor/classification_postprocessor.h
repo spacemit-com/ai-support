@@ -8,7 +8,7 @@
 #include <cmath>
 #include <stdexcept> // To use runtime_error
 
-#include "core/types.h"
+#include "task/vision/image_classification_types.h"
 #include "onnxruntime_cxx_api.h"
 
 #include "src/processor/processor.h"

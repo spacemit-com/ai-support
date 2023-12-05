@@ -21,7 +21,7 @@ visit [onnxruntime release](https://github.com/microsoft/onnxruntime/releases/ta
 export ORT_HOME=
 mkdir build
 cd build
-cmake -DORT_HOME=${ORT_HOME} -DBUILD_TYPE=${CMAKE_BUILD_TYPE} -DDEBUG=OFF ..
+cmake -DORT_HOME=${ORT_HOME} -DBUILD_TYPE=${CMAKE_BUILD_TYPE} -DDEBUG=OFF -DTEST=ON ..
 make -j16
 make install
 ```

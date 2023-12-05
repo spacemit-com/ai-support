@@ -5,6 +5,7 @@ void DetectionPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors,
                                          std::vector<int64_t>& input_dims,
                                          int img_height,
                                          int img_width,
+                                         std::vector<std::string> labels,
                                          float score_threshold, 
                                          float iou_threshold, 
                                          unsigned int topk, 
@@ -68,7 +69,7 @@ void DetectionPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors,
             box.y2 = std::min(box.y2,float(img_height-1));
             box.score = conf;
             box.label = label;
-            box.label_text = class_names[label];
+            box.label_text = labels[label].c_str();
             box.flag = true;
             bbox_collection.push_back(box);
             count += 1; // limit boxes for nms.
@@ -110,7 +111,8 @@ void DetectionPostprocessor::Postprocess_Yolov6(std::vector<Ort::Value> output_t
             std::vector<Boxi> &result_boxes,
             std::vector<int64_t>& input_dims,
             int img_height,
-            int img_width)
+            int img_width,
+            std::vector<std::string> labels)
 {
 #ifdef DEBUG
   std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -143,7 +145,7 @@ void DetectionPostprocessor::Postprocess_Yolov6(std::vector<Ort::Value> output_t
     }
     result_box.label = pred1.At<int>({0,i});
     result_box.score = pred2.At<float>({0,i,0});
-    result_box.label_text = class_names[result_box.label];
+    result_box.label_text = labels[result_box.label].c_str();
     result_box.flag = true;
     result_boxes.push_back(result_box);
   }
@@ -159,7 +161,8 @@ void DetectionPostprocessor::Postprocess_NanoDet(std::vector<Ort::Value> output_
             std::vector<Boxi> &result_boxes,
             std::vector<int64_t>& input_dims,
             int img_height,
-            int img_width)
+            int img_width,
+            std::vector<std::string> labels)
 { 
 #ifdef DEBUG
   std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -226,7 +229,7 @@ void DetectionPostprocessor::Postprocess_NanoDet(std::vector<Ort::Value> output_
         float dw = (input_width - resize_ratio * img_width) / 2;
         float dh = (input_height - resize_ratio * img_height) / 2;
         box.label = label;
-        box.label_text = class_names[label];
+        box.label_text = labels[label].c_str();
         box.score = cls_conf;
         box.flag = true;
         box.x1 = ((ct_x - dis_pred[0])*strides[i] - dw)/resize_ratio;

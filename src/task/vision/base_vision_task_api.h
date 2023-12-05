@@ -9,9 +9,9 @@
 #include "opencv2/opencv.hpp"
 
 template <class OutputType>
-class BaseVisionTaskApi : public BaseTaskApi<OutputType, cv::Mat&>{
+class BaseVisionTaskApi : public BaseTaskApi<OutputType, const cv::Mat&>{
     public:
-        BaseVisionTaskApi():BaseTaskApi<OutputType, cv::Mat&>() {};
+        BaseVisionTaskApi():BaseTaskApi<OutputType, const cv::Mat&>() {};
         ~BaseVisionTaskApi() {};
         // BaseVisionTaskApi is neither copyable nor movable.
         BaseVisionTaskApi(const BaseVisionTaskApi&) = delete;
@@ -19,7 +19,7 @@ class BaseVisionTaskApi : public BaseTaskApi<OutputType, cv::Mat&>{
 
     protected:
         virtual void Preprocess(std::vector<float> &input_tensors,
-                        cv::Mat& img_raw) override{}
+                       const cv::Mat& img_raw) override{}
     
 };
 

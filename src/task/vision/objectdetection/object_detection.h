@@ -8,27 +8,29 @@
 
 #include "opencv2/opencv.hpp"
 
-#include "core/types.h"
 #include "src/core/engine.h"
+#include "src/utils/label_map_utils.h"
 #include "src/task/vision/base_vision_task_api.h"
 #include "src/processor/detection_preprocessor.h"
 #include "src/processor/detection_postprocessor.h"
 
-class ObjectDetection : public BaseVisionTaskApi<std::vector<Boxi>>
+#include "task/vision/object_detection_types.h"
+
+class ObjectDetection : public BaseVisionTaskApi<ObjectDetectionResult>
 {
     public:
-    ObjectDetection(): BaseVisionTaskApi<std::vector<Boxi>>() {};
+    ObjectDetection(): BaseVisionTaskApi<ObjectDetectionResult>() {};
     ~ObjectDetection() {};
-    std::vector<Boxi> Detect(cv::Mat &raw_img);
-    std::vector<Boxi> Detect_Yolov6(cv::Mat &raw_img);
-    std::vector<Boxi> Detect_NanoDet(cv::Mat &raw_img);
-    std::vector<Boxi> Inference(cv::Mat &raw_img);
-    int Init(std::string &modelFilepath);
+    ObjectDetectionResult Detect(const cv::Mat &raw_img);
+    ObjectDetectionResult Detect_Yolov6(const cv::Mat &raw_img);
+    ObjectDetectionResult Detect_NanoDet(const cv::Mat &raw_img);
+    int Init(std::string &modelFilepath, std::string &labelFilepath);
+    int Initfromconfig(std::string &configFilepath);
     void Preprocess(std::vector<float> &input_tensors,
-            cv::Mat& img_raw) override;
+           const cv::Mat& img_raw) override;
 
     protected:
-    std::vector<Boxi> Postprocess() override;
+    ObjectDetectionResult Postprocess() override;
 
     private:
     std::string instanceName_;
@@ -40,6 +42,7 @@ class ObjectDetection : public BaseVisionTaskApi<std::vector<Boxi>>
     DetectionPreprocessor processor_;
     DetectionPostprocessor postprocessor_;
     std::vector<Boxi> result_boxes_;
+    ObjectDetectionResult result_;
     int img_height_;
     int img_width_;
 };

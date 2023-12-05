@@ -3,9 +3,10 @@
 
 int main()
 {
-    std::string modelFilepath="/home/gexy5/Documents/bianbu-support/data/models/nanodet-plus-m_320.v13.sim.qop.pc.onnx";
+    std::string modelFilepath="/home/gexy5/Documents/models/yolov4.onnx";
     std::string imageFilepath="/home/gexy5/Documents/bianbu-support/data/imgs/3.jpg";
-    std::string saveImgpath="/home/gexy5/Documents/bianbu-support/data/imgs/person_nanodet_result.jpg";
+    std::string saveImgpath="/home/gexy5/Documents/bianbu-support/data/imgs/3_result.jpg";
+    std::string labelFilepath="/home/gexy5/Documents/bianbu-support/data/labels/coco.txt";
 #ifdef DEBUG
     std::cout<<"."<<std::endl;
 #endif
@@ -23,9 +24,9 @@ int main()
 #endif
     std::vector<Boxi> resultBoxes;
     objectDetectionTask objectdetectiontask;
-    if(objectdetectiontask.Init(modelFilepath))
+    if(objectdetectiontask.Init(modelFilepath, labelFilepath))
     {
-        resultBoxes = objectdetectiontask.Detect_NanoDet(imgRaw);
+        resultBoxes = objectdetectiontask.Detect(imgRaw).result_bboxes;
     }
 #ifdef DEBUG
     std::chrono::steady_clock::time_point begin1 = std::chrono::steady_clock::now();

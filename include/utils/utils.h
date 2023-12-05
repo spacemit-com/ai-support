@@ -1,7 +1,7 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
-#include "core/types.h"
+#include "task/vision/object_detection_types.h"
 
 #include "opencv2/opencv.hpp"
 

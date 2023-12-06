@@ -45,12 +45,6 @@ class DetectionPostprocessor : public Postprocessor{
     private: 
     void nms(std::vector<Boxf> &input, std::vector<Boxf> &output,
                 float iou_threshold, unsigned int topk, unsigned int nms_type);
-    
-    int STRIDES[3] = {8, 16, 32};
-    float XYSCALE[3] = {1.2, 1.1, 1.05};
-    int anchors[3][3][2]= {{{12,16}, {19,36}, {40,28}}, 
-                           {{36,75}, {76,55}, {72,146}}, 
-                           {{142,110}, {192,243}, {459,401}}};
 };
 
 #endif

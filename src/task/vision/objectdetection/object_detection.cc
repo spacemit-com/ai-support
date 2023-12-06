@@ -1,5 +1,6 @@
 #include "src/task/vision/objectdetection/object_detection.h"
 #include "src/utils/json.hpp"
+#include "utils/time.h"
 
 #include <fstream>
 using json = nlohmann::json;
@@ -16,18 +17,13 @@ ObjectDetectionResult ObjectDetection::Detect_NanoDet(const cv::Mat &raw_img)
     img_height_ = raw_img.rows;
     img_width_ = raw_img.cols;
 
+    {
 #ifdef DEBUG
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        std::cout << "|-- Preprocess "<<std::endl;
+        TimeWatcher t("|--");
 #endif
-
-    processor_.Preprocess_NanoDet(raw_img, inputDims_, input_tensors_);
-
-#ifdef DEBUG
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    std::cout << "|-- preprocess Latency: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
-              << " ms" << std::endl;
-#endif
+        processor_.Preprocess_NanoDet(raw_img, inputDims_, input_tensors_);
+    }
 
     postprocessor_.Postprocess_NanoDet(Infer(input_tensors_),
         result_boxes_,
@@ -46,20 +42,13 @@ ObjectDetectionResult ObjectDetection::Detect_Yolov6(const cv::Mat &raw_img)
     input_tensors_.clear();
     img_height_ = raw_img.rows;
     img_width_ = raw_img.cols;
-
+    {
 #ifdef DEBUG
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        std::cout << "|-- Preprocess"<<std::endl;
+        TimeWatcher t("|--");
 #endif
-
-    processor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
-
-#ifdef DEBUG
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    std::cout << "preprocess Latency: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
-              << " ms" << std::endl;
-#endif
-
+        processor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
+    }
     postprocessor_.Postprocess_Yolov6(Infer(input_tensors_),
             result_boxes_,
             inputDims_,
@@ -77,20 +66,13 @@ ObjectDetectionResult ObjectDetection::Detect(const cv::Mat &raw_img)
     input_tensors_.clear();
     img_height_ = raw_img.rows;
     img_width_ = raw_img.cols;
-
+    {
 #ifdef DEBUG
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        std::cout << "|-- Preprocess"<<std::endl;
+        TimeWatcher t("|--");
 #endif
-
-    processor_.Preprocess(raw_img, inputDims_, input_tensors_, HWC);
-
-#ifdef DEBUG
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    std::cout << "preprocess Latency: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
-              << " ms" << std::endl;
-#endif
-            
+        processor_.Preprocess(raw_img, inputDims_, input_tensors_, HWC);
+    }
     postprocessor_.Postprocess(Infer(input_tensors_), 
                         result_boxes_, 
                         inputDims_, 

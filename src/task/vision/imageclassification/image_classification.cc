@@ -1,4 +1,5 @@
 #include "src/task/vision/imageclassification/image_classification.h"
+#include "utils/time.h"
 
 int imageClassification::Init(std::string modelFilepath, std::string labelFilepath)
 {
@@ -27,18 +28,13 @@ ImageClassificationResult imageClassification::Postprocess()
 ImageClassificationResult imageClassification::Classify(const cv::Mat &img_raw)
 {   
     img_raw_ = img_raw;
+    {
 #ifdef DEBUG
-    std::chrono::steady_clock::time_point begin =
-    std::chrono::steady_clock::now();
+        std::cout<<"|-- Preprocess"<<std::endl;
+        TimeWatcher t("|--");
 #endif
-    Preprocess(input_tensors_, img_raw_);
-#ifdef DEBUG
-    std::chrono::steady_clock::time_point end =
-    std::chrono::steady_clock::now();
-    std::cout << "preprocess Latency: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
-              << " ms" << std::endl;
-#endif
+        Preprocess(input_tensors_, img_raw_);
+    }
     return Postprocess();
 }
 

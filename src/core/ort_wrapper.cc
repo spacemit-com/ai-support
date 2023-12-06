@@ -1,4 +1,5 @@
 #include "src/core/ort_wrapper.h"
+#include "utils/time.h"
 
 int OrtWrapper::Init(std::string instanceName, std::string modelFilepath)
 {
@@ -91,15 +92,8 @@ std::vector<std::vector<int64_t>> OrtWrapper::GetOutputDims()
 std::vector<Ort::Value> OrtWrapper::Invoke(std::vector<float>& input_tensor_values)
 {
 #ifdef DEBUG
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    TimeWatcher t("|-- Infer tensor");
 #endif
-    //Run Inference
-
-    /* To run inference using ONNX Runtime, the user is responsible for creating and managing the 
-    input and output buffers. These buffers could be created and managed via std::vector.
-    The linear-format input data should be copied to the buffer for ONNX Runtime inference. */
-    
-
     //init onnxruntime allocator.
     Ort::AllocatorWithDefaultOptions allocator;
 
@@ -150,14 +144,6 @@ std::vector<Ort::Value> OrtWrapper::Invoke(std::vector<float>& input_tensor_valu
                  input_tensors.data(), 
                  1, 
                  output_node_names.data(),
-                 num_outputs);
-
-#ifdef DEBUG
-    std::chrono::steady_clock::time_point end =
-    std::chrono::steady_clock::now();
-    std::cout << "|-- infer tensor Latency: "
-        << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
-        << " ms" << std::endl;      
-#endif       
+                 num_outputs);     
     return outputTensors;
 }

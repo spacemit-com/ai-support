@@ -1,14 +1,18 @@
+#include "utils/time.h"
 #include "src/utils/utils.h"
 #include "src/processor/classification_preprocessor.h"
-
 
 void ClassificationPreprocessor::Preprocess(cv::Mat &imageBGR, std::vector<int64_t> inputDims, std::vector<float>& input_tensors)
 {
     cv::Mat resizedImageBGR, resizedImageRGB, resizedImage, preprocessedImage;
-    //std::cout<<inputDims[3]<<std::endl;
-    cv::resize(imageBGR, resizedImageBGR,
-            cv::Size(inputDims[3], inputDims[2]),
-            cv::InterpolationFlags::INTER_CUBIC);
+    {
+#ifdef DEBUG
+        TimeWatcher t("| |-- Resize image");
+#endif
+        cv::resize(imageBGR, resizedImageBGR,
+                cv::Size(inputDims[3], inputDims[2]),
+                cv::InterpolationFlags::INTER_CUBIC);
+    }
     
     // step 3: Convert the image to HWC RGB UINT8 format.
     cv::cvtColor(resizedImageBGR, resizedImageRGB, cv::ColorConversionCodes::COLOR_BGR2RGB);

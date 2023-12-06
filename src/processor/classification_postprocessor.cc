@@ -1,4 +1,5 @@
 #include "src/processor/classification_postprocessor.h"
+#include "utils/time.h"
 
 float ClassificationPostprocessor::division(float num, float den)
 {
@@ -11,8 +12,7 @@ float ClassificationPostprocessor::division(float num, float den)
 ImageClassificationResult ClassificationPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors, std::vector<std::string> labels)
 {
 #ifdef DEBUG
-    std::chrono::steady_clock::time_point begin =
-    std::chrono::steady_clock::now();
+    TimeWatcher t("|-- Postprocess");
 #endif
     int predId = 0;
     float activation = 0;
@@ -29,16 +29,7 @@ ImageClassificationResult ClassificationPostprocessor::Postprocess(std::vector<O
             maxActivation = activation;
         }
     }
-#ifdef DEBUG
-    std::chrono::steady_clock::time_point end =
-    std::chrono::steady_clock::now();
-    std::cout << "postprocess Latency: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
-              << " ms" << std::endl;
-#endif
     ImageClassificationResult result;
-    std::chrono::steady_clock::time_point tp = std::chrono::steady_clock::now();
-    result.timestamp = tp.time_since_epoch().count();
     result.label = predId;
     result.label_text = labels.at(predId);
     result.score = std::exp(maxActivation)/expSum;

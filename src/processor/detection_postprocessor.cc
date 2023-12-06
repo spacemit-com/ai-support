@@ -1,4 +1,5 @@
 #include "src/processor/detection_postprocessor.h"
+#include "utils/time.h"
 
 void DetectionPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors,
                                          std::vector<Boxi> &result_boxes,
@@ -12,9 +13,8 @@ void DetectionPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors,
                                          unsigned int nms_type)
 {
 #ifdef DEBUG
-  std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+  TimeWatcher t("|-- Postprocess");
 #endif
-
   std::vector<Boxf> bbox_collection;
   bbox_collection.clear();
   unsigned int count = 0;
@@ -98,13 +98,6 @@ void DetectionPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors,
     result_box.flag = detected_boxes[i].flag;
     result_boxes.push_back(result_box);
   }
-#ifdef DEBUG
-  std::chrono::steady_clock::time_point end =
-  std::chrono::steady_clock::now();
-  std::cout << "postprocess including inference Latency: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
-              << " ms" << std::endl;
-#endif
 }
 
 void DetectionPostprocessor::Postprocess_Yolov6(std::vector<Ort::Value> output_tensors,
@@ -115,7 +108,7 @@ void DetectionPostprocessor::Postprocess_Yolov6(std::vector<Ort::Value> output_t
             std::vector<std::string> labels)
 {
 #ifdef DEBUG
-  std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+  TimeWatcher t("|-- Postprocess");
 #endif
   std::vector<Boxf> bbox_collection;
   bbox_collection.clear();
@@ -149,12 +142,6 @@ void DetectionPostprocessor::Postprocess_Yolov6(std::vector<Ort::Value> output_t
     result_box.flag = true;
     result_boxes.push_back(result_box);
   }
-#ifdef DEBUG
-  std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-  std::cout << "postprocess including inference Latency: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
-              << " ms" << std::endl;
-#endif
 }
 
 void DetectionPostprocessor::Postprocess_NanoDet(std::vector<Ort::Value> output_tensors,
@@ -163,9 +150,9 @@ void DetectionPostprocessor::Postprocess_NanoDet(std::vector<Ort::Value> output_
             int img_height,
             int img_width,
             std::vector<std::string> labels)
-{ 
+{
 #ifdef DEBUG
-  std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+  TimeWatcher t("|-- Postprocess");
 #endif
   std::vector<Boxf> bbox_collection;
   bbox_collection.clear();
@@ -263,14 +250,6 @@ void DetectionPostprocessor::Postprocess_NanoDet(std::vector<Ort::Value> output_
     result_box.flag = detected_boxes[i].flag;
     result_boxes.push_back(result_box);
   }
-
-#ifdef DEBUG
-  std::chrono::steady_clock::time_point end =
-  std::chrono::steady_clock::now();
-  std::cout << "|-- postprocess: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
-              << " ms" << std::endl;
-#endif
 }
 
 void DetectionPostprocessor::nms(std::vector<Boxf>& input, std::vector<Boxf>& output,

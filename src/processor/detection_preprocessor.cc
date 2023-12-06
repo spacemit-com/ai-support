@@ -1,4 +1,5 @@
 #include "src/processor/detection_preprocessor.h"
+#include "utils/time.h"
 
 void DetectionPreprocessor::Preprocess_NanoDet(const cv::Mat &mat, 
                                               std::vector<int64_t>& input_node_dims, 
@@ -8,81 +9,52 @@ void DetectionPreprocessor::Preprocess_NanoDet(const cv::Mat &mat,
   const int input_width = input_node_dims.at(3);
 
   cv::Mat resizedImageBGR,  resizedImage, preprocessedImage;
-
-#ifdef DEBUG
-  std::chrono::steady_clock::time_point begin0 = std::chrono::steady_clock::now();
-#endif
-
-  resize_unscale(mat, resizedImage, input_height, input_width);
-#ifdef DEBUG
-  std::chrono::steady_clock::time_point end0 = std::chrono::steady_clock::now();
-  std::cout << "| |-- resize Latency: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(end0 - begin0).count()
-              << " ms" << std::endl;
-#endif
-
-#ifdef DEBUG
-  std::chrono::steady_clock::time_point begin2 = std::chrono::steady_clock::now();
-#endif
-  resizedImage.convertTo(resizedImage, CV_32F, 1.0);
-
-#ifdef DEBUG
-  std::chrono::steady_clock::time_point end2 = std::chrono::steady_clock::now();
-  std::cout << "| |-- to fp32 Latency: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(end2 - begin2).count()
-              << " ms" << std::endl;
-#endif
-
-#ifdef DEBUG
-  // step 5: Split the BGR channels from the image. 
-  std::chrono::steady_clock::time_point begin3 = std::chrono::steady_clock::now();
-#endif
-
-  cv::Mat channels[3];
-  cv::split(resizedImage, channels);
-  const float mean_vals[3] = {103.53, 116.28, 123.675};
-  const float scale_vals[3] = {57.375, 57.12, 58.395};
-  int channel = 3;
-  for(int i=0;i<channel;i++)
   {
-    channels[i] = (channels[i] - mean_vals[i]) / (scale_vals[i]);
+#ifdef DEBUG
+    TimeWatcher t("| |-- Resize unscale");
+#endif
+    resize_unscale(mat, resizedImage, input_height, input_width);
   }
-  cv::merge(channels, 3, resizedImage);
+  {
 #ifdef DEBUG
-  std::chrono::steady_clock::time_point end3 = std::chrono::steady_clock::now();
-  std::cout << "| |-- normalize Latency: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(end3 - begin3).count()
-              << " ms" << std::endl;
+    TimeWatcher t("| |-- Convert to fp32");
 #endif
+    resizedImage.convertTo(resizedImage, CV_32F, 1.0);
+  }
 
+  {
 #ifdef DEBUG
-  std::chrono::steady_clock::time_point begin4 = std::chrono::steady_clock::now();
+    TimeWatcher t("| |-- Normalize");
 #endif
+    cv::Mat channels[3];
+    cv::split(resizedImage, channels);
+    const float mean_vals[3] = {103.53, 116.28, 123.675};
+    const float scale_vals[3] = {57.375, 57.12, 58.395};
+    int channel = 3;
+    for(int i=0;i<channel;i++)
+    {
+      channels[i] = (channels[i] - mean_vals[i]) / (scale_vals[i]);
+    }
+    cv::merge(channels, 3, resizedImage);
+  }
 
-  cv::dnn::blobFromImage(resizedImage, preprocessedImage);
-
+  {
 #ifdef DEBUG
-  std::chrono::steady_clock::time_point end4 = std::chrono::steady_clock::now();
-  std::cout << "| |-- cv::dnn::blobFromImage Latency: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(end4 - begin4).count()
-              << " ms" << std::endl;  
+    TimeWatcher t("| |-- cv::dnn::blobFromImage");
 #endif
+    cv::dnn::blobFromImage(resizedImage, preprocessedImage);
+  }
 
+
+  {
 #ifdef DEBUG
-  std::chrono::steady_clock::time_point begin5 = std::chrono::steady_clock::now();
-#endif
-
-  size_t inputTensorSize = vectorProduct(input_node_dims);
-  input_tensor_value.resize(inputTensorSize);
-  input_tensor_value.assign(preprocessedImage.begin<float>(),
-                          preprocessedImage.end<float>());
-
-#ifdef DEBUG
-  std::chrono::steady_clock::time_point end5 = std::chrono::steady_clock::now();
-  std::cout << "| |-- cv::Mat to std::vector: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(end5 - begin5).count()
-              << " ms" << std::endl; 
-#endif
+    TimeWatcher t("| |-- cv::Mat to std::vector");
+#endif    
+    size_t inputTensorSize = vectorProduct(input_node_dims);
+    input_tensor_value.resize(inputTensorSize);
+    input_tensor_value.assign(preprocessedImage.begin<float>(),
+                            preprocessedImage.end<float>());
+  }
 }
 
 void DetectionPreprocessor::Preprocess(const cv::Mat &mat, 
@@ -130,104 +102,56 @@ void DetectionPreprocessor::Preprocess(const cv::Mat &mat,
     const int input_width = input_node_dims.at(3);
     
     cv::Mat resizedImageBGR, resizedImageRGB, resizedImage, preprocessedImage;
-
-#ifdef DEBUG
-    std::chrono::steady_clock::time_point begin0 = std::chrono::steady_clock::now();
-#endif
-
-    resize_unscale(mat, resizedImageBGR, input_height, input_width);
-
-#ifdef DEBUG
-    std::chrono::steady_clock::time_point end0 = std::chrono::steady_clock::now();
-    std::cout << "resize Latency: "
-                << std::chrono::duration_cast<std::chrono::milliseconds>(end0 - begin0).count()
-                << " ms" << std::endl;
-#endif
-        
-#ifdef DEBUG
-    std::chrono::steady_clock::time_point begin1 = std::chrono::steady_clock::now();
-#endif
-
-    // step 3: Convert the image to HWC RGB UINT8 format.
-    cv::cvtColor(resizedImageBGR, resizedImageRGB, cv::COLOR_BGR2RGB);
-
-#ifdef DEBUG
-    std::chrono::steady_clock::time_point end1 = std::chrono::steady_clock::now();
-    std::cout << "cv::cvtColor Latency: "
-                << std::chrono::duration_cast<std::chrono::milliseconds>(end1 - begin1).count()
-                << " ms" << std::endl;
-#endif
-
-#ifdef DEBUG
-    std::chrono::steady_clock::time_point begin2 = std::chrono::steady_clock::now();
-#endif
-
-    resizedImageRGB.convertTo(resizedImage, CV_32F, 1.0);
-
-#ifdef DEBUG
-    std::chrono::steady_clock::time_point end2 = std::chrono::steady_clock::now();
-    std::cout << "to fp32 Latency: "
-                << std::chrono::duration_cast<std::chrono::milliseconds>(end2 - begin2).count()
-                << " ms" << std::endl;
-#endif
-
-#ifdef DEBUG
-    // step 5: Split the BGR channels from the image. 
-    std::chrono::steady_clock::time_point begin3 = std::chrono::steady_clock::now();
-#endif
-
-    cv::Mat channels[3];
-    cv::split(resizedImage, channels);
-
-    //step 6: Normalize each channel.
-    // Normalization per channel
-    // Normalization parameters obtained from
-    // https://github.com/onnx/models/tree/master/vision/classification/squeezenet
-
-    const float mean_vals[3] = {116.28f, 116.28f, 116.28f};
-    const float scale_vals[3] = {0.017429f, 0.017429f, 0.017429f};
-    int channel = 3;
-    for(int i=0;i<channel;i++)
     {
-      channels[i] = (channels[i] - mean_vals[i]) * scale_vals[i];
+#ifdef DEBUG
+    TimeWatcher t("| |-- Resize unscale");
+#endif
+      resize_unscale(mat, resizedImageBGR, input_height, input_width);
     }
-    //step 7: Merge the RGB channels back to the image.
-    cv::merge(channels, 3, resizedImage);
-  
+          
+    {
 #ifdef DEBUG
-    std::chrono::steady_clock::time_point end3 = std::chrono::steady_clock::now();
-    std::cout << "normalize Latency: "
-                << std::chrono::duration_cast<std::chrono::milliseconds>(end3 - begin3).count()
-                << " ms" << std::endl;
+    TimeWatcher t("| |-- Convert to RGB");
 #endif
-
+      // step 3: Convert the image to HWC RGB UINT8 format.
+      cv::cvtColor(resizedImageBGR, resizedImageRGB, cv::COLOR_BGR2RGB);
+    }
+    {
 #ifdef DEBUG
-    std::chrono::steady_clock::time_point begin4 = std::chrono::steady_clock::now();
+    TimeWatcher t("| |-- Convert to fp32");
 #endif
-
-    cv::dnn::blobFromImage(resizedImage, preprocessedImage);
-
-#ifdef DEBUG    
-    std::chrono::steady_clock::time_point end4 = std::chrono::steady_clock::now();
-    std::cout << "cv::dnn::blobFromImage Latency: "
-                << std::chrono::duration_cast<std::chrono::milliseconds>(end4 - begin4).count()
-                << " ms" << std::endl;  
-#endif
-
+      resizedImage.convertTo(resizedImage, CV_32F, 1.0);
+    }
+    {
 #ifdef DEBUG
-    std::chrono::steady_clock::time_point begin5 = std::chrono::steady_clock::now();
+    TimeWatcher t("| |-- Normalize");
 #endif
-
-    size_t inputTensorSize = vectorProduct(input_node_dims);
-    input_tensor_value.resize(inputTensorSize);
-    input_tensor_value.assign(preprocessedImage.begin<float>(),
-                            preprocessedImage.end<float>());
-
+      cv::Mat channels[3];
+      cv::split(resizedImage, channels);
+      const float mean_vals[3] = {116.28f, 116.28f, 116.28f};
+      const float scale_vals[3] = {0.017429f, 0.017429f, 0.017429f};
+      int channel = 3;
+      for(int i=0;i<channel;i++)
+      {
+        channels[i] = (channels[i] - mean_vals[i]) * scale_vals[i];
+      }
+      //step 7: Merge the RGB channels back to the image.
+      cv::merge(channels, 3, resizedImage);
+    }
+    {
 #ifdef DEBUG
-    std::chrono::steady_clock::time_point end5 = std::chrono::steady_clock::now();
-    std::cout << "cv::Mat to std::vector Latency: "
-                << std::chrono::duration_cast<std::chrono::milliseconds>(end5 - begin5).count()
-                << " ms" << std::endl;  
+    TimeWatcher t("| |-- cv::dnn::blobFromImage");
 #endif
+      cv::dnn::blobFromImage(resizedImage, preprocessedImage);
+    }
+    {
+#ifdef DEBUG
+    TimeWatcher t("| |-- cv::Mat to std::vector");
+#endif    
+      size_t inputTensorSize = vectorProduct(input_node_dims);
+      input_tensor_value.resize(inputTensorSize);
+      input_tensor_value.assign(preprocessedImage.begin<float>(),
+                              preprocessedImage.end<float>());
+    }
   }
 }

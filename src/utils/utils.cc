@@ -1,4 +1,5 @@
 #include "src/utils/utils.h"
+#include <cstdint>
 
 float sigmoid(float x)
 {

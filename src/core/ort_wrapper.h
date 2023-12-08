@@ -29,12 +29,6 @@ class OrtWrapper
     std::vector<int64_t> GetInputDims();
     std::vector<std::vector<int64_t>> GetOutputDims();
 
-    template <typename T>
-    T vectorProduct(const std::vector<T>& v)
-    {
-        return accumulate(v.begin(), v.end(), 1, std::multiplies<T>());
-    }
-
     std::vector<Ort::Value> Invoke(std::vector<float> &input_values_handler);
     protected:
     private:

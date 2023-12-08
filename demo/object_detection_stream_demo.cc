@@ -118,7 +118,7 @@ class ExclusiveDataLoader: public DataLoader {
 public:
   ExclusiveDataLoader()
   {
-    capture = std::unique_ptr<cv::VideoCapture> (new cv::VideoCapture(4));
+    capture = std::unique_ptr<cv::VideoCapture> (new cv::VideoCapture(0));
     int width = 1280;
     int height = 720;
     capture->set(cv::CAP_PROP_FRAME_WIDTH, width);
@@ -184,8 +184,6 @@ void Detection(ExclusiveDataLoader& dataloader, Detector& detector) {
 // 预览线程
 void Preview(ExclusiveDataLoader& dataloader, Detector& detector) {
   cv::Mat frame;
-  int i=0;
-  std::string s1 = "/home/gexy5/Documents/demo/result/frame";
   while (true)
   {
     frame = dataloader.fetch_frame();  // 取(搬走)一帧数据
@@ -193,24 +191,31 @@ void Preview(ExclusiveDataLoader& dataloader, Detector& detector) {
     {
       // 是否有检测结果
       ObjectDetectionResult objs = detector.get_object();  // 取(搬走)检测结果(移动赋值)
-      std::string s2 = std::to_string(i);
-      s1 = s1 + s2;
-      s1 = s1 + ".jpg";
-      i++;
       if(objs.result_bboxes.size())
       {
         draw_boxes_inplace(frame, objs.result_bboxes);   // 画框
       }   
-      cv::imwrite(s1, frame);
+      cv::imshow("Detection", frame);
+      cv::waitKey(10);
     }   // 调用 detector.detected 和 detector.get_object 期间, 检测结果依然可能被刷新
   }
 }
 
-int main()
+int main(int argc, char* argv[])
 {
   Detector detector;
-  detector.init("/home/gexy5/Documents/bianbu-support/data/models/nanodet-plus-m_320.onnx", "/home/gexy5/Documents/bianbu-support/data/labels/coco.txt");
-  int i=0;
+  std::string filePath, labelFilepath;
+  if(argc == 3)
+  {
+    filePath = argv[1];
+    labelFilepath = argv[2];
+  }
+  else
+  {
+    std::cout<<"run with ./detection_stream_demo <modelFilepath> <labelFilepath>" <<std::endl;
+    return 0;
+  }
+  detector.init(filePath, labelFilepath);
   ExclusiveDataLoader dataloader;
   std::thread t1(Detection, std::ref(dataloader), std::ref(detector));
   std::thread t2(Preview, std::ref(dataloader), std::ref(detector));

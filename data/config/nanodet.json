@@ -4,8 +4,6 @@
     "model_path" : "/home/gexy5/Documents/bianbu-support/data/models/nanodet-plus-m_320.onnx",
     "label_path" : "/home/gexy5/Documents/bianbu-support/data/labels/coco.txt",
     "intra_threads_num" : 4,
-    "enable_profiling" : true,
-    "graph_optimization_level" : "ort_disable_all",
-    "preprocessor": "nanodet",
-    "postprocessor": "nanodet"
+    "profiling_projects" : "xxx",
+    "graph_optimization_level" : "ort_disable_all"
 }

@@ -1,5 +1,5 @@
 #要求的Cmake最低版本
-cmake_minimum_required(VERSION 3.22.1)
+cmake_minimum_required(VERSION 3.10)
  
 #工程名称
 project(bianbuai)
@@ -41,16 +41,6 @@ option(TEST "option for Test" ON)
 if (TEST)
    add_subdirectory(${CMAKE_SOURCE_DIR}/src/tests)
 endif()
-
-install(TARGETS detection_demo classification_demo detection_stream_demo
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
-
-install(TARGETS bianbuai
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
 
 # 安装 include 文件
 install(DIRECTORY include/ DESTINATION include/

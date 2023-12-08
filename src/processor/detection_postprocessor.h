@@ -46,5 +46,4 @@ class DetectionPostprocessor : public Postprocessor{
     void nms(std::vector<Boxf> &input, std::vector<Boxf> &output,
                 float iou_threshold, unsigned int topk, unsigned int nms_type);
 };
-
 #endif

@@ -14,11 +14,8 @@ int main(int argc, char* argv[])
     if(argc == 5)
     {
         filePath = argv[1];
-        //"/home/gexy5/Documents/bianbu-support/data/config/nanodet.json";
         imageFilepath = argv[2]; 
-        //"/home/gexy5/Documents/bianbu-support/data/imgs/3.jpg";
         saveImgpath =  argv[3];
-        //"/home/gexy5/Documents/bianbu-support/data/imgs/3_result.jpg";
         labelFilepath = argv[4];
         {
 #ifdef DEBUG

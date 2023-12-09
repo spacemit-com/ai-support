@@ -1,8 +1,11 @@
 #ifndef _IMAGE_CLASSIFICATION_TASK_H_
 #define _IMAGE_CLASSIFICATION_TASK_H_
 
-#include <string>
 #include "task/vision/image_classification_types.h"
+
+#include <memory>   // for: shared_ptr
+#include <string>
+
 #include "opencv2/opencv.hpp"
 
 class imageClassificationTask

@@ -1,8 +1,11 @@
 #ifndef _OBJECT_DETECTION_TASK_H_
 #define _OBJECT_DETECTION_TASK_H_
 
-#include <string>
 #include "task/vision/object_detection_types.h"
+
+#include <memory>   // for: shared_ptr
+#include <string>
+
 #include "opencv2/opencv.hpp"
 
 class objectDetectionTask

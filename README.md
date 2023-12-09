@@ -18,12 +18,23 @@ visit [onnxruntime release](https://github.com/microsoft/onnxruntime/releases/ta
 ### build demo with bash followed
 
 ```bash
-export ORT_HOME=
-mkdir build
-cd build
-cmake -DORT_HOME=${ORT_HOME} -DBUILD_TYPE=${CMAKE_BUILD_TYPE} -DDEBUG=OFF -DTEST=ON ..
-make -j16
-make install
+ORT_HOME=${PATH_TO_ONNXRUNTIME}
+# Note: Add the installation prefix of "OpenCV" to CMAKE_PREFIX_PATH or set
+# "OpenCV_DIR" to a directory containing one of the following names:
+#   OpenCVConfig.cmake
+#   opencv-config.cmake
+OPENCV_DIR=${PATH_TO_OPENCV_CMAKE_DIR}
+
+mkdir build && pushd build
+cmake .. -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_DIR} -DCMAKE_BUILD_TYPE=Debug -DTEST=OFF -DDEMO=ON
+make install -j`nproc`
+popd
+
+# Or with cross compiler:
+CROSS_TOOL=${PATH_TO_COMPILER_PREFIX}-
+SYSROOT=${PATH_TO_SYSROOT}
+cmake .. -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_DIR} \
+   -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT}
 ```
 
 ### run demo

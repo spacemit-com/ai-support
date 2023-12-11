@@ -3,6 +3,7 @@ link_directories(${ORT_HOME}/lib)
 
 file(GLOB_RECURSE SRC_FILES "./*.cpp" "./*.c" "./*.cc")
 add_library(bianbuai SHARED ${SRC_FILES})
+set_target_properties(bianbuai PROPERTIES VERSION 1.0.0 SOVERSION 1)
 
 target_include_directories(bianbuai PUBLIC  ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(bianbuai PRIVATE ${CMAKE_SOURCE_DIR})
@@ -29,5 +30,6 @@ install(TARGETS bianbuai
         ARCHIVE DESTINATION lib)
 
 # ▒~I▒~E include ▒~V~G件
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/include DESTINATION .
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/task ${CMAKE_SOURCE_DIR}/include/utils
+        DESTINATION include/bianbuai
         FILES_MATCHING PATTERN "*.h")

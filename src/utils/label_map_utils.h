@@ -6,10 +6,33 @@
 #include <fstream>
 #include <stdexcept> // To use runtime_error
 
-// Function to validate the Label file extension.
-extern bool checkLabelFileExtension(const std::string& filename);
+static bool checkLabelFileExtension(const std::string& filename)
+{
+    size_t pos = filename.rfind('.');
+    if (filename.empty())
+    {
+        throw std::runtime_error("[ ERROR ] The Label file path is empty");
+    }
+    if (pos == std::string::npos)
+        return false;
+    std::string ext = filename.substr(pos+1);
+    if (ext == "txt") {
+        return true;
+    } else {
+        return false;
+    }
+}
 
-// Function to read the labels from the labelFilepath.
-extern std::vector<std::string> readLabels(std::string& labelFilepath);
+static std::vector<std::string> readLabels(std::string& labelFilepath)
+{
+    std::vector<std::string> labels;
+    std::string line;
+    std::ifstream fp(labelFilepath);
+    while (std::getline(fp, line))
+    {
+        labels.push_back(line);
+    }
+    return labels;
+}
 
 #endif

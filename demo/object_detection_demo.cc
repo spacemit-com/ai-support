@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        std::cout<<"run with "<<argv[0]<<" <modelFilepath> <imageFilepath> <saveImgpath> <labelFilepath> or argv[0] <configFilepath> <imageFilepath> <saveImgpath>"<<std::endl;
+        std::cout<<"run with "<<argv[0]<<" <modelFilepath> <imageFilepath> <saveImgpath> <labelFilepath> or "<<argv[0]<<" <configFilepath> <imageFilepath> <saveImgpath>"<<std::endl;
     }
     return 0;
 }

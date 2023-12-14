@@ -70,7 +70,7 @@ public:
 
   // 推理
   int infer(cv::Mat frame) {
-    ObjectDetectionResult objs_temp = objectdetectiontask_->Detect_NanoDet(frame);
+    ObjectDetectionResult objs_temp = objectdetectiontask_->Detect(frame);
     objs_mutex_.lock();
     objs_array_->push(objs_temp);   // 直接替换掉当前的 objs_array_
     objs_mutex_.unlock();
@@ -143,7 +143,7 @@ public:
   SharedDataLoader() 
   {
     frame_queue_ = std::unique_ptr<ProducerConsumerQueue<cv::Mat>> (new ProducerConsumerQueue<cv::Mat>(1));
-    capture = std::unique_ptr<cv::VideoCapture> (new cv::VideoCapture("/home/gexy5/Documents/bianbu-support/data/imgs/test.mp4"));
+    capture = std::unique_ptr<cv::VideoCapture> (new cv::VideoCapture(0));
   }
   ~SharedDataLoader() {};
   cv::Mat fetch_frame() 

@@ -9,7 +9,7 @@ int DetectVideo(std::string &modelFilepath, std::string &labelFilepath, std::str
 	while (true)
 	{
 		capture >> frame;
-        std::vector<Boxi> resultBoxes = objectdetectiontask->Detect_NanoDet(frame).result_bboxes;
+        std::vector<Boxi> resultBoxes = objectdetectiontask->Detect(frame).result_bboxes;
         draw_boxes_inplace(frame , resultBoxes);
         cv::imshow("Detection", frame);
     };

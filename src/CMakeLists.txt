@@ -3,7 +3,7 @@ link_directories(${ORT_HOME}/lib)
 
 file(GLOB_RECURSE SRC_FILES "./*.cpp" "./*.c" "./*.cc")
 add_library(bianbuai SHARED ${SRC_FILES})
-set_target_properties(bianbuai PROPERTIES VERSION 1.0.0 SOVERSION 1)
+set_target_properties(bianbuai PROPERTIES VERSION 1.0.1 SOVERSION 1)
 
 target_include_directories(bianbuai PUBLIC  ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(bianbuai PRIVATE ${CMAKE_SOURCE_DIR})

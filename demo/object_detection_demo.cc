@@ -2,6 +2,8 @@
 #include "utils/utils.h"
 #include "utils/time.h"
 
+#include <iomanip> //for setprecision
+
 int main(int argc, char* argv[])
 {
     std::vector<Boxi> resultBoxes;
@@ -55,13 +57,14 @@ int main(int argc, char* argv[])
 #endif
           for(int i=0;i<resultBoxes.size();i++)
           {
-            std::cout<<"bbox"<<i<<" "\
-            <<"x1: "<<resultBoxes[i].x1\
-            <<" y1: "<<resultBoxes[i].y1\
-            <<" x2: "<<resultBoxes[i].x2\
-            <<" y2: "<<resultBoxes[i].y2\
-            <<" label_text: "<<resultBoxes[i].label_text\
-            <<" score: "<<resultBoxes[i].score<<std::endl;
+            std::cout<<"bbox["<<i<<"]"<<" "\
+            <<"x1y1x2y2: "\
+            <<"("<<std::setw(4)<<resultBoxes[i].x1<<","\
+            <<std::setw(4)<<resultBoxes[i].y1<<","\
+            <<std::setw(4)<<resultBoxes[i].x2<<","\
+            <<std::setw(4)<<resultBoxes[i].y2<<")"<<", "\
+            <<"score: "<<std::setw(4)<<std::setprecision(6)<<resultBoxes[i].score<<", "\
+            <<"label_text: "<<std::setw(4)<<resultBoxes[i].label_text<<std::endl;
           }
         }
         {

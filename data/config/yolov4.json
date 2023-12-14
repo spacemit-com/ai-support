@@ -1,7 +1,7 @@
 {
-    "name": "Yolov6",
+    "name": "Yolov4",
     "instance_name" : "object-detection-inference",
-    "model_path" : "/xxx/bianbu-ai-support/data/models/yolov6p5_t.onnx",
+    "model_path" : "/xxx/bianbu-ai-support/data/models/yolov4.onnx",
     "label_path" : "/xxx/bianbu-ai-support/data/labels/coco.txt",
     "intra_threads_num" : 4,
     "profiling_projects" : "",

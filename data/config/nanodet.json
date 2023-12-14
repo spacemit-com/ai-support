@@ -1,9 +1,9 @@
 {
     "name": "NanoDet",
     "instance_name" : "object-detection-inference",
-    "model_path" : "/home/gexy5/Documents/bianbu-support/data/models/nanodet-plus-m_320.onnx",
-    "label_path" : "/home/gexy5/Documents/bianbu-support/data/labels/coco.txt",
+    "model_path" : "/xxx/bianbu-ai-support/data/models/nanodet-plus-m_320.onnx",
+    "label_path" : "/xxx/bianbu-ai-support/data/labels/coco.txt",
     "intra_threads_num" : 4,
-    "profiling_projects" : "xxx",
+    "profiling_projects" : "",
     "graph_optimization_level" : "ort_disable_all"
 }

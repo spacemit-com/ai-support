@@ -3,10 +3,10 @@
 
 void DetectionPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors,
                                          std::vector<Boxi> &result_boxes,
-                                         std::vector<int64_t>& input_dims,
+                                         std::vector<int64_t> &input_dims,
                                          int img_height,
                                          int img_width,
-                                         std::vector<std::string> labels,
+                                         std::vector<std::string> &labels,
                                          float score_threshold, 
                                          float iou_threshold, 
                                          unsigned int topk, 
@@ -107,10 +107,10 @@ void DetectionPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors,
 
 void DetectionPostprocessor::Postprocess_Yolov6(std::vector<Ort::Value> output_tensors,
             std::vector<Boxi> &result_boxes,
-            std::vector<int64_t>& input_dims,
+            std::vector<int64_t> &input_dims,
             int img_height,
             int img_width,
-            std::vector<std::string> labels)
+            std::vector<std::string> &labels)
 {
 #ifdef DEBUG
   TimeWatcher t("|-- Postprocess");
@@ -151,10 +151,10 @@ void DetectionPostprocessor::Postprocess_Yolov6(std::vector<Ort::Value> output_t
 
 void DetectionPostprocessor::Postprocess_NanoDet(std::vector<Ort::Value> output_tensors,
             std::vector<Boxi> &result_boxes,
-            std::vector<int64_t>& input_dims,
+            std::vector<int64_t> &input_dims,
             int img_height,
             int img_width,
-            std::vector<std::string> labels)
+            std::vector<std::string> &labels)
 {
 #ifdef DEBUG
   TimeWatcher t("|-- Postprocess");

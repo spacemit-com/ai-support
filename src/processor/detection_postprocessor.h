@@ -19,10 +19,10 @@ class DetectionPostprocessor : public Postprocessor{
 
     void Postprocess(std::vector<Ort::Value> output_tensors,
                     std::vector<Boxi> &result_boxes,
-                    std::vector<int64_t>& input_dims,
+                    std::vector<int64_t> &input_dims,
                     int img_height,
                     int img_width,
-                    std::vector<std::string> labels,
+                    std::vector<std::string> &labels,
                     float score_threshold = 0.25f, 
                     float iou_threshold = 0.45f, 
                     unsigned int topk = 100, 
@@ -30,17 +30,17 @@ class DetectionPostprocessor : public Postprocessor{
 
     void Postprocess_Yolov6(std::vector<Ort::Value> output_tensors,
                 std::vector<Boxi> &result_boxes,
-                std::vector<int64_t>& input_dims,
+                std::vector<int64_t> &input_dims,
                 int img_height,
                 int img_width,
-                std::vector<std::string> labels);
+                std::vector<std::string> &labels);
 
     void Postprocess_NanoDet(std::vector<Ort::Value> output_tensors,
             std::vector<Boxi> &result_boxes,
-            std::vector<int64_t>& input_dims,
+            std::vector<int64_t> &input_dims,
             int img_height,
             int img_width,
-            std::vector<std::string> labels);
+            std::vector<std::string> &labels);
 
     private: 
     void nms(std::vector<Boxf> &input, std::vector<Boxf> &output,

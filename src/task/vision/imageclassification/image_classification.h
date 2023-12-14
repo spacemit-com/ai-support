@@ -27,7 +27,7 @@ class imageClassification : public BaseVisionTaskApi<ImageClassificationResult>
     public:
     imageClassification():BaseVisionTaskApi<ImageClassificationResult>() {};
     ~imageClassification() {};
-    int Init(std::string modelFilepath, std::string labelFilepath);
+    int Init(const std::string modelFilepath, const std::string labelFilepath);
     void Preprocess(std::vector<float> &input_tensors,
               const cv::Mat& img_raw) override;
     ImageClassificationResult Classify(const cv::Mat &img_raw);

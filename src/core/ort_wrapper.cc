@@ -36,9 +36,10 @@ int OrtWrapper::Init(json config)
     session_=std::move(session);
     int intraThreadsnum = config["intra_threads_num"]; 
     sessionOptions_.SetIntraOpNumThreads(intraThreadsnum);
-    if(config["enable_profiling"])
+    std::string profiling_projects = config["profiling_projects"];
+    if(profiling_projects != "")
     {
-        sessionOptions_.EnableProfiling(ORT_TSTR("xxx"));
+        sessionOptions_.EnableProfiling(ORT_TSTR(profiling_projects.c_str()));
     }
     // Sets graph optimization level
     // Available levels are

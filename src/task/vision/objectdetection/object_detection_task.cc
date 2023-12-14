@@ -6,31 +6,49 @@ class objectDetectionTask::impl {
     std::unique_ptr<ObjectDetection> objectdetection_;
 };
 
-objectDetectionTask::objectDetectionTask(std::string &filePath, std::string& labelFilepath) : pimpl_(std::make_unique<impl>()) 
+objectDetectionTask::objectDetectionTask(const std::string &filePath, const std::string& labelFilepath) : pimpl_(std::make_unique<impl>()) 
 {
-    pimpl_->objectdetection_ = std::unique_ptr<ObjectDetection>(new ObjectDetection());
-    std::string suffixStr = filePath.substr(filePath.find_last_of('.') + 1);
-    if(strcmp(suffixStr.c_str(), "onnx") == 0)
+    if(filePath.length()>4)
     {
-        int flag = pimpl_->objectdetection_->Initfromcommand(filePath, labelFilepath);
+        pimpl_->objectdetection_ = std::unique_ptr<ObjectDetection>(new ObjectDetection());
+        std::string suffixStr = filePath.substr(filePath.length()-4,4);
+        if(strcmp(suffixStr.c_str(), "onnx") == 0)
+        {
+            int flag = pimpl_->objectdetection_->Initfromcommand(filePath, labelFilepath);
+        }
+        else if(strcmp(suffixStr.c_str(), "json") == 0)
+        {
+            int flag = pimpl_->objectdetection_->Initfromconfig(filePath);
+        }
     }
-    else if(strcmp(suffixStr.c_str(), "json") == 0)
+    else
     {
-        int flag = pimpl_->objectdetection_->Initfromconfig(filePath);
+        std::cout<<"Unsupport filepath"<<std::endl;
     }
 }
 
-ObjectDetectionResult objectDetectionTask::Detect_Yolov6(const cv::Mat &raw_img)
+objectDetectionTask::objectDetectionTask(const std::string &filePath) : pimpl_(std::make_unique<impl>()) 
 {
-    return pimpl_->objectdetection_->Detect_Yolov6(raw_img);
+    if(filePath.length()>4)
+    {
+        pimpl_->objectdetection_ = std::unique_ptr<ObjectDetection>(new ObjectDetection());
+        std::string suffixStr = filePath.substr(filePath.length()-4,4);
+        if(strcmp(suffixStr.c_str(), "json") == 0)
+        {
+        int flag = pimpl_->objectdetection_->Initfromconfig(filePath);
+        }
+        else
+        {
+            std::cout<<"Unsupport file"<<std::endl;
+        }
+    }
+    else
+    {
+        std::cout<<"Unsupport filepath"<<std::endl;
+    }
 }
 
 ObjectDetectionResult objectDetectionTask::Detect(const cv::Mat &raw_img)
 {
     return pimpl_->objectdetection_->Detect(raw_img);
-}
-
-ObjectDetectionResult objectDetectionTask::Detect_NanoDet(const cv::Mat &raw_img)
-{
-    return pimpl_->objectdetection_->Detect_NanoDet(raw_img);
 }

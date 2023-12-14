@@ -19,7 +19,7 @@ class ClassificationPostprocessor : public Postprocessor{
     ClassificationPostprocessor() {};
     ~ClassificationPostprocessor() {};
     // Function to validate the input image file extension.
-    ImageClassificationResult Postprocess(std::vector<Ort::Value> output_tensors, std::vector<std::string> labels);
+    ImageClassificationResult Postprocess(std::vector<Ort::Value> output_tensors, std::vector<std::string> &labels);
 
     //Handling divide by zero
     float division(float num, float den);

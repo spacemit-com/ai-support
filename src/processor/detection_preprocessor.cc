@@ -120,7 +120,7 @@ void DetectionPreprocessor::Preprocess(const cv::Mat &mat,
 #ifdef DEBUG
     TimeWatcher t("| |-- Convert to fp32");
 #endif
-      resizedImage.convertTo(resizedImage, CV_32F, 1.0);
+      resizedImageRGB.convertTo(resizedImage, CV_32F, 1.0);
     }
     {
 #ifdef DEBUG

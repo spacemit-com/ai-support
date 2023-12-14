@@ -9,7 +9,7 @@ float ClassificationPostprocessor::division(float num, float den)
    return (num / den);
 }
 
-ImageClassificationResult ClassificationPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors, std::vector<std::string> labels)
+ImageClassificationResult ClassificationPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors, std::vector<std::string> &labels)
 {
 #ifdef DEBUG
     TimeWatcher t("|-- Postprocess");

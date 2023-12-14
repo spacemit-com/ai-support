@@ -1,7 +1,7 @@
 #include "src/task/vision/imageclassification/image_classification.h"
 #include "utils/time.h"
 
-int imageClassification::Init(std::string modelFilepath, std::string labelFilepath)
+int imageClassification::Init(const std::string modelFilepath, const std::string labelFilepath)
 {
     instanceName_="image-classification-inference";
     modelFilepath_=modelFilepath;

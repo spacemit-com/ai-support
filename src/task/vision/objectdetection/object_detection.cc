@@ -10,6 +10,26 @@ void ObjectDetection::Preprocess(std::vector<float> &input_tensors, const cv::Ma
     processor_.Preprocess(img_raw, inputDims_, input_tensors_, CHW);
 }
 
+ObjectDetectionResult ObjectDetection::Detect(const cv::Mat &raw_img)
+{
+    if(modelFilepath_.find("yolov4")!=modelFilepath_.npos)
+    {
+        return Detect_Yolov4(raw_img);
+    }
+    else if(modelFilepath_.find("yolov6")!=modelFilepath_.npos)
+    {
+        return Detect_Yolov6(raw_img);
+    }
+    else if(modelFilepath_.find("nanodet-plus")!=modelFilepath_.npos)
+    {
+        return Detect_NanoDet(raw_img);
+    }
+    else{
+        std::cout<<"Unsupported model"<<std::endl;
+        return result_;
+    }
+}
+
 ObjectDetectionResult ObjectDetection::Detect_NanoDet(const cv::Mat &raw_img)
 {
     result_boxes_.clear();
@@ -60,7 +80,7 @@ ObjectDetectionResult ObjectDetection::Detect_Yolov6(const cv::Mat &raw_img)
     return result_;
 }
 
-ObjectDetectionResult ObjectDetection::Detect(const cv::Mat &raw_img)
+ObjectDetectionResult ObjectDetection::Detect_Yolov4(const cv::Mat &raw_img)
 {
     result_boxes_.clear();
     input_tensors_.clear();
@@ -96,7 +116,7 @@ ObjectDetectionResult ObjectDetection::Postprocess()
     return result_;
 }
 
-int ObjectDetection::Initfromcommand(std::string &modelFilepath, std::string &labelFilepath)
+int ObjectDetection::Initfromcommand(const std::string &modelFilepath, const std::string &labelFilepath)
 {
     instanceName_ = "object-detection-inference";
     modelFilepath_ = modelFilepath;
@@ -107,10 +127,11 @@ int ObjectDetection::Initfromcommand(std::string &modelFilepath, std::string &la
     return flag;
 }
 
-int ObjectDetection::Initfromconfig(std::string &configFilepath)
+int ObjectDetection::Initfromconfig(const std::string &configFilepath)
 {
     std::ifstream f(configFilepath);
     json config = json::parse(f);
+    modelFilepath_ = config["model_path"];
     int flag = GetEngine()->Init(config);
     labelFilepath_ = config["label_path"];
     inputDims_ = GetEngine()->GetInputDims();

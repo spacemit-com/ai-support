@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
         imageFilepath = argv[3];
     }
     else{
-        std::cout<<"run with ./classification_demo <modelFilepath> <labelFilepath> <imageFilepath>" <<std::endl;
+        std::cout<<"run with "<<argv[0]<<" <modelFilepath> <labelFilepath> <imageFilepath>" <<std::endl;
         return 0;
     }
     cv::Mat imgRaw;

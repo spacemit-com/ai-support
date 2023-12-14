@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
         DetectVideo(modelFilepath, labelFilepath, videoFilepath);
     }
     else{
-        std::cout<<"run with ./detection_video_demo <modelFilepath>  <labelFilepath> <videoFilepath>"<<std::endl;
+        std::cout<<"run with "<<argv[0]<<" <modelFilepath>  <labelFilepath> <videoFilepath>"<<std::endl;
     }
     return 0;
 }

@@ -212,7 +212,7 @@ int main(int argc, char* argv[])
   }
   else
   {
-    std::cout<<"run with ./detection_stream_demo <modelFilepath> <labelFilepath>" <<std::endl;
+    std::cout<<"run with "<<argv[0]<<" <modelFilepath> <labelFilepath>" <<std::endl;
     return 0;
   }
   detector.init(filePath, labelFilepath);

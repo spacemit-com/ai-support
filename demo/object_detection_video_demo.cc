@@ -9,6 +9,10 @@ int DetectVideo(std::string &modelFilepath, std::string &labelFilepath, std::str
 	while (true)
 	{
 		capture >> frame;
+        if(frame.empty())
+        {
+            break;
+        }
         std::vector<Boxi> resultBoxes = objectdetectiontask->Detect(frame).result_bboxes;
         draw_boxes_inplace(frame , resultBoxes);
         cv::imshow("Detection", frame);

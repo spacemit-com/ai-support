@@ -14,15 +14,15 @@ ObjectDetectionResult ObjectDetection::Detect(const cv::Mat &raw_img)
 {
     if(modelFilepath_.find("yolov4")!=modelFilepath_.npos)
     {
-        return Detect_Yolov4(raw_img);
+        return DetectYolov4(raw_img);
     }
     else if(modelFilepath_.find("yolov6")!=modelFilepath_.npos)
     {
-        return Detect_Yolov6(raw_img);
+        return DetectYolov6(raw_img);
     }
     else if(modelFilepath_.find("nanodet-plus")!=modelFilepath_.npos)
     {
-        return Detect_NanoDet(raw_img);
+        return DetectNanoDet(raw_img);
     }
     else{
         std::cout<<"Unsupported model"<<std::endl;
@@ -30,7 +30,7 @@ ObjectDetectionResult ObjectDetection::Detect(const cv::Mat &raw_img)
     }
 }
 
-ObjectDetectionResult ObjectDetection::Detect_NanoDet(const cv::Mat &raw_img)
+ObjectDetectionResult ObjectDetection::DetectNanoDet(const cv::Mat &raw_img)
 {
     result_boxes_.clear();
     input_tensors_.clear();
@@ -42,10 +42,10 @@ ObjectDetectionResult ObjectDetection::Detect_NanoDet(const cv::Mat &raw_img)
         std::cout << "|-- Preprocess "<<std::endl;
         TimeWatcher t("|--");
 #endif
-        processor_.Preprocess_NanoDet(raw_img, inputDims_, input_tensors_);
+        processor_.PreprocessNanoDet(raw_img, inputDims_, input_tensors_);
     }
 
-    postprocessor_.Postprocess_NanoDet(Infer(input_tensors_),
+    postprocessor_.PostprocessNanoDet(Infer(input_tensors_),
         result_boxes_,
         inputDims_,
         img_height_, 
@@ -56,7 +56,7 @@ ObjectDetectionResult ObjectDetection::Detect_NanoDet(const cv::Mat &raw_img)
     return result_;
 }
 
-ObjectDetectionResult ObjectDetection::Detect_Yolov6(const cv::Mat &raw_img)
+ObjectDetectionResult ObjectDetection::DetectYolov6(const cv::Mat &raw_img)
 {
     result_boxes_.clear();
     input_tensors_.clear();
@@ -69,7 +69,7 @@ ObjectDetectionResult ObjectDetection::Detect_Yolov6(const cv::Mat &raw_img)
 #endif
         processor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
     }
-    postprocessor_.Postprocess_Yolov6(Infer(input_tensors_),
+    postprocessor_.PostprocessYolov6(Infer(input_tensors_),
             result_boxes_,
             inputDims_,
             img_height_, 
@@ -80,7 +80,7 @@ ObjectDetectionResult ObjectDetection::Detect_Yolov6(const cv::Mat &raw_img)
     return result_;
 }
 
-ObjectDetectionResult ObjectDetection::Detect_Yolov4(const cv::Mat &raw_img)
+ObjectDetectionResult ObjectDetection::DetectYolov4(const cv::Mat &raw_img)
 {
     result_boxes_.clear();
     input_tensors_.clear();
@@ -116,7 +116,7 @@ ObjectDetectionResult ObjectDetection::Postprocess()
     return result_;
 }
 
-int ObjectDetection::Initfromcommand(const std::string &modelFilepath, const std::string &labelFilepath)
+int ObjectDetection::InitFromCommand(const std::string &modelFilepath, const std::string &labelFilepath)
 {
     instanceName_ = "object-detection-inference";
     modelFilepath_ = modelFilepath;
@@ -127,7 +127,7 @@ int ObjectDetection::Initfromcommand(const std::string &modelFilepath, const std
     return flag;
 }
 
-int ObjectDetection::Initfromconfig(const std::string &configFilepath)
+int ObjectDetection::InitFromConfig(const std::string &configFilepath)
 {
     std::ifstream f(configFilepath);
     json config = json::parse(f);

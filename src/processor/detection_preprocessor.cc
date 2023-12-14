@@ -1,7 +1,7 @@
 #include "src/processor/detection_preprocessor.h"
 #include "utils/time.h"
 
-void DetectionPreprocessor::Preprocess_NanoDet(const cv::Mat &mat, 
+void DetectionPreprocessor::PreprocessNanoDet(const cv::Mat &mat, 
                                               std::vector<int64_t>& input_node_dims, 
                                               std::vector<float>& input_tensor_value)
 {

@@ -14,11 +14,11 @@ objectDetectionTask::objectDetectionTask(const std::string &filePath, const std:
         std::string suffixStr = filePath.substr(filePath.length()-4,4);
         if(strcmp(suffixStr.c_str(), "onnx") == 0)
         {
-            int flag = pimpl_->objectdetection_->Initfromcommand(filePath, labelFilepath);
+            int flag = pimpl_->objectdetection_->InitFromCommand(filePath, labelFilepath);
         }
         else if(strcmp(suffixStr.c_str(), "json") == 0)
         {
-            int flag = pimpl_->objectdetection_->Initfromconfig(filePath);
+            int flag = pimpl_->objectdetection_->InitFromConfig(filePath);
         }
     }
     else
@@ -35,7 +35,7 @@ objectDetectionTask::objectDetectionTask(const std::string &filePath) : pimpl_(s
         std::string suffixStr = filePath.substr(filePath.length()-4,4);
         if(strcmp(suffixStr.c_str(), "json") == 0)
         {
-        int flag = pimpl_->objectdetection_->Initfromconfig(filePath);
+        int flag = pimpl_->objectdetection_->InitFromConfig(filePath);
         }
         else
         {

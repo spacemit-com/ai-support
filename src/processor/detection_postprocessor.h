@@ -28,14 +28,14 @@ class DetectionPostprocessor : public Postprocessor{
                     unsigned int topk = 100, 
                     unsigned int nms_type = OFFSET);
 
-    void Postprocess_Yolov6(std::vector<Ort::Value> output_tensors,
+    void PostprocessYolov6(std::vector<Ort::Value> output_tensors,
                 std::vector<Boxi> &result_boxes,
                 std::vector<int64_t> &input_dims,
                 int img_height,
                 int img_width,
                 std::vector<std::string> &labels);
 
-    void Postprocess_NanoDet(std::vector<Ort::Value> output_tensors,
+    void PostprocessNanoDet(std::vector<Ort::Value> output_tensors,
             std::vector<Boxi> &result_boxes,
             std::vector<int64_t> &input_dims,
             int img_height,

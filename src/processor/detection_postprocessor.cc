@@ -105,7 +105,7 @@ void DetectionPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors,
   }
 }
 
-void DetectionPostprocessor::Postprocess_Yolov6(std::vector<Ort::Value> output_tensors,
+void DetectionPostprocessor::PostprocessYolov6(std::vector<Ort::Value> output_tensors,
             std::vector<Boxi> &result_boxes,
             std::vector<int64_t> &input_dims,
             int img_height,
@@ -149,7 +149,7 @@ void DetectionPostprocessor::Postprocess_Yolov6(std::vector<Ort::Value> output_t
   }
 }
 
-void DetectionPostprocessor::Postprocess_NanoDet(std::vector<Ort::Value> output_tensors,
+void DetectionPostprocessor::PostprocessNanoDet(std::vector<Ort::Value> output_tensors,
             std::vector<Boxi> &result_boxes,
             std::vector<int64_t> &input_dims,
             int img_height,

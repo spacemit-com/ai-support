@@ -22,7 +22,7 @@ class DetectionPreprocessor : public Preprocessor{
                     std::vector<int64_t>& input_node_dims, 
                     std::vector<float>& input_tensor_value,
                     unsigned int data_format);
-    void Preprocess_NanoDet(const cv::Mat &mat, 
+    void PreprocessNanoDet(const cv::Mat &mat, 
                     std::vector<int64_t>& input_node_dims, 
                     std::vector<float>& input_tensor_value);
 

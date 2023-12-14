@@ -5,7 +5,7 @@
 
 #include "opencv2/opencv.hpp"
 
-void draw_boxes_inplace(cv::Mat &mat_inplace, const std::vector<Boxi> &boxes)
+static void draw_boxes_inplace(cv::Mat &mat_inplace, const std::vector<Boxi> &boxes)
 {
   if (boxes.empty()) return;
   for (const auto &box: boxes)

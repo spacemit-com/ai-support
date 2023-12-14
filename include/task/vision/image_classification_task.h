@@ -11,7 +11,7 @@
 class imageClassificationTask
 {
     public:
-    imageClassificationTask(std::string& filePath, std::string& labelFilepath);
+    imageClassificationTask(const std::string& filePath, const std::string& labelFilepath);
     ~imageClassificationTask() = default;
     ImageClassificationResult Classify(const cv::Mat &img_raw);
     private:

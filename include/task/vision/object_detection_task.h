@@ -11,11 +11,10 @@
 class objectDetectionTask
 {
     public:
-    objectDetectionTask(std::string &filePath, std::string& labelFilepath);
+    objectDetectionTask(const std::string &filePath, const std::string& labelFilepath);
+    objectDetectionTask(const std::string &filePath);
     ~objectDetectionTask() = default;
     ObjectDetectionResult Detect(const cv::Mat &raw_img);
-    ObjectDetectionResult Detect_Yolov6(const cv::Mat &raw_img);
-    ObjectDetectionResult Detect_NanoDet(const cv::Mat &raw_img);
 
     private:
 	class impl;

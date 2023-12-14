@@ -51,6 +51,21 @@ int main(int argc, char* argv[])
         resultBoxes = objectdetectiontask->Detect(imgRaw).result_bboxes;
         {
 #ifdef DEBUG
+          TimeWatcher t("|-- Output result");
+#endif
+          for(int i=0;i<resultBoxes.size();i++)
+          {
+            std::cout<<"bbox"<<i<<" "\
+            <<"x1: "<<resultBoxes[i].x1\
+            <<" y1: "<<resultBoxes[i].y1\
+            <<" x2: "<<resultBoxes[i].x2\
+            <<" y2: "<<resultBoxes[i].y2\
+            <<" label_text: "<<resultBoxes[i].label_text\
+            <<" score: "<<resultBoxes[i].score<<std::endl;
+          }
+        }
+        {
+#ifdef DEBUG
           TimeWatcher t("|-- Box drawing");
 #endif
           draw_boxes_inplace(imgRaw , resultBoxes);

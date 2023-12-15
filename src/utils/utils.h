@@ -3,15 +3,7 @@
 
 #include <cmath>
 #include <vector>
-#include <numeric>
-#include <stdexcept>
 #include <cstdint>  // for: uint32_t
-
-template <typename T>
-T vectorProduct(const std::vector<T>& v)
-{
-    return accumulate(v.begin(), v.end(), 1, std::multiplies<T>());
-}
 
 static float sigmoid(float x)
 {

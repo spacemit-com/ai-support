@@ -1,5 +1,4 @@
 #include "utils/time.h"
-#include "src/utils/utils.h"
 #include "src/processor/classification_preprocessor.h"
 
 void ClassificationPreprocessor::Preprocess(cv::Mat &imageBGR, std::vector<int64_t> inputDims, std::vector<float>& input_tensor_value)

@@ -34,26 +34,9 @@ void DetectionPreprocessor::PreprocessNanoDet(const cv::Mat &mat,
     for(int i=0;i<channel;i++)
     {
       channels[i] = (channels[i] - mean_vals[i]) / (scale_vals[i]);
+      std::vector<float> data = std::vector<float>(channels[i].reshape(1, 1));
+      input_tensor_value.insert(input_tensor_value.end(), data.begin(), data.end());
     }
-    cv::merge(channels, 3, resizedImage);
-  }
-
-  {
-#ifdef DEBUG
-    TimeWatcher t("| |-- cv::dnn::blobFromImage");
-#endif
-    cv::dnn::blobFromImage(resizedImage, preprocessedImage);
-  }
-
-
-  {
-#ifdef DEBUG
-    TimeWatcher t("| |-- cv::Mat to std::vector");
-#endif    
-    size_t inputTensorSize = vectorProduct(input_node_dims);
-    input_tensor_value.resize(inputTensorSize);
-    input_tensor_value.assign(preprocessedImage.begin<float>(),
-                            preprocessedImage.end<float>());
   }
 }
 
@@ -134,24 +117,9 @@ void DetectionPreprocessor::Preprocess(const cv::Mat &mat,
       for(int i=0;i<channel;i++)
       {
         channels[i] = (channels[i] - mean_vals[i]) * scale_vals[i];
+        std::vector<float> data = std::vector<float>(channels[i].reshape(1, 1));
+        input_tensor_value.insert(input_tensor_value.end(), data.begin(), data.end());
       }
-      //step 7: Merge the RGB channels back to the image.
-      cv::merge(channels, 3, resizedImage);
-    }
-    {
-#ifdef DEBUG
-    TimeWatcher t("| |-- cv::dnn::blobFromImage");
-#endif
-      cv::dnn::blobFromImage(resizedImage, preprocessedImage);
-    }
-    {
-#ifdef DEBUG
-    TimeWatcher t("| |-- cv::Mat to std::vector");
-#endif    
-      size_t inputTensorSize = vectorProduct(input_node_dims);
-      input_tensor_value.resize(inputTensorSize);
-      input_tensor_value.assign(preprocessedImage.begin<float>(),
-                              preprocessedImage.end<float>());
     }
   }
 }

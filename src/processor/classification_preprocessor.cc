@@ -2,7 +2,7 @@
 #include "src/utils/utils.h"
 #include "src/processor/classification_preprocessor.h"
 
-void ClassificationPreprocessor::Preprocess(cv::Mat &imageBGR, std::vector<int64_t> inputDims, std::vector<float>& input_tensors)
+void ClassificationPreprocessor::Preprocess(cv::Mat &imageBGR, std::vector<int64_t> inputDims, std::vector<float>& input_tensor_value)
 {
     cv::Mat resizedImageBGR, resizedImageRGB, resizedImage, preprocessedImage;
     {
@@ -22,25 +22,14 @@ void ClassificationPreprocessor::Preprocess(cv::Mat &imageBGR, std::vector<int64
     // step 5: Split the RGB channels from the image.   
     cv::Mat channels[3];
     cv::split(resizedImage, channels);
+    const float mean_vals[3] = {0.485, 0.456, 0.406};
+    const float scale_vals[3] = {0.229, 0.224, 0.225};
 
-    //step 6: Normalize each channel.
-    // Normalization per channel
-    // Normalization parameters obtained from
-    // https://github.com/onnx/models/tree/master/vision/classification/squeezenet
-    channels[0] = (channels[0] - 0.485) / 0.229;
-    channels[1] = (channels[1] - 0.456) / 0.224;
-    channels[2] = (channels[2] - 0.406) / 0.225;
-
-    //step 7: Merge the RGB channels back to the image.
-    cv::merge(channels, 3, resizedImage);
-
-    // step 8: Convert the image to CHW RGB float format.
-    // HWC to CHW
-    cv::dnn::blobFromImage(resizedImage, preprocessedImage);
-  
-    size_t inputTensorSize = vectorProduct(inputDims);
-    std::vector<float> inputTensorValues(inputTensorSize);
-    inputTensorValues.assign(preprocessedImage.begin<float>(),
-                            preprocessedImage.end<float>());
-    input_tensors = inputTensorValues;
+    int channel = 3;
+    for(int i=0;i<channel;i++)
+    {
+      channels[i] = (channels[i] - mean_vals[i]) / (scale_vals[i]);
+      std::vector<float> data = std::vector<float>(channels[i].reshape(1, 1));
+      input_tensor_value.insert(input_tensor_value.end(), data.begin(), data.end());
+    }
 }

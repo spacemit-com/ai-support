@@ -19,7 +19,7 @@ class DetectionPostprocessor : public Postprocessor{
 
     void Postprocess(std::vector<Ort::Value> output_tensors,
                     std::vector<Boxi> &result_boxes,
-                    std::vector<int64_t> &input_dims,
+                    std::vector<std::vector<int64_t>> &input_dims,
                     int img_height,
                     int img_width,
                     std::vector<std::string> &labels,
@@ -30,14 +30,14 @@ class DetectionPostprocessor : public Postprocessor{
 
     void PostprocessYolov6(std::vector<Ort::Value> output_tensors,
                 std::vector<Boxi> &result_boxes,
-                std::vector<int64_t> &input_dims,
+                std::vector<std::vector<int64_t>> &input_dims,
                 int img_height,
                 int img_width,
                 std::vector<std::string> &labels);
 
     void PostprocessNanoDet(std::vector<Ort::Value> output_tensors,
             std::vector<Boxi> &result_boxes,
-            std::vector<int64_t> &input_dims,
+            std::vector<std::vector<int64_t>> &input_dims,
             int img_height,
             int img_width,
             std::vector<std::string> &labels);

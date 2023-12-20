@@ -3,7 +3,7 @@
 
 void DetectionPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors,
                                          std::vector<Boxi> &result_boxes,
-                                         std::vector<int64_t> &input_dims,
+                                         std::vector<std::vector<int64_t>> &input_dims,
                                          int img_height,
                                          int img_width,
                                          std::vector<std::string> &labels,
@@ -23,8 +23,8 @@ void DetectionPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors,
   std::vector<Boxf> bbox_collection;
   bbox_collection.clear();
   unsigned int count = 0;
-  const float input_height = static_cast<float>(input_dims.at(2)); // e.g 640
-  const float input_width = static_cast<float>(input_dims.at(1)); // e.g 640
+  const float input_height = static_cast<float>(input_dims[0][2]); // e.g 640
+  const float input_width = static_cast<float>(input_dims[0][1]); // e.g 640
   const float resize_ratio = std::min(input_height/img_height, input_width/img_width);
   for(int s=0;s<output_tensors.size();s++)
   {
@@ -107,7 +107,7 @@ void DetectionPostprocessor::Postprocess(std::vector<Ort::Value> output_tensors,
 
 void DetectionPostprocessor::PostprocessYolov6(std::vector<Ort::Value> output_tensors,
             std::vector<Boxi> &result_boxes,
-            std::vector<int64_t> &input_dims,
+            std::vector<std::vector<int64_t>> &input_dims,
             int img_height,
             int img_width,
             std::vector<std::string> &labels)
@@ -118,8 +118,8 @@ void DetectionPostprocessor::PostprocessYolov6(std::vector<Ort::Value> output_te
   std::vector<Boxf> bbox_collection;
   bbox_collection.clear();
   unsigned int count = 0;
-  const float input_height = static_cast<float>(input_dims.at(2)); // e.g 640
-  const float input_width = static_cast<float>(input_dims.at(3)); // e.g 640
+  const float input_height = static_cast<float>(input_dims[0][2]); // e.g 640
+  const float input_width = static_cast<float>(input_dims[0][3]); // e.g 640
   const float resize_ratio = std::min(input_height/img_height, input_width/img_width);
   Ort::Value &pred0 = output_tensors.at(0); // batch*13*13*3*85
   Ort::Value &pred1 = output_tensors.at(1); // batch*13*13*3*85
@@ -151,7 +151,7 @@ void DetectionPostprocessor::PostprocessYolov6(std::vector<Ort::Value> output_te
 
 void DetectionPostprocessor::PostprocessNanoDet(std::vector<Ort::Value> output_tensors,
             std::vector<Boxi> &result_boxes,
-            std::vector<int64_t> &input_dims,
+            std::vector<std::vector<int64_t>> &input_dims,
             int img_height,
             int img_width,
             std::vector<std::string> &labels)
@@ -162,8 +162,8 @@ void DetectionPostprocessor::PostprocessNanoDet(std::vector<Ort::Value> output_t
   std::vector<Boxf> bbox_collection;
   bbox_collection.clear();
   const int cls_num = 80;
-  const float input_height = static_cast<float>(input_dims.at(2)); // e.g 640
-  const float input_width = static_cast<float>(input_dims.at(3)); // e.g 640
+  const float input_height = static_cast<float>(input_dims[0][2]); // e.g 640
+  const float input_width = static_cast<float>(input_dims[0][3]); // e.g 640
   const float resize_ratio = std::min(input_height/img_height, input_width/img_width);
   Ort::Value &pred = output_tensors.at(0); // batch*2125*112
   auto outputInfo = pred.GetTensorTypeAndShapeInfo();

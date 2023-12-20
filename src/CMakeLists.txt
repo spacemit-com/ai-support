@@ -29,9 +29,9 @@ target_link_libraries(bianbuai PRIVATE ${TARGET_SHARED_LINKER_FLAGS})
 
 # if use spacemit-ep ,link spacemit-ep
 if(ENABLE_SPACEMIT_EP)
-    target_link_libraries(bianbuai PRIVATE onnxruntime spacemit_ep opencv_core opencv_imgproc opencv_dnn)
+    target_link_libraries(bianbuai PRIVATE onnxruntime spacemit_ep opencv_core opencv_imgproc)
 else()
-    target_link_libraries(bianbuai PRIVATE onnxruntime opencv_core opencv_imgproc opencv_dnn)
+    target_link_libraries(bianbuai PRIVATE onnxruntime opencv_core opencv_imgproc)
 endif()
 
 install(TARGETS bianbuai

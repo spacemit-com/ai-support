@@ -39,7 +39,7 @@ class BaseTaskApi : public BaseUntypedTaskApi{
         // BaseTaskApi is neither copyable nor movable.
         BaseTaskApi(const BaseTaskApi&) = delete;
         BaseTaskApi& operator=(const BaseTaskApi&) = delete;
-        std::vector<int64_t> GetInputShape()
+        std::vector<std::vector<int64_t>> GetInputShape()
         {
             return GetEngine()->GetInputDims();
         }
@@ -47,12 +47,12 @@ class BaseTaskApi : public BaseUntypedTaskApi{
 
     protected:
         // Subclasses need to populate input_tensors from api_inputs.
-        virtual void Preprocess(std::vector<float>& input_tensors,
+        virtual void Preprocess(std::vector<std::vector<float>>& input_tensors,
         InputTypes... api_inputs) = 0;  
         // Subclasses need to construct OutputType object from output_tensors.
         // Original inputs are also provided as they may be needed.
         virtual OutputType Postprocess() = 0; 
-        std::vector<Ort::Value> Infer(std::vector<float>& input_tensors) {    
+        std::vector<Ort::Value> Infer(std::vector<std::vector<float>>& input_tensors) {    
             return GetEngine()->Interpreter(input_tensors);
         }
 };

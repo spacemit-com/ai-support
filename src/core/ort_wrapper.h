@@ -26,10 +26,10 @@ class OrtWrapper
     {return session_->GetInputCount();}
     size_t GetOutputCount()   
     {return session_->GetOutputCount();}
-    std::vector<int64_t> GetInputDims();
+    std::vector<std::vector<int64_t>> GetInputDims();
     std::vector<std::vector<int64_t>> GetOutputDims();
 
-    std::vector<Ort::Value> Invoke(std::vector<float> &input_values_handler);
+    std::vector<Ort::Value> Invoke(std::vector<std::vector<float>>& input_tensor_values);
     protected:
     private:
     std::unique_ptr<Ort::Env> env_;

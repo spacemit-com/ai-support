@@ -24,11 +24,11 @@ class Engine
     {return ortwrapper_.GetInputCount();}
     size_t GetOutputCount()   
     {return ortwrapper_.GetOutputCount();}
-    std::vector<int64_t> GetInputDims()
+    std::vector<std::vector<int64_t>> GetInputDims()
     {return ortwrapper_.GetInputDims();}
     std::vector<std::vector<int64_t>> GetOutputDims()
     {return ortwrapper_.GetOutputDims();}
-    std::vector<Ort::Value> Interpreter(std::vector<float> &input_values_handler);
+    std::vector<Ort::Value> Interpreter(std::vector<std::vector<float>> &input_values_handler);
     protected:
     private:
     OrtWrapper ortwrapper_;

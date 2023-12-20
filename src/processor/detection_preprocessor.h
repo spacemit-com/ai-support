@@ -17,12 +17,12 @@ class DetectionPreprocessor : public Preprocessor{
     ~DetectionPreprocessor() {};
     // Function to validate the input image file extension.
     void Preprocess(const cv::Mat &mat, 
-                    std::vector<int64_t>& input_node_dims, 
-                    std::vector<float>& input_tensor_value,
+                    std::vector<std::vector<int64_t>>& input_node_dims, 
+                    std::vector<std::vector<float>>& input_tensor_values,
                     unsigned int data_format);
     void PreprocessNanoDet(const cv::Mat &mat, 
-                    std::vector<int64_t>& input_node_dims, 
-                    std::vector<float>& input_tensor_value);
+                    std::vector<std::vector<int64_t>>& input_node_dims, 
+                    std::vector<std::vector<float>>& input_tensor_values);
 };
 
 #endif

@@ -15,7 +15,7 @@ class ClassificationPreprocessor : public Preprocessor{
     public:
     ClassificationPreprocessor() {};
     ~ClassificationPreprocessor() {};
-    void Preprocess(cv::Mat &imageBGR, std::vector<int64_t> inputDims, std::vector<float>& input_tensor_value);
+    void Preprocess(cv::Mat &imageBGR, std::vector<std::vector<int64_t>> inputDims, std::vector<std::vector<float>>& input_tensor_values);
 };
 
 #endif

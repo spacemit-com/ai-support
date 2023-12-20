@@ -1,5 +1,7 @@
 #include "task/vision/object_detection_task.h"
 #include "src/task/vision/objectdetection/object_detection.h"
+#include "src/utils/utils.h"
+#include "include/utils/utils.h"
 
 class objectDetectionTask::impl {
     public:
@@ -8,43 +10,84 @@ class objectDetectionTask::impl {
 
 objectDetectionTask::objectDetectionTask(const std::string &filePath, const std::string& labelFilepath) : pimpl_(std::make_unique<impl>()) 
 {
-    if(filePath.length()>4)
+    pimpl_->objectdetection_ = std::unique_ptr<ObjectDetection>(new ObjectDetection());
+    if(!checkLabelFileExtension(labelFilepath)) 
     {
-        pimpl_->objectdetection_ = std::unique_ptr<ObjectDetection>(new ObjectDetection());
+        std::cout<<"[ ERROR ] The LabelFilepath is not set correctly and the labels file should end with extension .txt"<<std::endl;
+    }
+    else if(filePath.length()>4)
+    {
         std::string suffixStr = filePath.substr(filePath.length()-4,4);
         if(strcmp(suffixStr.c_str(), "onnx") == 0)
         {
-            int flag = pimpl_->objectdetection_->InitFromCommand(filePath, labelFilepath);
+            if(!checkModelFileExtension(filePath))
+            {
+                std::cout<<"[ ERROR ] The ModelFilepath is not correct. Make sure you are setting the path to an onnx model file (.onnx)"<<std::endl;
+            }
+            else if(!exists_check(filePath)||!exists_check(labelFilepath))
+            {
+                std::cout<<"[ ERROR ] The File does not exist. Make sure you are setting the correct path to the file"<<std::endl;
+            }
+            else
+            {
+                int flag = pimpl_->objectdetection_->InitFromCommand(filePath, labelFilepath);
+            }
         }
         else if(strcmp(suffixStr.c_str(), "json") == 0)
         {
-            int flag = pimpl_->objectdetection_->InitFromConfig(filePath);
+            if(!checkConfigFileExtension(filePath))
+            {
+                std::cout<<"[ ERROR ] The ConfigFilepath is not correct. Make sure you are setting the path to an json file (.json)"<<std::endl;
+            }
+            else if(!exists_check(filePath))
+            {
+                std::cout<<"[ ERROR ] The File does not exist. Make sure you are setting the correct path to the file"<<std::endl;
+            }
+            else
+            {
+                int flag = pimpl_->objectdetection_->InitFromConfig(filePath);
+            }
+        }
+        else
+        {
+            std::cout<<"[ ERROR ] Unsupport file"<<std::endl;
         }
     }
     else
     {
-        std::cout<<"Unsupport filepath"<<std::endl;
+        std::cout<<"[ ERROR ] Unsupport filepath"<<std::endl;
     }
 }
 
 objectDetectionTask::objectDetectionTask(const std::string &filePath) : pimpl_(std::make_unique<impl>()) 
 {
+    pimpl_->objectdetection_ = std::unique_ptr<ObjectDetection>(new ObjectDetection());
     if(filePath.length()>4)
     {
-        pimpl_->objectdetection_ = std::unique_ptr<ObjectDetection>(new ObjectDetection());
         std::string suffixStr = filePath.substr(filePath.length()-4,4);
         if(strcmp(suffixStr.c_str(), "json") == 0)
         {
-        int flag = pimpl_->objectdetection_->InitFromConfig(filePath);
+            if(!checkConfigFileExtension(filePath))
+            {
+                std::cout<<"[ ERROR ] The ConfigFilepath is not correct. Make sure you are setting the path to an json file (.json)"<<std::endl;
+            }
+            else if(!exists_check(filePath))
+            {
+                std::cout<<"[ ERROR ] The File does not exist. Make sure you are setting the correct path to the file"<<std::endl;
+            }
+            else
+            {
+                int flag = pimpl_->objectdetection_->InitFromConfig(filePath);
+            }
         }
         else
         {
-            std::cout<<"Unsupport file"<<std::endl;
+            std::cout<<"[ ERROR ] Unsupport file"<<std::endl;
         }
     }
     else
     {
-        std::cout<<"Unsupport filepath"<<std::endl;
+        std::cout<<"[ ERROR ] Unsupport filepath"<<std::endl;
     }
 }
 

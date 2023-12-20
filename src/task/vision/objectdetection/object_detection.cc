@@ -5,13 +5,19 @@
 #include <fstream>
 using json = nlohmann::json;
 
-void ObjectDetection::Preprocess(std::vector<float> &input_tensors, const cv::Mat& img_raw)
+void ObjectDetection::Preprocess(std::vector<std::vector<float>> &input_tensors, const cv::Mat& img_raw)
 {
     processor_.Preprocess(img_raw, inputDims_, input_tensors_, CHW);
 }
 
 ObjectDetectionResult ObjectDetection::Detect(const cv::Mat &raw_img)
 {
+    if(initFlag_!=0)
+    {
+        std::cout<<"[ ERROR ] Init fail return empty result"<<std::endl;
+        ObjectDetectionResult empty_result;
+        return empty_result;
+    }
     if(modelFilepath_.find("yolov4")!=modelFilepath_.npos)
     {
         return DetectYolov4(raw_img);
@@ -24,8 +30,9 @@ ObjectDetectionResult ObjectDetection::Detect(const cv::Mat &raw_img)
     {
         return DetectNanoDet(raw_img);
     }
-    else{
-        std::cout<<"Unsupported model"<<std::endl;
+    else
+    {
+        std::cout<<"[ ERROR ] Unsupported model"<<std::endl;
         return result_;
     }
 }
@@ -121,20 +128,26 @@ int ObjectDetection::InitFromCommand(const std::string &modelFilepath, const std
     instanceName_ = "object-detection-inference";
     modelFilepath_ = modelFilepath;
     labelFilepath_ = labelFilepath;
-    int flag = GetEngine()->Init(instanceName_, modelFilepath_);
+    initFlag_ = GetEngine()->Init(instanceName_, modelFilepath_);
     inputDims_ = GetEngine()->GetInputDims();
     labels_ = readLabels(labelFilepath_);
-    return flag;
+    return initFlag_;
 }
 
 int ObjectDetection::InitFromConfig(const std::string &configFilepath)
 {
     std::ifstream f(configFilepath);
     json config = json::parse(f);
+    if(configCheck(config))
+    {
+        initFlag_ = 1;
+        std::cout<<"[ ERROR ] Config check fail"<<std::endl;
+        return initFlag_;
+    }
     modelFilepath_ = config["model_path"];
-    int flag = GetEngine()->Init(config);
     labelFilepath_ = config["label_path"];
-    inputDims_ = GetEngine()->GetInputDims();
     labels_ = readLabels(labelFilepath_);
-    return flag;
+    initFlag_ = GetEngine()->Init(config);
+    inputDims_ = GetEngine()->GetInputDims();
+    return initFlag_;
 }

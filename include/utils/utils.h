@@ -5,6 +5,29 @@
 
 #include "opencv2/opencv.hpp"
 
+#include <sys/stat.h>
+#include <string>
+#include <iostream>
+#include <stdexcept> // To use runtime_error
+
+static bool checkImageFileExtension(const std::string& filename)
+{
+    size_t pos = filename.rfind('.');
+    if (filename.empty())
+    {
+        std::cout<<"[ ERROR ] The Image file path is empty"<<std::endl;
+        return false;
+    }
+    if (pos == std::string::npos)
+        return false;
+    std::string ext = filename.substr(pos+1);
+    if (ext == "jpeg"||ext == "jpg"||ext == "png") {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 static void draw_boxes_inplace(cv::Mat &mat_inplace, const std::vector<Boxi> &boxes)
 {
   if (boxes.empty()) return;
@@ -23,6 +46,12 @@ static void draw_boxes_inplace(cv::Mat &mat_inplace, const std::vector<Boxi> &bo
       }
     }
   }
+}
+
+static bool exists_check(const std::string& name) 
+{
+  struct stat buffer;   
+  return (stat (name.c_str(), &buffer) == 0); 
 }
 
 #endif

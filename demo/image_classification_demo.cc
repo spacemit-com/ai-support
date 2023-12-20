@@ -1,5 +1,6 @@
 #include "task/vision/image_classification_task.h"
 #include "utils/time.h"
+#include "utils/utils.h"
 
 int main(int argc, char* argv[])
 {
@@ -9,6 +10,16 @@ int main(int argc, char* argv[])
         filePath = argv[1];
         labelFilepath = argv[2];
         imageFilepath = argv[3];
+        if(!checkImageFileExtension(imageFilepath))
+        {
+            std::cout<<"[ ERROR ] The ImageFilepath is not correct. Make sure you are setting the path to an imgae file (.jpg/.jpeg/.png)"<<std::endl;
+            return 0;
+        }
+        if(!exists_check(imageFilepath))
+        {
+            std::cout<<"[ ERROR ] The Image File does not exist. Make sure you are setting the correct path to the file"<<std::endl;
+            return 0;
+        }
     }
     else{
         std::cout<<"run with "<<argv[0]<<" <modelFilepath> <labelFilepath> <imageFilepath>" <<std::endl;
@@ -26,6 +37,6 @@ int main(int argc, char* argv[])
         imgRaw = cv::imread(imageFilepath);
     }
     ImageClassificationResult result = imageclassification->Classify(imgRaw);
-    std::cout<<result.label_text<<std::endl;
+    std::cout<<"classify result: "<<result.label_text<<std::endl;
     return 0;
 }

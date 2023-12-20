@@ -18,7 +18,7 @@ class BaseVisionTaskApi : public BaseTaskApi<OutputType, const cv::Mat&>{
         BaseVisionTaskApi& operator=(const BaseVisionTaskApi&) = delete;
 
     protected:
-        virtual void Preprocess(std::vector<float> &input_tensors,
+        virtual void Preprocess(std::vector<std::vector<float>> &input_tensors,
                        const cv::Mat& img_raw) override{}
     
 };

@@ -15,7 +15,7 @@
 
 #include "task/vision/image_classification_types.h"
 #include "src/core/engine.h"
-#include "src/utils/label_map_utils.h"
+#include "src/utils/utils.h"
 #include "src/task/vision/base_vision_task_api.h"
 #include "src/processor/classification_postprocessor.h"
 #include "src/processor/classification_preprocessor.h"
@@ -25,10 +25,13 @@
 class imageClassification : public BaseVisionTaskApi<ImageClassificationResult> 
 {
     public:
-    imageClassification():BaseVisionTaskApi<ImageClassificationResult>() {};
+    imageClassification():BaseVisionTaskApi<ImageClassificationResult>()
+    {
+        initFlag_ = -1;
+    }
     ~imageClassification() {};
     int Init(const std::string modelFilepath, const std::string labelFilepath);
-    void Preprocess(std::vector<float> &input_tensors,
+    void Preprocess(std::vector<std::vector<float>> &input_tensors,
               const cv::Mat& img_raw) override;
     ImageClassificationResult Classify(const cv::Mat &img_raw);
 
@@ -36,7 +39,6 @@ class imageClassification : public BaseVisionTaskApi<ImageClassificationResult>
     bool checkModelExtension(const std::string& filename);
     ImageClassificationResult Postprocess() override;
     private:
-    void InitCheck();
     ClassificationPreprocessor preprocessor_;
     ClassificationPostprocessor postprocessor_;
     std::string instanceName_;
@@ -45,7 +47,8 @@ class imageClassification : public BaseVisionTaskApi<ImageClassificationResult>
     std::string labelFilepath_;
     std::vector<std::string> labels_;
     std::vector<Ort::Value> output_tensors_;
-    std::vector<float> input_tensors_;
+    std::vector<std::vector<float>> input_tensors_;
+    int initFlag_ = false;
 };
 
 #endif

@@ -18,6 +18,16 @@ int main(int argc, char* argv[])
         filePath = argv[1];
         imageFilepath = argv[2]; 
         saveImgpath =  argv[3];
+        if(!checkImageFileExtension(imageFilepath)||!checkImageFileExtension(saveImgpath))
+        {
+            std::cout<<"[ ERROR ] The ImageFilepath is not correct. Make sure you are setting the path to an imgae file (.jpg/.jpeg/.png)"<<std::endl;
+            return 0;
+        }
+        if(!exists_check(imageFilepath)||!exists_check(saveImgpath))
+        {
+            std::cout<<"[ ERROR ] The Image File does not exist. Make sure you are setting the correct path to the file"<<std::endl;
+            return 0;
+        }
         {
 #ifdef DEBUG
           TimeWatcher t("|-- Load input data");
@@ -43,6 +53,16 @@ int main(int argc, char* argv[])
         imageFilepath = argv[2]; 
         saveImgpath =  argv[3];
         labelFilepath = argv[4];
+        if(!checkImageFileExtension(imageFilepath)||!checkImageFileExtension(saveImgpath))
+        {
+            std::cout<<"[ ERROR ] The ImageFilepath is not correct. Make sure you are setting the path to an imgae file (.jpg/.jpeg/.png)"<<std::endl;
+            return 0;
+        }
+        if(!exists_check(imageFilepath)||!exists_check(saveImgpath))
+        {
+            std::cout<<"[ ERROR ] The Image File does not exist. Make sure you are setting the correct path to the file"<<std::endl;
+            return 0;
+        }
         {
 #ifdef DEBUG
           TimeWatcher t("|-- Load input data");

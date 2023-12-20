@@ -5,6 +5,10 @@ file(GLOB_RECURSE SRC_FILES "./*.cpp" "./*.c" "./*.cc")
 add_library(bianbuai SHARED ${SRC_FILES})
 set_target_properties(bianbuai PROPERTIES VERSION 1.0.1 SOVERSION 1)
 
+if(ENABLE_SPACEMIT_EP)
+    add_definitions(-DENABLE_SPACEMIT_EP)
+endif()
+
 target_include_directories(bianbuai PUBLIC  ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(bianbuai PRIVATE ${CMAKE_SOURCE_DIR})
 target_include_directories(bianbuai SYSTEM PUBLIC  ${OPENCV_INC})
@@ -22,7 +26,13 @@ set(TARGET_SHARED_LINKER_FLAGS "-Wl,--as-needed")
 # 'target_link_libraries' should be used here:
 #set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--as-needed")
 target_link_libraries(bianbuai PRIVATE ${TARGET_SHARED_LINKER_FLAGS})
-target_link_libraries(bianbuai PRIVATE onnxruntime opencv_core opencv_imgproc)
+
+# if use spacemit-ep ,link spacemit-ep
+if(ENABLE_SPACEMIT_EP)
+    target_link_libraries(bianbuai PRIVATE onnxruntime spacemit_ep opencv_core opencv_imgproc opencv_dnn)
+else()
+    target_link_libraries(bianbuai PRIVATE onnxruntime opencv_core opencv_imgproc opencv_dnn)
+endif()
 
 install(TARGETS bianbuai
         RUNTIME DESTINATION bin

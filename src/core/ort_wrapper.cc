@@ -1,5 +1,8 @@
 #include "src/core/ort_wrapper.h"
 #include "utils/time.h"
+#ifdef ENABLE_SPACEMIT_EP
+#include "spacemit_ort_env.h"
+#endif
 
 int OrtWrapper::Init(std::string instanceName, std::string modelFilepath)
 {
@@ -7,11 +10,7 @@ int OrtWrapper::Init(std::string instanceName, std::string modelFilepath)
                  instanceName.c_str()));
     //Creation: The Ort::Session is created here
     env_= std::move(env);
-    std::unique_ptr<Ort::Session> session(new Ort::Session(*env_, modelFilepath.c_str(), sessionOptions_));
-    session_=std::move(session);
     sessionOptions_.SetIntraOpNumThreads(4);
-    sessionOptions_.EnableProfiling(ORT_TSTR("xxx"));
-    
     // Sets graph optimization level
     // Available levels are
     // ORT_DISABLE_ALL -> To disable all optimizations
@@ -21,25 +20,67 @@ int OrtWrapper::Init(std::string instanceName, std::string modelFilepath)
     // ORT_ENABLE_ALL -> To Enable All possible optimizations
     sessionOptions_.SetGraphOptimizationLevel(
         GraphOptimizationLevel::ORT_DISABLE_ALL);
-    return 1;
+    std::unique_ptr<Ort::Session> session(new Ort::Session(*env_, modelFilepath.c_str(), sessionOptions_));
+    session_=std::move(session);
+    return 0;
 }
 
 int OrtWrapper::Init(json config)
 {
-    std::string instanceName = config["instance_name"];
+    std::string instanceName;
+    if(config.contains("instance_name"))
+    {
+        instanceName = config["instance_name"];
+    }
     std::string modelFilepath = config["model_path"];
     std::unique_ptr<Ort::Env> env(new Ort::Env(OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING,
                  instanceName.c_str()));
     //Creation: The Ort::Session is created here
     env_= std::move(env);
-    std::unique_ptr<Ort::Session> session(new Ort::Session(*env_, modelFilepath.c_str(), sessionOptions_));
-    session_=std::move(session);
-    int intraThreadsnum = config["intra_threads_num"]; 
-    sessionOptions_.SetIntraOpNumThreads(intraThreadsnum);
-    std::string profiling_projects = config["profiling_projects"];
-    if(profiling_projects != "")
+#ifdef ENABLE_SPACEMIT_EP
+    if(config["enbale_spcacemit_ep"]==true)
     {
-        sessionOptions_.EnableProfiling(ORT_TSTR(profiling_projects.c_str()));
+        SessionOptionsSpaceMITEnvInit(sessionOptions_); 
+    }
+#endif
+#ifndef ENABLE_SPACEMIT_EP
+    if(config["enbale_spcacemit_ep"]==true)
+    {
+        std::cout<<"Unsupport spacemit ep without added -DENABLE_SPACEMIT_EP at compile time"<<std::endl; 
+    }
+#endif
+    if(config.contains("intra_threads_num"))
+    {
+        int intraThreadsnum = config["intra_threads_num"]; 
+        sessionOptions_.SetIntraOpNumThreads(intraThreadsnum);
+    }
+    else
+    {
+        sessionOptions_.SetIntraOpNumThreads(4);
+    }
+    if(config.contains("profiling_projects"))
+    {
+        std::string profiling_projects = config["profiling_projects"];
+        if(profiling_projects != "")
+        {
+            sessionOptions_.EnableProfiling(ORT_TSTR(profiling_projects.c_str()));
+        }
+    }
+    if(config.contains("op_model_path"))
+    {
+        std::string op_model_path = config["op_model_path"];
+        if(op_model_path != "")
+        {
+            sessionOptions_.SetOptimizedModelFilePath(op_model_path.c_str());
+        }
+    }
+    if(config.contains("log_level"))
+    {
+        int log_level = config["log_level"];
+        if(log_level >= 0 && log_level <= 4)
+        {
+            sessionOptions_.SetLogSeverityLevel(log_level);
+        }
     }
     // Sets graph optimization level
     // Available levels are
@@ -48,30 +89,44 @@ int OrtWrapper::Init(json config)
     // removals) ORT_ENABLE_EXTENDED -> To enable extended optimizations
     // (Includes level 1 + more complex optimizations like node fusions)
     // ORT_ENABLE_ALL -> To Enable All possible optimizations
-    if(config["graph_optimization_level"] == "ort_disable_all")
+    if(config.contains("graph_optimization_level"))
     {
-        sessionOptions_.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_DISABLE_ALL);
+        if(config["graph_optimization_level"] == "ort_disable_all")
+        {
+            sessionOptions_.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_DISABLE_ALL);
+        }
+        else if(config["graph_optimization_level"] == "ort_enable_basic")
+        {
+            sessionOptions_.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_BASIC);        
+        }
+        else if(config["graph_optimization_level"] == "ort_enable_extended")
+        {
+            sessionOptions_.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);        
+        }
+        else
+        {
+            sessionOptions_.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);             
+        }
     }
-    else if(config["graph_optimization_level"] == "ort_enable_basic")
-    {
-        sessionOptions_.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_BASIC);        
-    }
-    else if(config["graph_optimization_level"] == "ort_enable_extended")
-    {
-        sessionOptions_.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);        
-    }
-    else{
-        sessionOptions_.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);             
-    }
-    return 1;
+    std::unique_ptr<Ort::Session> session(new Ort::Session(*env_, modelFilepath.c_str(), sessionOptions_));
+    session_=std::move(session);
+    return 0;
 }
 
-std::vector<int64_t> OrtWrapper::GetInputDims()
+std::vector<std::vector<int64_t>> OrtWrapper::GetInputDims()
 {    
-    Ort::TypeInfo type_info = session_->GetInputTypeInfo(0);
-    auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
-    auto input_node_dims = tensor_info.GetShape();
-    input_node_dims[0]=abs(input_node_dims[0]);
+    int num_inputs = session_->GetInputCount();
+    std::vector<std::vector<int64_t>> input_node_dims;
+    input_node_dims.resize(num_inputs);
+    for (unsigned int i = 0; i < num_inputs; ++i)
+    {
+        Ort::TypeInfo input_type_info = session_->GetInputTypeInfo(i);
+        auto input_tensor_info = input_type_info.GetTensorTypeAndShapeInfo();
+        auto input_dims = input_tensor_info.GetShape();
+        input_dims[0]=abs(input_dims[0]);
+        input_dims[1]=abs(input_dims[1]);
+        input_node_dims[i]=input_dims;
+    }
     return input_node_dims;
 }
 
@@ -90,7 +145,7 @@ std::vector<std::vector<int64_t>> OrtWrapper::GetOutputDims()
     return output_node_dims;
 }
 
-std::vector<Ort::Value> OrtWrapper::Invoke(std::vector<float>& input_tensor_values)
+std::vector<Ort::Value> OrtWrapper::Invoke(std::vector<std::vector<float>>& input_tensor_values)
 {
 #ifdef DEBUG
     TimeWatcher t("|-- Infer tensor");
@@ -98,20 +153,36 @@ std::vector<Ort::Value> OrtWrapper::Invoke(std::vector<float>& input_tensor_valu
     //init onnxruntime allocator.
     Ort::AllocatorWithDefaultOptions allocator;
 
-    // input node names
+    //input names initial and build
     std::vector<const char *> input_node_names;
-    auto input_node_name = session_->GetInputNameAllocated(0, allocator);
-    const char *input_name = input_node_name.get();
-    input_node_names.resize(1);
-    input_node_names[0] = input_name;
+    std::vector<std::string> input_names;
+    int num_inputs = session_->GetInputCount();
+    input_node_names.resize(num_inputs);
+    for (int i = 0; i < num_inputs; i++) {
+        input_names.push_back(std::string(""));
+    }
+    
+    for (unsigned int i = 0; i < num_inputs; ++i)
+    {
+        auto input_name = session_->GetInputNameAllocated(i, allocator);
+        input_names[i].append(input_name.get());
+        input_node_names[i] = input_names[i].c_str();
+    }
  
     // input node dims and input dims
     auto input_node_dims = GetInputDims();
 
     //input tensor size
-    int input_tensor_size = 1;
-    for (unsigned int i = 0; i < input_node_dims.size(); ++i)
-        input_tensor_size *= input_node_dims.at(i);
+    std::vector<int> input_tensor_size;
+    input_tensor_size.resize(input_node_dims.size());
+    for (unsigned int i = 0; i < num_inputs; ++i)
+    {
+        input_tensor_size[i] = 1;
+        for(unsigned int j = 0; j < input_node_dims[i].size(); ++j)
+        {
+            input_tensor_size[i] *= input_node_dims[i][j];
+        }
+    }
 
 
     //output names initial and build
@@ -125,8 +196,8 @@ std::vector<Ort::Value> OrtWrapper::Invoke(std::vector<float>& input_tensor_valu
     
     for (unsigned int i = 0; i < num_outputs; ++i)
     {
-        auto out_name = session_->GetOutputNameAllocated(i, allocator);
-        output_names[i].append(out_name.get());
+        auto output_name = session_->GetOutputNameAllocated(i, allocator);
+        output_names[i].append(output_name.get());
         output_node_names[i] = output_names[i].c_str();
     }
 
@@ -134,16 +205,19 @@ std::vector<Ort::Value> OrtWrapper::Invoke(std::vector<float>& input_tensor_valu
     std::vector<Ort::Value> input_tensors;
     Ort::MemoryInfo memoryInfo = Ort::MemoryInfo::CreateCpu(
         OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
-
-    input_tensors.push_back(Ort::Value::CreateTensor<float>(
-        memoryInfo, input_tensor_values.data(), input_tensor_size, input_node_dims.data(),
-        input_node_dims.size()));
+    
+    for(int i = 0; i < num_inputs; i++)
+    {
+        input_tensors.push_back(Ort::Value::CreateTensor<float>(
+            memoryInfo, input_tensor_values[i].data(), input_tensor_size[i], input_node_dims[i].data(),
+            input_node_dims[i].size()));
+    }
 
     //run model
     auto outputTensors = session_->Run(Ort::RunOptions{nullptr}, 
                  input_node_names.data(),
                  input_tensors.data(), 
-                 1, 
+                 num_inputs, 
                  output_node_names.data(),
                  num_outputs);     
     return outputTensors;

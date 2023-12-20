@@ -22,7 +22,7 @@ set(TARGET_SHARED_LINKER_FLAGS "-Wl,--as-needed")
 # 'target_link_libraries' should be used here:
 #set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--as-needed")
 target_link_libraries(bianbuai PRIVATE ${TARGET_SHARED_LINKER_FLAGS})
-target_link_libraries(bianbuai PRIVATE onnxruntime opencv_core opencv_imgproc opencv_dnn)
+target_link_libraries(bianbuai PRIVATE onnxruntime opencv_core opencv_imgproc)
 
 install(TARGETS bianbuai
         RUNTIME DESTINATION bin

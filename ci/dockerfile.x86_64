@@ -1,0 +1,22 @@
+FROM ubuntu:18.04
+LABEL maintainer='ai_support <ai_support@spacemit.com>'
+
+WORKDIR /home/workspace
+ENV LANG=C.UTF-8 TZ=Asia/Shanghai
+
+# update source
+RUN sed -i'' 's/archive\.ubuntu\.com/us\.archive\.ubuntu\.com/' /etc/apt/sources.list
+RUN apt -y update
+
+# install dependencies
+RUN DEBIAN_FRONTEND=noninteractive apt install -y libopencv-dev wget cmake tree build-essential gcc g++ --fix-missing
+
+# install onnxruntime
+COPY onnxruntime-linux-x64-1.15.1.tgz /tmp/
+RUN tar xzf /tmp/onnxruntime-linux-x64-1.15.1.tgz -C /home/workspace && rm /tmp/onnxruntime-linux-x64-1.15.1.tgz
+
+# Build bianbu-ai-support:v1.0.0 image:
+# $ docker build -t bianbu-ai-support:v1.0.0 -f dockerfile.x86_64 .
+# $ docker tag bianbu-ai-support:v1.0.0 harbor.bianbu.xyz/bianbu-ai/bianbu-ai-support:v1.0.0
+# $ docker push harbor.bianbu.xyz/bianbu-ai/bianbu-ai-support:v1.0.0
+# v1.0.0: digest: sha256:3a8d345662fc0e264de5d630335e778e4ce86c8b79493bb84d63fc11d5aa2b7c size: 1790

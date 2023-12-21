@@ -42,13 +42,13 @@ int main(int argc, char* argv[])
 #endif
           for(int i=0;i<resultBoxes.size();i++)
           {
-            std::cout<<"bbox["<<i<<"]"<<" "\
+            std::cout<<"bbox["<<std::setw(2)<<i<<"]"<<" "\
             <<"x1y1x2y2: "\
             <<"("<<std::setw(4)<<resultBoxes[i].x1<<","\
             <<std::setw(4)<<resultBoxes[i].y1<<","\
             <<std::setw(4)<<resultBoxes[i].x2<<","\
             <<std::setw(4)<<resultBoxes[i].y2<<")"<<", "\
-            <<"score: "<<std::setw(4)<<std::setprecision(6)<<resultBoxes[i].score<<", "\
+            <<"score: "<<std::fixed<<std::setprecision(3)<<std::setw(4)<<resultBoxes[i].score<<", "\
             <<"label_text: "<<std::setw(4)<<resultBoxes[i].label_text<<std::endl;
           }
         }

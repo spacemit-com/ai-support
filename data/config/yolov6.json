@@ -1,12 +1,12 @@
 {
     "name": "Yolov6",
     "instance_name" : "object-detection-inference",
-    "model_path" : "/xxx/bianbu-ai-support/data/models/yolov6p5_t.onnx",
-    "label_path" : "/xxx/bianbu-ai-support/data/labels/coco.txt",
+    "model_path" : "../models/yolov6p5_t.onnx",
+    "label_path" : "../labels/coco.txt",
     "intra_threads_num" : 4,
     "profiling_projects" : "",
     "graph_optimization_level" : "ort_disable_all",
-    "enbale_spcacemit_ep" :false,
+    "disable_spcacemit_ep" :false,
     "log_level" : 0,
-    "op_model_path" : "xxx_opt.onnx"
+    "opt_model_path" : "yolov6p5_t_opt.onnx"
 }

@@ -1,6 +1,6 @@
 #include "src/core/ort_wrapper.h"
 #include "utils/time.h"
-#ifdef ENABLE_SPACEMIT_EP
+#ifdef HAS_SPACEMIT_EP
 #include "spacemit_ort_env.h"
 #endif
 
@@ -37,18 +37,30 @@ int OrtWrapper::Init(json config)
                  instanceName.c_str()));
     //Creation: The Ort::Session is created here
     env_= std::move(env);
-#ifdef ENABLE_SPACEMIT_EP
-    if(config["enbale_spcacemit_ep"]==true)
+    if(!config.contains("disable_spcacemit_ep")||config["disable_spcacemit_ep"]==false)
     {
+#ifdef HAS_SPACEMIT_EP
         SessionOptionsSpaceMITEnvInit(sessionOptions_); 
-    }
+        auto providers = Ort::GetAvailableProviders();
+        int flag = 0;
+        for (auto provider : providers)
+        {
+            std::string providerName = provider;
+            if(!std::strcmp(provider.c_str(), "SpaceMITExecutionProvider"))
+            {
+                flag = 1;
+                break;
+            }
+        }
+        if(!flag)
+        {
+            std::cout<<"[Warning] Unsupport spacemit ep now"<<std::endl;
+        }
 #endif
-#ifndef ENABLE_SPACEMIT_EP
-    if(config["enbale_spcacemit_ep"]==true)
-    {
-        std::cout<<"Unsupport spacemit ep without added -DENABLE_SPACEMIT_EP at compile time"<<std::endl; 
-    }
+#ifndef HAS_SPACEMIT_EP
+        std::cout<<"[Warning] Unsupport spacemit ep now"<<std::endl; 
 #endif
+    }
     if(config.contains("intra_threads_num"))
     {
         int intraThreadsnum = config["intra_threads_num"]; 
@@ -66,12 +78,12 @@ int OrtWrapper::Init(json config)
             sessionOptions_.EnableProfiling(ORT_TSTR(profiling_projects.c_str()));
         }
     }
-    if(config.contains("op_model_path"))
+    if(config.contains("opt_model_path"))
     {
-        std::string op_model_path = config["op_model_path"];
-        if(op_model_path != "")
+        std::string opt_model_path = config["opt_model_path"];
+        if(opt_model_path != "")
         {
-            sessionOptions_.SetOptimizedModelFilePath(op_model_path.c_str());
+            sessionOptions_.SetOptimizedModelFilePath(opt_model_path.c_str());
         }
     }
     if(config.contains("log_level"))

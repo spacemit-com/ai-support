@@ -9,6 +9,17 @@ int DetectVideo(std::string &modelFilepath, std::string &labelFilepath, std::str
     std::unique_ptr<objectDetectionTask> objectdetectiontask = std::unique_ptr<objectDetectionTask>(new objectDetectionTask(modelFilepath, labelFilepath));
     cv::VideoCapture capture(videoPath);
     cv::Mat frame;
+	if(!capture.read(frame))
+    {
+        std::cout<<"读取视频失败"<<std::endl;
+        return -1;
+    }
+    double rate = capture.get(cv::CAP_PROP_FPS);
+    int delay = 1000/rate;
+	int fps = rate;
+	int frameWidth = frame.rows;
+	int frameHeight = frame.cols;
+	cv::VideoWriter writer("./output.avi", cv::VideoWriter::fourcc('D','I','V','X'), fps, cv::Size(frameHeight, frameWidth), 1);
 	while (true)
 	{
 		capture >> frame;
@@ -34,8 +45,12 @@ int DetectVideo(std::string &modelFilepath, std::string &labelFilepath, std::str
           }
         }
         draw_boxes_inplace(frame , resultBoxes);
-        cv::imshow("Detection", frame);
+        cv::Mat frame_new = frame.clone();
+		writer.write(frame_new);
+		cv::waitKey(delay);//因为图像处理需要消耗一定时间,所以图片展示速度比保存视频要慢
+        //cv::imshow("Detection", frame);
     };
+    capture.release();
     return 0;
 }
 

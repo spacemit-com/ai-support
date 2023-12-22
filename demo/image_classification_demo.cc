@@ -1,6 +1,7 @@
 #include "task/vision/image_classification_task.h"
 #include "utils/time.h"
 #include "utils/utils.h"
+#include "utils/check_utils.h"
 
 int main(int argc, char* argv[])
 {

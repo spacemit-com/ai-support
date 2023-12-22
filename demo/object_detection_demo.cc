@@ -2,6 +2,9 @@
 #include "utils/utils.h"
 #include "utils/time.h"
 
+#include "utils/box_utils.h"
+#include "utils/check_utils.h"
+
 #include <iomanip> //for setprecision
 
 int main(int argc, char* argv[])
@@ -23,7 +26,7 @@ int main(int argc, char* argv[])
             std::cout<<"[ ERROR ] The ImageFilepath is not correct. Make sure you are setting the path to an imgae file (.jpg/.jpeg/.png)"<<std::endl;
             return 0;
         }
-        if(!exists_check(imageFilepath)||!exists_check(saveImgpath))
+        if(!exists_check(imageFilepath))
         {
             std::cout<<"[ ERROR ] The Image File does not exist. Make sure you are setting the correct path to the file"<<std::endl;
             return 0;
@@ -74,7 +77,7 @@ int main(int argc, char* argv[])
             std::cout<<"[ ERROR ] The ImageFilepath is not correct. Make sure you are setting the path to an imgae file (.jpg/.jpeg/.png)"<<std::endl;
             return 0;
         }
-        if(!exists_check(imageFilepath)||!exists_check(saveImgpath))
+        if(!exists_check(imageFilepath))
         {
             std::cout<<"[ ERROR ] The Image File does not exist. Make sure you are setting the correct path to the file"<<std::endl;
             return 0;
@@ -93,13 +96,13 @@ int main(int argc, char* argv[])
 #endif
           for(int i=0;i<resultBoxes.size();i++)
           {
-            std::cout<<"bbox["<<i<<"]"<<" "\
+            std::cout<<"bbox["<<std::setw(2)<<i<<"]"<<" "\
             <<"x1y1x2y2: "\
             <<"("<<std::setw(4)<<resultBoxes[i].x1<<","\
             <<std::setw(4)<<resultBoxes[i].y1<<","\
             <<std::setw(4)<<resultBoxes[i].x2<<","\
             <<std::setw(4)<<resultBoxes[i].y2<<")"<<", "\
-            <<"score: "<<std::setw(4)<<std::setprecision(6)<<resultBoxes[i].score<<", "\
+            <<"score: "<<std::fixed<<std::setprecision(3)<<std::setw(4)<<resultBoxes[i].score<<", "\
             <<"label_text: "<<std::setw(4)<<resultBoxes[i].label_text<<std::endl;
           }
         }

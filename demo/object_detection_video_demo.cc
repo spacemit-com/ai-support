@@ -1,6 +1,9 @@
 #include "task/vision/object_detection_task.h"
 #include "utils/utils.h"
 
+#include "utils/box_utils.h"
+#include "utils/check_utils.h"
+
 int DetectVideo(std::string &modelFilepath, std::string &labelFilepath, std::string videoPath)
 {
     std::unique_ptr<objectDetectionTask> objectdetectiontask = std::unique_ptr<objectDetectionTask>(new objectDetectionTask(modelFilepath, labelFilepath));

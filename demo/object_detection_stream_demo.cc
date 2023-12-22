@@ -1,6 +1,8 @@
 #include "task/vision/object_detection_task.h"
 #include "utils/utils.h"
 
+#include "utils/box_utils.h"
+#include "utils/check_utils.h"
 
 #include <iostream>
 #include <thread>

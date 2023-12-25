@@ -1,28 +1,27 @@
-#ifndef _DETECTION_PREPROCESSOR_H_
-#define _DETECTION_PREPROCESSOR_H_
+#ifndef SUPPORT_SRC_PROCESSOR_DETECTION_PREPROCESSOR_H_
+#define SUPPORT_SRC_PROCESSOR_DETECTION_PREPROCESSOR_H_
 
-#include <vector>
-#include <string>
 #include <chrono>
-
-#include "src/utils/cv2_utils.h"
-#include "src/utils/nms_utils.h"
-#include "src/processor/processor.h"
+#include <string>
+#include <vector>
 
 #include "opencv2/opencv.hpp"
+#include "src/processor/processor.h"
+#include "src/utils/cv2_utils.h"
+#include "src/utils/nms_utils.h"
 
-class DetectionPreprocessor : public Preprocessor{
-    public:
-    DetectionPreprocessor() {};
-    ~DetectionPreprocessor() {};
-    // Function to validate the input image file extension.
-    void Preprocess(const cv::Mat &mat, 
-                    std::vector<std::vector<int64_t>>& input_node_dims, 
-                    std::vector<std::vector<float>>& input_tensor_values,
-                    unsigned int data_format);
-    void PreprocessNanoDet(const cv::Mat &mat, 
-                    std::vector<std::vector<int64_t>>& input_node_dims, 
-                    std::vector<std::vector<float>>& input_tensor_values);
+class DetectionPreprocessor : public Preprocessor {
+ public:
+  DetectionPreprocessor() {}
+  ~DetectionPreprocessor() {}
+  // Function to validate the input image file extension.
+  void Preprocess(const cv::Mat& mat,
+                  std::vector<std::vector<int64_t>>& input_node_dims,
+                  std::vector<std::vector<float>>& input_tensor_values,
+                  unsigned int data_format);
+  void PreprocessNanoDet(const cv::Mat& mat,
+                         std::vector<std::vector<int64_t>>& input_node_dims,
+                         std::vector<std::vector<float>>& input_tensor_values);
 };
 
-#endif
+#endif  // SUPPORT_SRC_PROCESSOR_DETECTION_PREPROCESSOR_H_

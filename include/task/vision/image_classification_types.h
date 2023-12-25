@@ -1,13 +1,12 @@
-#ifndef _IMAGE_CLASSIFICATION_TYPES_H_
-#define _IMAGE_CLASSIFICATION_TYPES_H_
+#ifndef SUPPORT_INCLUDE_TASK_VISION_IMAGE_CLASSIFICATION_TYPES_H_
+#define SUPPORT_INCLUDE_TASK_VISION_IMAGE_CLASSIFICATION_TYPES_H_
 
 #include <string>
 
-struct ImageClassificationResult
-{
+struct ImageClassificationResult {
   std::string label_text;
   int label;
   float score;
   int timestamp;
 };
-#endif
+#endif  // SUPPORT_INCLUDE_TASK_VISION_IMAGE_CLASSIFICATION_TYPES_H_

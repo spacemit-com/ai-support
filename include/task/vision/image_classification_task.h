@@ -1,22 +1,22 @@
-#ifndef _IMAGE_CLASSIFICATION_TASK_H_
-#define _IMAGE_CLASSIFICATION_TASK_H_
+#ifndef SUPPORT_INCLUDE_TASK_VISION_IMAGE_CLASSIFICATION_TASK_H_
+#define SUPPORT_INCLUDE_TASK_VISION_IMAGE_CLASSIFICATION_TASK_H_
 
-#include "task/vision/image_classification_types.h"
-
-#include <memory>   // for: shared_ptr
+#include <memory>  // for: shared_ptr
 #include <string>
 
 #include "opencv2/opencv.hpp"
+#include "task/vision/image_classification_types.h"
 
-class imageClassificationTask
-{
-    public:
-    imageClassificationTask(const std::string& filePath, const std::string& labelFilepath);
-    ~imageClassificationTask() = default;
-    ImageClassificationResult Classify(const cv::Mat &img_raw);
-    private:
-	class impl;
-	std::shared_ptr<impl> pimpl_;
+class imageClassificationTask {
+ public:
+  imageClassificationTask(const std::string& filePath,
+                          const std::string& labelFilepath);
+  ~imageClassificationTask() = default;
+  ImageClassificationResult Classify(const cv::Mat& img_raw);
+
+ private:
+  class impl;
+  std::shared_ptr<impl> pimpl_;
 };
 
-#endif
+#endif  // SUPPORT_INCLUDE_TASK_VISION_IMAGE_CLASSIFICATION_TASK_H_

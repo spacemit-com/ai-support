@@ -9,6 +9,9 @@
 #include "task/vision/object_detection_task.h"
 #include "utils/box_utils.h"
 #include "utils/check_utils.h"
+#ifdef DEBUG
+#include "utils/time.h"
+#endif
 #include "utils/utils.h"
 
 class Detector {
@@ -72,23 +75,33 @@ class ExclusiveDataLoader : public DataLoader {
  public:
   ExclusiveDataLoader() {}
   ~ExclusiveDataLoader() {}
-  int init(std::string& path) {
-    capture.open(path);
-    return 0;
+  int init(const std::string& path) {
+    capture_.open(path);
+    if (capture_.isOpened()) {
+      return 0;
+    } else {
+      std::cout << "Open video capture failed" << std::endl;
+      return -1;
+    }
   }
-  int init(int cameraId) {
-    capture.open(cameraId);
-    return 0;
+  int init(const int cameraId) {
+    capture_.open(cameraId);
+    if (capture_.isOpened()) {
+      return 0;
+    } else {
+      std::cout << "Open camera capture failed" << std::endl;
+      return -1;
+    }
   }
   cv::Mat fetch_frame() {
     cv::Mat frame;
-    capture.read(frame);
+    capture_.read(frame);
     return frame;
   }
   cv::Mat peek_frame() { return fetch_frame(); }
 
  private:
-  cv::VideoCapture capture;
+  cv::VideoCapture capture_;
 };
 
 // 共享式
@@ -98,19 +111,29 @@ class SharedDataLoader : public DataLoader {
   ~SharedDataLoader() {}
   int init(const std::string& path) {
     capture_.open(path);
-    int width = 1280;
-    int height = 720;
-    capture_.set(cv::CAP_PROP_FRAME_WIDTH, width);
-    capture_.set(cv::CAP_PROP_FRAME_HEIGHT, height);
-    return 0;
+    if (capture_.isOpened()) {
+      int width = 1280;
+      int height = 720;
+      capture_.set(cv::CAP_PROP_FRAME_WIDTH, width);
+      capture_.set(cv::CAP_PROP_FRAME_HEIGHT, height);
+      return 0;
+    } else {
+      std::cout << "Open video capture failed" << std::endl;
+      return -1;
+    }
   }
   int init(int cameraId) {
     capture_.open(cameraId);
-    int width = 1280;
-    int height = 720;
-    capture_.set(cv::CAP_PROP_FRAME_WIDTH, width);
-    capture_.set(cv::CAP_PROP_FRAME_HEIGHT, height);
-    return 0;
+    if (capture_.isOpened()) {
+      int width = 1280;
+      int height = 720;
+      capture_.set(cv::CAP_PROP_FRAME_WIDTH, width);
+      capture_.set(cv::CAP_PROP_FRAME_HEIGHT, height);
+      return 0;
+    } else {
+      std::cout << "Open camera capture failed" << std::endl;
+      return -1;
+    }
   }
   cv::Mat fetch_frame() {
     frame_mutex_.lock();
@@ -213,19 +236,23 @@ int main(int argc, char* argv[]) {
 
   if (detector.init(filePath, labelFilepath) != 0) {
     std::cout << "[ERROR] detector init error" << std::endl;
+    return 0;
   }
   SharedDataLoader dataloader;
   if (inputType == "video") {
     if (dataloader.init(input) != 0) {
       std::cout << "[ERROR] dataloader init error" << std::endl;
+      return 0;
     }
   } else if (inputType == "cameraId" && isNumber(input) == 1) {
     int cameraId = std::stoi(input);
     if (dataloader.init(cameraId) != 0) {
       std::cout << "[ERROR] dataloader init error" << std::endl;
+      return 0;
     }
   } else {
     std::cout << "[ERROR] unsupported input type" << std::endl;
+    return 0;
   }
   std::thread t1(Detection, std::ref(dataloader), std::ref(detector));
   std::thread t2(Preview, std::ref(dataloader), std::ref(detector));

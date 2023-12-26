@@ -1,6 +1,9 @@
 #include "task/vision/object_detection_task.h"
 #include "utils/box_utils.h"
 #include "utils/check_utils.h"
+#ifdef DEBUG
+#include "utils/time.h"
+#endif
 #include "utils/utils.h"
 
 int DetectVideo(const std::string &modelFilepath,
@@ -10,6 +13,10 @@ int DetectVideo(const std::string &modelFilepath,
       std::unique_ptr<objectDetectionTask>(
           new objectDetectionTask(modelFilepath, labelFilepath));
   cv::VideoCapture capture(videoPath);
+  if (!capture.isOpened()) {
+    std::cout << "Open video capture failed" << std::endl;
+    return 0;
+  }
   cv::Mat frame;
   if (!capture.read(frame)) {
     std::cout << "Read frame failed" << std::endl;
@@ -68,7 +75,8 @@ int main(int argc, char *argv[]) {
     labelFilepath = argv[2];
     videoFilepath = argv[3];
     dstFilepath = argv[4];
-    DetectVideo(modelFilepath, labelFilepath, videoFilepath, dstFilepath);
+    int flag =
+        DetectVideo(modelFilepath, labelFilepath, videoFilepath, dstFilepath);
   } else {
     std::cout << "run with " << argv[0]
               << " <modelFilepath>  <labelFilepath> <videoFilepath> "

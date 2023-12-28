@@ -26,7 +26,7 @@ image: harbor.bianbu.xyz/bianbu-ai/bianbu-ai-support@sha256:608c5d8659711ca381a8
 
 .only-defaults: &only-defaults
   only:
-    - master
+    - main
     - merge_requests
 
 variables:

@@ -6,6 +6,9 @@
 
 set -e
 
+# Note: update the following settings if necessary
+SDK=$(dirname $(which bianbu)) #$(dirname ${BASH_SOURCE[0]})
+
 function config_native() {
   BIANBUAI_HOME=$SDK/bianbu-ai-support
   # Plz update the following settings !!!
@@ -13,13 +16,11 @@ function config_native() {
 }
 
 function config_x86_riscv64() {
-  # Note: update the following settings if necessary
-  SDK=$(dirname $(which bianbu)) #$(dirname ${BASH_SOURCE[0]})
-
   CROSS_TOOL=$SDK/spacemit-gcc/bin/riscv64-unknown-linux-gnu-
   SYSROOT=$SDK/spacemit-gcc/sysroot
   BIANBUAI_HOME=$SDK/bianbu-ai-support
   ORT_HOME=$SDK/spacemit-ort
+  OPENCV_DIR=$SDK/bianbu-ai-support/lib/3rdparty/opencv4/lib/cmake/opencv4
   QEMU_CMD="$SDK/qemu/bin/qemu-riscv64 -L $SYSROOT"
 }
 
@@ -32,7 +33,7 @@ fi
 
 function build() {
   mkdir build && pushd build
-  cmake .. -DORT_HOME=${ORT_HOME} -DBIANBUAI_HOME=${BIANBUAI_HOME} -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT}
+  cmake .. -DBIANBUAI_HOME=${BIANBUAI_HOME} -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_DIR} -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT}
   make -j4
   popd
   echo "[INFO] Building demos done."
@@ -78,5 +79,5 @@ function smoke_test() {
 if [[ "$@" =~ "--test" ]]; then
   smoke_test
 else
-  echo "[INFO] Try '${BASH_SOURCE[0]} --test' to run the demos."
+  echo "[INFO] Try '${BASH_SOURCE[0]} $@ --test' to run the demos."
 fi

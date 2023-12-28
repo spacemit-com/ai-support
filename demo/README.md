@@ -11,15 +11,17 @@ CROSS_TOOL=$SDK/spacemit-gcc/bin/riscv64-unknown-linux-gnu-
 SYSROOT=$SDK/spacemit-gcc/sysroot
 BIANBUAI_HOME=$SDK/bianbu-ai-support
 ORT_HOME=$SDK/spacemit-ort
+OPENCV_DIR=$SDK/bianbu-ai-support/lib/3rdparty/opencv4/lib/cmake/opencv4
 
 # For native building, one may need to install opencv first, then try:
 #CROSS_TOOL=
 #SYSROOT=
 #BIANBUAI_HOME=$SDK/bianbu-ai-support
 #ORT_HOME=${PATH_TO_OFFICIAL_ONNXRUNTIME_RELEASE}
+#OPENCV_DIR=
 
 mkdir build && pushd build
-cmake .. -DORT_HOME=${ORT_HOME} -DBIANBUAI_HOME=${BIANBUAI_HOME} -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT}
+cmake .. -DBIANBUAI_HOME=${BIANBUAI_HOME} -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_DIR} -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT}
 make -j4
 popd
 ```

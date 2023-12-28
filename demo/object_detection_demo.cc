@@ -24,13 +24,13 @@ int main(int argc, char* argv[]) {
       std::cout << "[ ERROR ] The ImageFilepath is not correct. Make sure you "
                    "are setting the path to an imgae file (.jpg/.jpeg/.png)"
                 << std::endl;
-      return 0;
+      return -1;
     }
     if (!exists_check(imageFilepath)) {
       std::cout << "[ ERROR ] The Image File does not exist. Make sure you are "
                    "setting the correct path to the file"
                 << std::endl;
-      return 0;
+      return -1;
     }
     {
 #ifdef DEBUG
@@ -79,13 +79,13 @@ int main(int argc, char* argv[]) {
       std::cout << "[ ERROR ] The ImageFilepath is not correct. Make sure you "
                    "are setting the path to an imgae file (.jpg/.jpeg/.png)"
                 << std::endl;
-      return 0;
+      return -1;
     }
     if (!exists_check(imageFilepath)) {
       std::cout << "[ ERROR ] The Image File does not exist. Make sure you are "
                    "setting the correct path to the file"
                 << std::endl;
-      return 0;
+      return -1;
     }
     {
 #ifdef DEBUG
@@ -131,6 +131,7 @@ int main(int argc, char* argv[]) {
         << " <modelFilepath> <imageFilepath> <saveImgpath> <labelFilepath> or "
         << argv[0] << " <configFilepath> <imageFilepath> <saveImgpath>"
         << std::endl;
+    return -1;
   }
   return 0;
 }

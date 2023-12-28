@@ -13,19 +13,19 @@ int main(int argc, char* argv[]) {
       std::cout << "[ ERROR ] The ImageFilepath is not correct. Make sure you "
                    "are setting the path to an imgae file (.jpg/.jpeg/.png)"
                 << std::endl;
-      return 0;
+      return -1;
     }
     if (!exists_check(imageFilepath)) {
       std::cout << "[ ERROR ] The Image File does not exist. Make sure you are "
                    "setting the correct path to the file"
                 << std::endl;
-      return 0;
+      return -1;
     }
   } else {
     std::cout << "run with " << argv[0]
               << " <modelFilepath> <labelFilepath> <imageFilepath>"
               << std::endl;
-    return 0;
+    return -1;
   }
   cv::Mat imgRaw;
   std::unique_ptr<imageClassificationTask> imageclassification =

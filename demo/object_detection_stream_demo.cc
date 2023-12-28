@@ -231,28 +231,28 @@ int main(int argc, char* argv[]) {
               << " <modelFilepath> <labelFilepath> <input> <inputType> (video "
                  "or cameraId)"
               << std::endl;
-    return 0;
+    return -1;
   }
 
   if (detector.init(filePath, labelFilepath) != 0) {
     std::cout << "[ERROR] detector init error" << std::endl;
-    return 0;
+    return -1;
   }
   SharedDataLoader dataloader;
   if (inputType == "video") {
     if (dataloader.init(input) != 0) {
       std::cout << "[ERROR] dataloader init error" << std::endl;
-      return 0;
+      return -1;
     }
   } else if (inputType == "cameraId" && isNumber(input) == 1) {
     int cameraId = std::stoi(input);
     if (dataloader.init(cameraId) != 0) {
       std::cout << "[ERROR] dataloader init error" << std::endl;
-      return 0;
+      return -1;
     }
   } else {
     std::cout << "[ERROR] unsupported input type" << std::endl;
-    return 0;
+    return -1;
   }
   std::thread t1(Detection, std::ref(dataloader), std::ref(detector));
   std::thread t2(Preview, std::ref(dataloader), std::ref(detector));

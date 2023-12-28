@@ -15,7 +15,7 @@ int DetectVideo(const std::string &modelFilepath,
   cv::VideoCapture capture(videoPath);
   if (!capture.isOpened()) {
     std::cout << "Open video capture failed" << std::endl;
-    return 0;
+    return -1;
   }
   cv::Mat frame;
   if (!capture.read(frame)) {
@@ -82,6 +82,7 @@ int main(int argc, char *argv[]) {
               << " <modelFilepath>  <labelFilepath> <videoFilepath> "
                  "<dstFilepath> (end with .avi)"
               << std::endl;
+    return -1;
   }
   return 0;
 }

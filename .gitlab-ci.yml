@@ -22,7 +22,7 @@ stages:             # List of stages for jobs, and their order of execution
   - package
   - deploy
 
-image: harbor.bianbu.xyz/bianbu-ai/bianbu-ai-support@sha256:608c5d8659711ca381a840438b623d58fbce3f583f3bad54d10afd0b061a8f17
+image: harbor.bianbu.xyz/bianbu-ai/bianbu-ai-support@sha256:7606f892304a1430e0ff0389f35ef7093b758d2cb46914cf652e840711961136
 
 .only-defaults: &only-defaults
   only:
@@ -30,7 +30,7 @@ image: harbor.bianbu.xyz/bianbu-ai/bianbu-ai-support@sha256:608c5d8659711ca381a8
     - merge_requests
 
 variables:
-  SDK: "/opt/spacemit-ai-sdk.v0.5.1.x"
+  SDK: "/opt"
   DATA: "$SDK/bianbu-ai-support/data"
   CROSS_TOOL: "$SDK/spacemit-gcc/bin/riscv64-unknown-linux-gnu-"
   SYSROOT: "$SDK/spacemit-gcc/sysroot"
@@ -42,14 +42,13 @@ build-job-x86_64:   # This job runs in the build stage, which runs first.
   variables:
     BUILD_DIR: "build.x86_64"
     ORT_HOME: "${ORT_HOME_X86}"
-    OPENCV_LIB: "/usr/lib/x86_64-linux-gnu"
     INSTALL_PREFIX: "bianbu-ai-support.x86_64"
   before_script:
     - echo "Before scripts ..."
   script:
     - echo "Compiling the code ..."
-    - mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DORT_HOME=${ORT_HOME} -DOPENCV_LIB=${OPENCV_LIB} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=OFF && make install -j`nproc` && popd
-    - pushd demo && mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DBIANBUAI_HOME=$(pwd)/../../${BUILD_DIR}/${INSTALL_PREFIX} -DORT_HOME=${ORT_HOME} -DOPENCV_LIB=${OPENCV_LIB} && make install -j`nproc` && popd
+    - mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DORT_HOME=${ORT_HOME} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=OFF && make install -j`nproc` VERBOSE=1 && popd
+    - pushd demo && mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DBIANBUAI_HOME=$(pwd)/../../${BUILD_DIR}/${INSTALL_PREFIX} -DORT_HOME=${ORT_HOME} && make install -j`nproc` VERBOSE=1 && popd
   #  - echo "Compile complete."
   artifacts:
     paths:
@@ -62,14 +61,17 @@ build-job-riscv64:  # This job runs in the build stage, which runs second.
   variables:
     BUILD_DIR: "build.riscv64"
     ORT_HOME: "$SDK/spacemit-ort"
-    OPENCV_DIR: "$SDK/bianbu-ai-support/3rdparty/opencv4/lib/cmake/opencv4/"
+    # TODO: fix opencv.v4.6.0 output precision error
+    OPENCV_SHARED_DIR: "$SDK/bianbu-ai-support/3rdparty/opencv.v4.7.0.shared"
+    OPENCV_STATIC_DIR: "$SDK/bianbu-ai-support/3rdparty/opencv.v4.7.0.static"
     INSTALL_PREFIX: "bianbu-ai-support.riscv64"
   before_script:
     - echo "Before scripts ..."
   script:
     - echo "Compiling the code ..."
-    - mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_DIR} -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=OFF && make install -j`nproc` && popd
-    - pushd demo && mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DBIANBUAI_HOME=$(pwd)/../../${BUILD_DIR}/${INSTALL_PREFIX} -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_DIR} -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} && make install -j`nproc` && popd
+    # Note: To use opencv static libraries, one'd better set OpenCV_DIR variable instead of OPENCV_INC and OPENCV_LIB variables.
+    - mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_STATIC_DIR}/lib/cmake/opencv4 -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=OFF && make install -j`nproc` VERBOSE=1 && popd
+    - pushd demo && mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DBIANBUAI_HOME=$(pwd)/../../${BUILD_DIR}/${INSTALL_PREFIX} -DORT_HOME=${ORT_HOME} -DOPENCV_INC=${OPENCV_SHARED_DIR}/include/opencv4 -DOPENCV_LIB=${OPENCV_SHARED_DIR}/lib -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} && make install -j`nproc` VERBOSE=1 && popd
   #  - echo "Compile complete."
   artifacts:
     paths:

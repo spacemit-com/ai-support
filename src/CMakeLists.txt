@@ -85,6 +85,9 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/task ${CMAKE_SOURCE_DIR}/include/u
         DESTINATION include/bianbuai
         FILES_MATCHING PATTERN "*.h")
 
-install(DIRECTORY ${ORT_HOME}/lib
+install(DIRECTORY ${ORT_HOME}/include ${ORT_HOME}/lib
         DESTINATION lib/3rdparty/onnxruntime
-        FILES_MATCHING PATTERN "*onnxruntime*.so*" PATTERN "*spacemit*.so*")
+        FILES_MATCHING PATTERN "*.h" PATTERN "*onnxruntime*.so*" PATTERN "*spacemit*.so*")
+if (EXISTS "${ORT_HOME}/bin")
+  install(DIRECTORY ${ORT_HOME}/bin DESTINATION lib/3rdparty/onnxruntime)
+endif()

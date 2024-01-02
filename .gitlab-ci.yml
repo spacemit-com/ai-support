@@ -27,6 +27,7 @@ image: harbor.bianbu.xyz/bianbu-ai/bianbu-ai-support@sha256:7606f892304a1430e0ff
 .only-defaults: &only-defaults
   only:
     - main
+    - cicd
     - merge_requests
 
 variables:
@@ -47,8 +48,8 @@ build-job-x86_64:   # This job runs in the build stage, which runs first.
     - echo "Before scripts ..."
   script:
     - echo "Compiling the code ..."
-    - mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DORT_HOME=${ORT_HOME} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=OFF && make install -j`nproc` VERBOSE=1 && popd
-    - pushd demo && mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DBIANBUAI_HOME=$(pwd)/../../${BUILD_DIR}/${INSTALL_PREFIX} -DORT_HOME=${ORT_HOME} && make install -j`nproc` VERBOSE=1 && popd
+    - mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DORT_HOME=${ORT_HOME} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=ON && make install -j`nproc` VERBOSE=1 && popd
+    - pushd demo && mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DBIANBUAI_HOME=$(pwd)/../../${BUILD_DIR}/${INSTALL_PREFIX} -DORT_HOME=${ORT_HOME} && make -j`nproc` VERBOSE=1 && popd
   #  - echo "Compile complete."
   artifacts:
     paths:
@@ -62,7 +63,7 @@ build-job-riscv64:  # This job runs in the build stage, which runs second.
     BUILD_DIR: "build.riscv64"
     ORT_HOME: "$SDK/spacemit-ort"
     # TODO: fix opencv.v4.6.0 output precision error
-    OPENCV_SHARED_DIR: "$SDK/bianbu-ai-support/3rdparty/opencv.v4.7.0.shared"
+    OPENCV_SHARED_DIR: "$SDK/bianbu-ai-support/3rdparty/opencv.v4.7.0.shared" # v4.6.0.shared.qt5
     OPENCV_STATIC_DIR: "$SDK/bianbu-ai-support/3rdparty/opencv.v4.7.0.static"
     INSTALL_PREFIX: "bianbu-ai-support.riscv64"
   before_script:
@@ -70,8 +71,9 @@ build-job-riscv64:  # This job runs in the build stage, which runs second.
   script:
     - echo "Compiling the code ..."
     # Note: To use opencv static libraries, one'd better set OpenCV_DIR variable instead of OPENCV_INC and OPENCV_LIB variables.
-    - mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_STATIC_DIR}/lib/cmake/opencv4 -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=OFF && make install -j`nproc` VERBOSE=1 && popd
-    - pushd demo && mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DBIANBUAI_HOME=$(pwd)/../../${BUILD_DIR}/${INSTALL_PREFIX} -DORT_HOME=${ORT_HOME} -DOPENCV_INC=${OPENCV_SHARED_DIR}/include/opencv4 -DOPENCV_LIB=${OPENCV_SHARED_DIR}/lib -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} && make install -j`nproc` VERBOSE=1 && popd
+    - mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_STATIC_DIR}/lib/cmake/opencv4 -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=ON && make install -j`nproc` VERBOSE=1 && popd
+    #- mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DORT_HOME=${ORT_HOME} -DOPENCV_INC=${OPENCV_SHARED_DIR}/include/opencv4 -DOPENCV_LIB=${OPENCV_SHARED_DIR}/lib -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=ON -DUSE_OPENCV_SHARED_LIBS=ON && make install -j`nproc` VERBOSE=1 && popd
+    - pushd demo && mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DBIANBUAI_HOME=$(pwd)/../../${BUILD_DIR}/${INSTALL_PREFIX} -DORT_HOME=${ORT_HOME} -DOPENCV_INC=${OPENCV_SHARED_DIR}/include/opencv4 -DOPENCV_LIB=${OPENCV_SHARED_DIR}/lib -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} && make -j`nproc` VERBOSE=1 && popd
   #  - echo "Compile complete."
   artifacts:
     paths:
@@ -103,10 +105,14 @@ riscv64-test-job:   # This job runs in the test stage.
 package:
   stage: package
   variables:
-    timestamp: ""
+    CI_PKG_OPTION: "--skip-py" # "--skip-ort --skip-py"
   script:
-    - timestamp=$(date +"%Y%m%d_%H%M%S")
-    - mkdir output
+    #- echo $(date +"%Y%m%d_%H%M%S")
+    - mkdir -p output
+    # make deb ball
+    - bash ci/pack.sh build.x86_64/bianbu-ai-support.x86_64 ${CI_PKG_OPTION} && mkdir output/deb.x86_64 && mv bianbu-ai-support-*.deb output/deb.x86_64
+    - bash ci/pack.sh build.riscv64/bianbu-ai-support.riscv64 ${CI_PKG_OPTION} && mkdir output/deb.riscv64 && mv bianbu-ai-support-*.deb output/deb.riscv64
+    # make tar ball
     - pushd build.x86_64 && tar czf ../output/bianbu-ai-support.x86_64.$(date +"%Y%m%d_%H%M%S").tar.gz bianbu-ai-support.x86_64 && popd
     - pushd build.riscv64 && tar czf ../output/bianbu-ai-support.riscv64.$(date +"%Y%m%d_%H%M%S").tar.gz bianbu-ai-support.riscv64 && popd
     - rm -rf build.x86_64 build.riscv64 demo

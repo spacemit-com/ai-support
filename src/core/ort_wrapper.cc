@@ -43,21 +43,13 @@ int OrtWrapper::Init(json config) {
 #ifdef HAS_SPACEMIT_EP
     SessionOptionsSpaceMITEnvInit(sessionOptions_);
     auto providers = Ort::GetAvailableProviders();
-    int flag = 0;
-    for (auto provider : providers) {
-      std::string providerName = provider;
-      if (!std::strcmp(provider.c_str(), "SpaceMITExecutionProvider")) {
-        flag = 1;
-        break;
-      }
-    }
-    if (!flag) {
-      std::cout << "[Warning] Unsupport spacemit ep now" << std::endl;
-    }
+    std::cout << "Enable spacemit ep now" << std::endl;
 #endif
 #ifndef HAS_SPACEMIT_EP
     std::cout << "[Warning] Unsupport spacemit ep now" << std::endl;
 #endif
+  } else {
+    std::cout << "Disable spacemit ep now" << std::endl;
   }
   if (config.contains("intra_threads_num")) {
     int intraThreadsnum = config["intra_threads_num"];

@@ -4,18 +4,30 @@ set(CMAKE_CXX_STANDARD 14)
 # TODO: update cc files with '#ifndef NDEBUG'
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
+option(USE_OPENCV_SHARED_LIBS "Build Bianbu AI Support Library using opencv shared library." OFF)
+if (USE_OPENCV_SHARED_LIBS)
+  set(OPENCV_LIBS opencv_core opencv_imgproc)
+else()
+  # TODO: support MSVC
+  set(OPENCV_LIBS libopencv_core.a libopencv_imgproc.a)
+  set(OpenCV_SHARED OFF)
+endif()
 # To find OpenCV, one may need to set OpenCV_DIR variable to the
 # absolute path to the directory containing OpenCVConfig.cmake file.
 # Otherwise, try to set OPENCV_INC and OPENCV_LIB variables via the
 # command line or GUI.
-find_package(OpenCV)
+if ((NOT DEFINED OPENCV_INC OR OPENCV_INC STREQUAL "") OR ((NOT DEFINED OPENCV_LIB OR OPENCV_LIB STREQUAL "")))
+find_package(OpenCV REQUIRED COMPONENTS core imgproc)
 if (OpenCV_FOUND)
   if (NOT DEFINED OPENCV_INC OR OPENCV_INC STREQUAL "")
     set(OPENCV_INC "${OpenCV_INCLUDE_DIRS}")
   endif()
   if (NOT DEFINED OPENCV_LIB OR OPENCV_LIB STREQUAL "")
-    set(OPENCV_LIB "${OpenCV_DIR}/../../lib")
+    get_target_property(OpenCV_LIB_PATH opencv_core LOCATION)
+    get_filename_component(OPENCV_LIB ${OpenCV_LIB_PATH} DIRECTORY)
+    set(OPENCV_LIBS ${OpenCV_LIBS})
   endif()
+endif()
 endif()
 
 # Check Required Env
@@ -58,7 +70,7 @@ set(TARGET_SHARED_LINKER_FLAGS "-Wl,--as-needed")
 # 'target_link_libraries' should be used here:
 #set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--as-needed")
 target_link_libraries(bianbuai PRIVATE ${TARGET_SHARED_LINKER_FLAGS})
-target_link_libraries(bianbuai PRIVATE ${SPACEMITEP_LIB} onnxruntime opencv_core opencv_imgproc)
+target_link_libraries(bianbuai PRIVATE ${SPACEMITEP_LIB} onnxruntime ${OPENCV_LIBS})
 
 install(TARGETS bianbuai
         RUNTIME DESTINATION bin

@@ -12,14 +12,18 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 # absolute path to the directory containing OpenCVConfig.cmake file.
 # Otherwise, try to set OPENCV_INC and OPENCV_LIB variables via the
 # command line or GUI.
-find_package(OpenCV)
+if ((NOT DEFINED OPENCV_INC OR OPENCV_INC STREQUAL "") OR ((NOT DEFINED OPENCV_LIB OR OPENCV_LIB STREQUAL "")))
+find_package(OpenCV REQUIRED)
 if (OpenCV_FOUND)
   if (NOT DEFINED OPENCV_INC OR OPENCV_INC STREQUAL "")
     set(OPENCV_INC "${OpenCV_INCLUDE_DIRS}")
   endif()
   if (NOT DEFINED OPENCV_LIB OR OPENCV_LIB STREQUAL "")
-    set(OPENCV_LIB "${OpenCV_DIR}/../../lib")
+    get_target_property(OpenCV_LIB_PATH opencv_core LOCATION)
+    get_filename_component(OPENCV_LIB ${OpenCV_LIB_PATH} DIRECTORY)
+    set(OPENCV_LIBS ${OpenCV_LIBS})
   endif()
+endif()
 endif()
 
 # Check Required Env
@@ -42,9 +46,9 @@ endif()
 
 include_directories(${OPENCV_INC} ${BIANBUAI_HOME}/include/bianbuai)
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath-link,${BIANBUAI_HOME}/lib:${OPENCV_LIB}:${ORT_HOME}/lib")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath-link,${BIANBUAI_HOME}/lib:${OPENCV_LIB}:${OPENCV_LIB}/3rdparty:${ORT_HOME}/lib")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
-link_directories(${BIANBUAI_HOME}/lib ${ORT_HOME}/lib ${OPENCV_LIB})
+link_directories(${BIANBUAI_HOME}/lib ${ORT_HOME}/lib ${OPENCV_LIB} ${OPENCV_LIB}/3rdparty)
 
 add_executable(classification_demo image_classification_demo.cc)
 target_link_libraries(classification_demo PUBLIC bianbuai opencv_core opencv_imgcodecs)

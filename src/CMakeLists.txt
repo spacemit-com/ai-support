@@ -1,3 +1,7 @@
+file(READ ${CMAKE_SOURCE_DIR}/VERSION_NUMBER VERSION_CONTENT)
+string(STRIP "${VERSION_CONTENT}" VERSION_CONTENT)
+project(bianbuai-support-library VERSION ${VERSION_CONTENT})
+
 set(CMAKE_CXX_STANDARD 14)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 
@@ -46,7 +50,7 @@ link_directories(${ORT_HOME}/lib)
 
 file(GLOB_RECURSE SRC_FILES "./*.cpp" "./*.c" "./*.cc")
 add_library(bianbuai SHARED ${SRC_FILES})
-set_target_properties(bianbuai PROPERTIES VERSION 1.0.1 SOVERSION 1)
+set_target_properties(bianbuai PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
 
 if (EXISTS "${ORT_HOME}/lib/libspacemit_ep.so")
   add_definitions(-DHAS_SPACEMIT_EP)

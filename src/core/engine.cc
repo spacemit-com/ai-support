@@ -1,7 +1,9 @@
 #include "src/core/engine.h"
 
-int Engine::Init(std::string instanceName, std::string modelFilepath) {
-  return ortwrapper_.Init(instanceName, modelFilepath);
+int Engine::Init(std::string instanceName, std::string modelFilepath,
+                 const bool disable_spacemit_ep, const int intra_threads_num) {
+  return ortwrapper_.Init(instanceName, modelFilepath, intra_threads_num,
+                          disable_spacemit_ep);
 }
 
 int Engine::Init(json config) { return ortwrapper_.Init(config); }

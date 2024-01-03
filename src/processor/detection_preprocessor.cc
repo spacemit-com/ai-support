@@ -2,7 +2,7 @@
 
 #include "utils/time.h"
 
-void DetectionPreprocessor::PreprocessNanoDet(
+void DetectionPreprocessor::PreprocessNanoDetPlus(
     const cv::Mat& mat, std::vector<std::vector<int64_t>>& input_node_dims,
     std::vector<std::vector<float>>& input_tensor_values) {
   const int input_height = input_node_dims[0][2];
@@ -12,7 +12,9 @@ void DetectionPreprocessor::PreprocessNanoDet(
 #ifdef DEBUG
     TimeWatcher t("| |-- Resize unscale");
 #endif
-    resize_unscale(mat, resizedImage, input_height, input_width);
+    if (input_height != mat.cols || input_width != mat.rows) {
+      resize_unscale(mat, resizedImage, input_height, input_width);
+    }
   }
   {
 #ifdef DEBUG

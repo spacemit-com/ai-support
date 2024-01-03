@@ -26,7 +26,9 @@ class imageClassification
     initFlag_ = -1;
   }
   ~imageClassification() {}
-  int Init(const std::string modelFilepath, const std::string labelFilepath);
+  int Init(const std::string modelFilepath, const std::string labelFilepath,
+           const bool disable_spacemit_ep = true,
+           const int intra_threads_num = 4);
   void Preprocess(std::vector<std::vector<float>>& input_tensors,
                   const cv::Mat& img_raw) override;
   ImageClassificationResult Classify(const cv::Mat& img_raw);

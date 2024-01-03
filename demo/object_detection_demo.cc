@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <unistd.h>
+
 #include <iomanip>  // for setprecision
 
 #include "task/vision/object_detection_task.h"
@@ -8,9 +11,11 @@
 
 int main(int argc, char* argv[]) {
   std::vector<Boxi> resultBoxes;
-  std::string filePath;
-  std::string modelFilepath, imageFilepath, saveImgpath, labelFilepath,
-      configFilepath;
+  bool disable_spacemit_ep;
+  std::string filePath, modelFilepath, imageFilepath, saveImgpath,
+      labelFilepath, configFilepath;
+  float score_threshold, nms_threshold;
+  int intra_threads_num;
   cv::Mat imgRaw;
 #ifdef DEBUG
   std::cout << "." << std::endl;
@@ -96,6 +101,100 @@ int main(int argc, char* argv[]) {
     std::unique_ptr<objectDetectionTask> objectdetectiontask =
         std::unique_ptr<objectDetectionTask>(
             new objectDetectionTask(filePath, labelFilepath));
+    resultBoxes = objectdetectiontask->Detect(imgRaw).result_bboxes;
+    {
+#ifdef DEBUG
+      TimeWatcher t("|-- Output result");
+#endif
+      for (int i = 0; i < resultBoxes.size(); i++) {
+        std::cout << "bbox[" << std::setw(2) << i << "]"
+                  << " "
+                  << "x1y1x2y2: "
+                  << "(" << std::setw(4) << resultBoxes[i].x1 << ","
+                  << std::setw(4) << resultBoxes[i].y1 << "," << std::setw(4)
+                  << resultBoxes[i].x2 << "," << std::setw(4)
+                  << resultBoxes[i].y2 << ")"
+                  << ", "
+                  << "score: " << std::fixed << std::setprecision(3)
+                  << std::setw(4) << resultBoxes[i].score << ", "
+                  << "label_text: " << resultBoxes[i].label_text << std::endl;
+      }
+    }
+    {
+#ifdef DEBUG
+      TimeWatcher t("|-- Box drawing");
+#endif
+      draw_boxes_inplace(imgRaw, resultBoxes);
+    }
+
+    cv::imwrite(saveImgpath, imgRaw);
+    // cv::imshow("detected.jpg",imgRaw);
+    // cv::waitKey(0);
+  } else if (argc > 5) {
+    std::string argv5, argv6, argv7, argv8;
+    filePath = argv[1];
+    imageFilepath = argv[2];
+    saveImgpath = argv[3];
+    labelFilepath = argv[4];
+    if (!checkImageFileExtension(imageFilepath) ||
+        !checkImageFileExtension(saveImgpath)) {
+      std::cout << "[ ERROR ] The ImageFilepath is not correct. Make sure you "
+                   "are setting the path to an imgae file (.jpg/.jpeg/.png)"
+                << std::endl;
+      return -1;
+    }
+    if (!exists_check(imageFilepath)) {
+      std::cout << "[ ERROR ] The Image File does not exist. Make sure you are "
+                   "setting the correct path to the file"
+                << std::endl;
+      return -1;
+    }
+    {
+#ifdef DEBUG
+      TimeWatcher t("|-- Load input data");
+#endif
+      imgRaw = cv::imread(imageFilepath);
+    }
+    int o;
+    const char* optstring =
+        "d:t:s:n:";  // 有三个选项-abc，其中c选项后有两个冒号，表示后面可选参数
+    while ((o = getopt(argc, argv, optstring)) != -1) {
+      switch (o) {
+        case 'd':
+          argv5 = optarg;
+          disable_spacemit_ep = std::stoi(argv5);
+          break;
+        case 't':
+          argv6 = optarg;
+          std::cout << argv6 << std::endl;
+          intra_threads_num = std::stoi(argv6);
+          break;
+        case 's':
+          argv7 = optarg;
+          score_threshold = std::stof(argv7);
+          break;
+        case 'n':
+          argv8 = optarg;
+          nms_threshold = std::stof(argv8);
+          break;
+        case '?':
+          std::cout << "[Errot] Unsupported usage" << std::endl;
+          break;
+      }
+    }
+    if (intra_threads_num == 0) {
+      intra_threads_num = 1;
+    }
+    if (score_threshold == 0.0) {
+      score_threshold = 0.4;
+    }
+    if (nms_threshold == 0.0) {
+      nms_threshold = 0.5;
+    }
+    std::unique_ptr<objectDetectionTask> objectdetectiontask =
+        std::unique_ptr<objectDetectionTask>(new objectDetectionTask(
+            filePath, labelFilepath, disable_spacemit_ep, intra_threads_num,
+            score_threshold, nms_threshold));
     resultBoxes = objectdetectiontask->Detect(imgRaw).result_bboxes;
     {
 #ifdef DEBUG

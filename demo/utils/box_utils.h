@@ -16,8 +16,8 @@ static void draw_boxes_inplace(cv::Mat &mat_inplace,
       if (box.label_text) {
         std::string label_text(box.label_text);
         label_text = label_text + ":" + std::to_string(box.score).substr(0, 4);
-        cv::putText(mat_inplace, label_text, box.tl(), cv::FONT_HERSHEY_SIMPLEX,
-                    .6f, cv::Scalar(0, 0, 255), 1);
+        cv::putText(mat_inplace, label_text, box.bl(), cv::FONT_HERSHEY_TRIPLEX,
+                    .5f, cv::Scalar(230, 216, 173), 1);
       }
     }
   }

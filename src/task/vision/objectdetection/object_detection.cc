@@ -1,5 +1,6 @@
 #include "src/task/vision/objectdetection/object_detection.h"
 
+#include <chrono>
 #include <fstream>
 
 #include "src/utils/json.hpp"
@@ -21,15 +22,16 @@ ObjectDetectionResult ObjectDetection::Detect(const cv::Mat &raw_img) {
     return DetectYolov4(raw_img);
   } else if (modelFilepath_.find("yolov6") != modelFilepath_.npos) {
     return DetectYolov6(raw_img);
-  } else if (modelFilepath_.find("nanodet-plus") != modelFilepath_.npos) {
-    return DetectNanoDet(raw_img);
+  } else if (modelFilepath_.find("nanodet") != modelFilepath_.npos) {
+    return DetectNanoDetPlus(raw_img);
   } else {
     std::cout << "[ ERROR ] Unsupported model" << std::endl;
     return result_;
   }
 }
 
-ObjectDetectionResult ObjectDetection::DetectNanoDet(const cv::Mat &raw_img) {
+ObjectDetectionResult ObjectDetection::DetectNanoDetPlus(
+    const cv::Mat &raw_img) {
   result_boxes_.clear();
   input_tensors_.clear();
   img_height_ = raw_img.rows;
@@ -40,17 +42,17 @@ ObjectDetectionResult ObjectDetection::DetectNanoDet(const cv::Mat &raw_img) {
     std::cout << "|-- Preprocess " << std::endl;
     TimeWatcher t("|--");
 #endif
-    processor_.PreprocessNanoDet(raw_img, inputDims_, input_tensors_);
+    processor_.PreprocessNanoDetPlus(raw_img, inputDims_, input_tensors_);
   }
-
-  postprocessor_.PostprocessNanoDet(Infer(input_tensors_), result_boxes_,
-                                    inputDims_, img_height_, img_width_,
-                                    labels_);
+  postprocessor_.PostprocessNanoDetPlus(
+      Infer(input_tensors_), result_boxes_, inputDims_, img_height_, img_width_,
+      labels_, score_threshold_, nms_threshold_);
 
   result_.result_bboxes = result_boxes_;
+  result_.timestamp = std::chrono::high_resolution_clock::now();
   return result_;
 }
-
+auto start = std::chrono::high_resolution_clock::now();
 ObjectDetectionResult ObjectDetection::DetectYolov6(const cv::Mat &raw_img) {
   result_boxes_.clear();
   input_tensors_.clear();
@@ -68,6 +70,7 @@ ObjectDetectionResult ObjectDetection::DetectYolov6(const cv::Mat &raw_img) {
                                    labels_);
 
   result_.result_bboxes = result_boxes_;
+  result_.timestamp = std::chrono::high_resolution_clock::now();
   return result_;
 }
 
@@ -87,6 +90,7 @@ ObjectDetectionResult ObjectDetection::DetectYolov4(const cv::Mat &raw_img) {
                              img_height_, img_width_, labels_);
 
   result_.result_bboxes = result_boxes_;
+  result_.timestamp = std::chrono::high_resolution_clock::now();
   return result_;
 }
 ObjectDetectionResult ObjectDetection::Postprocess() {
@@ -98,11 +102,18 @@ ObjectDetectionResult ObjectDetection::Postprocess() {
 }
 
 int ObjectDetection::InitFromCommand(const std::string &modelFilepath,
-                                     const std::string &labelFilepath) {
+                                     const std::string &labelFilepath,
+                                     const bool disable_spacemit_ep,
+                                     const int intra_threads_num,
+                                     const float &score_threshold,
+                                     const float &nms_threshold) {
   instanceName_ = "object-detection-inference";
   modelFilepath_ = modelFilepath;
   labelFilepath_ = labelFilepath;
-  initFlag_ = GetEngine()->Init(instanceName_, modelFilepath_);
+  score_threshold_ = score_threshold;
+  nms_threshold_ = nms_threshold;
+  initFlag_ = GetEngine()->Init(instanceName_, modelFilepath_,
+                                disable_spacemit_ep, intra_threads_num);
   inputDims_ = GetEngine()->GetInputDims();
   labels_ = readLabels(labelFilepath_);
   return initFlag_;

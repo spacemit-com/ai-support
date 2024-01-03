@@ -26,8 +26,7 @@ void DetectionPostprocessor::Postprocess(
     Ort::Value &pred = output_tensors.at(s);  // batch*13*13*3*85
     auto outputInfo = pred.GetTensorTypeAndShapeInfo();
     auto pred_dims = outputInfo.GetShape();
-
-    const unsigned int num_classes = pred_dims.at(4) - 5;  // 20
+    const unsigned int num_classes = pred_dims.at(4) - 5;  // 80
     for (unsigned int i = 0; i < pred_dims[1]; ++i) {
       for (unsigned int j = 0; j < pred_dims[2]; ++j) {
         int grid_x = j;
@@ -137,10 +136,11 @@ void DetectionPostprocessor::PostprocessYolov6(
   }
 }
 
-void DetectionPostprocessor::PostprocessNanoDet(
+void DetectionPostprocessor::PostprocessNanoDetPlus(
     std::vector<Ort::Value> output_tensors, std::vector<Boxi> &result_boxes,
     std::vector<std::vector<int64_t>> &input_dims, int img_height,
-    int img_width, std::vector<std::string> &labels) {
+    int img_width, std::vector<std::string> &labels,
+    const float &score_threshold, const float &nms_threshold) {
 #ifdef DEBUG
   TimeWatcher t("|-- Postprocess");
 #endif
@@ -152,6 +152,7 @@ void DetectionPostprocessor::PostprocessNanoDet(
   const float resize_ratio =
       std::min(input_height / img_height, input_width / img_width);
   Ort::Value &pred = output_tensors.at(0);  // batch*2125*112
+  const float *output_pred_ptr = pred.GetTensorData<float>();
   auto outputInfo = pred.GetTensorTypeAndShapeInfo();
   auto pred_dims = outputInfo.GetShape();
   std::vector<int> hw = {40, 20, 10, 5};
@@ -163,29 +164,28 @@ void DetectionPostprocessor::PostprocessNanoDet(
         num++;
         int ct_x = x;
         int ct_y = y;
+        const float *scores = output_pred_ptr + num * 112;  // row ptr
         float cls_conf = pred.At<float>({0, num, 0});
-        float tmp_conf;
         unsigned int label = 0;
         for (unsigned int h = 0; h < cls_num; h++) {
-          tmp_conf = pred.At<float>({0, num, h});
+          float tmp_conf = scores[h];
           if (tmp_conf > cls_conf) {
             cls_conf = tmp_conf;
             label = h;
           }
         }
-
-        if (cls_conf < 0.30f) continue;
+        if (cls_conf < score_threshold) continue;
         std::vector<float> dis_pred(4, .0);
         for (int s = 0; s < 4; s++) {
           float alptha = .0;
           int cur_num = cls_num + s * 8;
           std::vector<float> dst(8);
           for (int j = 0; j < 8; j++) {
-            alptha = std::max(alptha, pred.At<float>({0, num, cur_num + j}));
+            alptha = std::max(alptha, scores[cur_num + j]);
           }
           float sum = .0f;
           for (int j = 0; j < 8; j++) {
-            dst[j] = fast_exp(pred.At<float>({0, num, cur_num + j}) - alptha);
+            dst[j] = fast_exp(scores[cur_num + j] - alptha);
             sum = sum + dst[j];
           }
           for (int j = 0; j < 8; j++) {
@@ -215,7 +215,7 @@ void DetectionPostprocessor::PostprocessNanoDet(
   std::vector<Boxf> detected_boxes;
 
   // 4. hard|blend|offset nms with topk.
-  nms(bbox_collection, detected_boxes, 0.30f, 100, OFFSET);
+  nms(bbox_collection, detected_boxes, nms_threshold, 100, OFFSET);
 
   int detected_boxes_num = detected_boxes.size();
   for (int i = 0; i < detected_boxes_num; i++) {

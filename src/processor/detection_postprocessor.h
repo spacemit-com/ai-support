@@ -30,11 +30,13 @@ class DetectionPostprocessor : public Postprocessor {
                          int img_height, int img_width,
                          std::vector<std::string> &labels);
 
-  void PostprocessNanoDet(std::vector<Ort::Value> output_tensors,
-                          std::vector<Boxi> &result_boxes,
-                          std::vector<std::vector<int64_t>> &input_dims,
-                          int img_height, int img_width,
-                          std::vector<std::string> &labels);
+  void PostprocessNanoDetPlus(std::vector<Ort::Value> output_tensors,
+                              std::vector<Boxi> &result_boxes,
+                              std::vector<std::vector<int64_t>> &input_dims,
+                              int img_height, int img_width,
+                              std::vector<std::string> &labels,
+                              const float &score_threshold,
+                              const float &nms_threshold);
 
  private:
   void nms(std::vector<Boxf> &input, std::vector<Boxf> &output,

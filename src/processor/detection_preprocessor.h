@@ -19,9 +19,9 @@ class DetectionPreprocessor : public Preprocessor {
                   std::vector<std::vector<int64_t>>& input_node_dims,
                   std::vector<std::vector<float>>& input_tensor_values,
                   unsigned int data_format);
-  void PreprocessNanoDet(const cv::Mat& mat,
-                         std::vector<std::vector<int64_t>>& input_node_dims,
-                         std::vector<std::vector<float>>& input_tensor_values);
+  void PreprocessNanoDetPlus(
+      const cv::Mat& mat, std::vector<std::vector<int64_t>>& input_node_dims,
+      std::vector<std::vector<float>>& input_tensor_values);
 };
 
 #endif  // SUPPORT_SRC_PROCESSOR_DETECTION_PREPROCESSOR_H_

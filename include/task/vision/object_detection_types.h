@@ -1,6 +1,7 @@
 #ifndef SUPPORT_INCLUDE_TASK_VISION_OBJECT_DETECTION_TYPES_H_
 #define SUPPORT_INCLUDE_TASK_VISION_OBJECT_DETECTION_TYPES_H_
 
+#include <chrono>
 #include <limits>  // for numeric_limits<>
 #include <type_traits>
 #include <vector>
@@ -45,6 +46,8 @@ struct BoundingBoxType {
   cv::Rect rect() const;
 
   cv::Point2i tl() const;
+
+  cv::Point2i bl() const;
 
   cv::Point2i rb() const;
 
@@ -120,6 +123,13 @@ inline cv::Point2i BoundingBoxType<T1, T2>::tl() const {
 }
 
 template <typename T1, typename T2>
+inline cv::Point2i BoundingBoxType<T1, T2>::bl() const {
+  __assert_type<value_type, score_type>();
+  auto boxi = this->template convert_type<int>();
+  return cv::Point2i(boxi.x1, boxi.y2);
+}
+
+template <typename T1, typename T2>
 inline cv::Point2i BoundingBoxType<T1, T2>::rb() const {
   __assert_type<value_type, score_type>();
   auto boxi = this->template convert_type<int>();
@@ -149,7 +159,7 @@ BoundingBoxType<T1, T2>::area() const {
 
 struct ObjectDetectionResult {
   std::vector<Boxi> result_bboxes;
-  int timestamp;
+  std::chrono::_V2::system_clock::time_point timestamp;
 };
 
 #endif  // SUPPORT_INCLUDE_TASK_VISION_OBJECT_DETECTION_TYPES_H_

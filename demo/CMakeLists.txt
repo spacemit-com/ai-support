@@ -13,7 +13,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 # Otherwise, try to set OPENCV_INC and OPENCV_LIB variables via the
 # command line or GUI.
 if ((NOT DEFINED OPENCV_INC OR OPENCV_INC STREQUAL "") OR ((NOT DEFINED OPENCV_LIB OR OPENCV_LIB STREQUAL "")))
-find_package(OpenCV REQUIRED)
+find_package(OpenCV REQUIRED COMPONENTS core imgproc imgcodecs videoio highgui)
 if (OpenCV_FOUND)
   if (NOT DEFINED OPENCV_INC OR OPENCV_INC STREQUAL "")
     set(OPENCV_INC "${OpenCV_INCLUDE_DIRS}")

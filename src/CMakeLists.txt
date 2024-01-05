@@ -8,20 +8,13 @@ set(CMAKE_CXX_STANDARD 14)
 # TODO: update cc files with '#ifndef NDEBUG'
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
-option(USE_OPENCV_SHARED_LIBS "Build Bianbu AI Support Library using opencv shared library." OFF)
-if (USE_OPENCV_SHARED_LIBS)
-  set(OPENCV_LIBS opencv_core opencv_imgproc)
-else()
-  # TODO: support MSVC
-  set(OPENCV_LIBS libopencv_core.a libopencv_imgproc.a)
-  set(OpenCV_SHARED OFF)
-endif()
+set(OPENCV_LIBS opencv_core opencv_imgproc)
 # To find OpenCV, one may need to set OpenCV_DIR variable to the
 # absolute path to the directory containing OpenCVConfig.cmake file.
 # Otherwise, try to set OPENCV_INC and OPENCV_LIB variables via the
 # command line or GUI.
 if ((NOT DEFINED OPENCV_INC OR OPENCV_INC STREQUAL "") OR ((NOT DEFINED OPENCV_LIB OR OPENCV_LIB STREQUAL "")))
-find_package(OpenCV REQUIRED COMPONENTS core imgproc)
+find_package(OpenCV REQUIRED COMPONENTS ${OPENCV_LIBS})
 if (OpenCV_FOUND)
   if (NOT DEFINED OPENCV_INC OR OPENCV_INC STREQUAL "")
     set(OPENCV_INC "${OpenCV_INCLUDE_DIRS}")
@@ -29,7 +22,6 @@ if (OpenCV_FOUND)
   if (NOT DEFINED OPENCV_LIB OR OPENCV_LIB STREQUAL "")
     get_target_property(OpenCV_LIB_PATH opencv_core LOCATION)
     get_filename_component(OPENCV_LIB ${OpenCV_LIB_PATH} DIRECTORY)
-    set(OPENCV_LIBS ${OpenCV_LIBS})
   endif()
 endif()
 endif()
@@ -60,7 +52,7 @@ endif()
 target_include_directories(bianbuai PUBLIC  ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(bianbuai PRIVATE ${CMAKE_SOURCE_DIR})
 target_include_directories(bianbuai SYSTEM PUBLIC  ${OPENCV_INC})
-target_include_directories(bianbuai SYSTEM PRIVATE ${ORT_HOME}/include)
+target_include_directories(bianbuai SYSTEM PRIVATE ${ORT_HOME}/include ${ORT_HOME}/include/onnxruntime)
 
 set(HIDE_SYMBOLS_LINKER_FLAGS "-Wl,--exclude-libs,ALL")
 # Note: 'target_link_options' with 'PRIVATE' keyword would be cleaner
@@ -85,9 +77,9 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/task ${CMAKE_SOURCE_DIR}/include/u
         DESTINATION include/bianbuai
         FILES_MATCHING PATTERN "*.h")
 
-install(DIRECTORY ${ORT_HOME}/include ${ORT_HOME}/lib
-        DESTINATION lib/3rdparty/onnxruntime
-        FILES_MATCHING PATTERN "*.h" PATTERN "*onnxruntime*.so*" PATTERN "*spacemit*.so*")
-if (EXISTS "${ORT_HOME}/bin")
-  install(DIRECTORY ${ORT_HOME}/bin DESTINATION lib/3rdparty/onnxruntime)
-endif()
+#install(DIRECTORY ${ORT_HOME}/include ${ORT_HOME}/lib
+#        DESTINATION lib/3rdparty/onnxruntime
+#        FILES_MATCHING PATTERN "*.h" PATTERN "*onnxruntime*.so*" PATTERN "*spacemit*.so*")
+#if (EXISTS "${ORT_HOME}/bin")
+#  install(DIRECTORY ${ORT_HOME}/bin DESTINATION lib/3rdparty/onnxruntime)
+#endif()

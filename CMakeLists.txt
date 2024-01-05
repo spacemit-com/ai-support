@@ -9,8 +9,8 @@ if (DEMO)
   add_subdirectory(${CMAKE_SOURCE_DIR}/demo)
 endif()
 # always install demo project with test data
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/demo DESTINATION .)
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/data DESTINATION demo)
+#install(DIRECTORY ${CMAKE_SOURCE_DIR}/demo DESTINATION .)
+#install(DIRECTORY ${CMAKE_SOURCE_DIR}/data DESTINATION demo)
 
 option(TEST "option for Test" ON)
 if (TEST)

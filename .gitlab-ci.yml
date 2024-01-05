@@ -37,6 +37,7 @@ variables:
   SYSROOT: "$SDK/spacemit-gcc/sysroot"
   QEMU_CMD: "$SDK/qemu/bin/qemu-riscv64 -L $SYSROOT"
   ORT_HOME_X86: "/home/workspace/onnxruntime-linux-x64-1.15.1"
+  CI_INSTALL_OPTION: "--with-demo --with-ort"
 
 build-job-x86_64:   # This job runs in the build stage, which runs first.
   stage: build
@@ -49,6 +50,10 @@ build-job-x86_64:   # This job runs in the build stage, which runs first.
   script:
     - echo "Compiling the code ..."
     - mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DORT_HOME=${ORT_HOME} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=ON && make install -j`nproc` VERBOSE=1 && popd
+    # copy demo and data
+    - if [[ "${CI_INSTALL_OPTION}" =~ "--with-demo" ]]; then cp -rdf demo ${BUILD_DIR}/${INSTALL_PREFIX} && cp -rdf data ${BUILD_DIR}/${INSTALL_PREFIX}/demo; fi
+    # copy onnxruntime
+    - if [[ "${CI_INSTALL_OPTION}" =~ "--with-ort" ]]; then mkdir -p ${BUILD_DIR}/${INSTALL_PREFIX}/lib/3rdparty/onnxruntime && cp -rdf ${ORT_HOME}/* ${BUILD_DIR}/${INSTALL_PREFIX}/lib/3rdparty/onnxruntime; fi
     - pushd demo && mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DBIANBUAI_HOME=$(pwd)/../../${BUILD_DIR}/${INSTALL_PREFIX} -DORT_HOME=${ORT_HOME} && make -j`nproc` VERBOSE=1 && popd
   #  - echo "Compile complete."
   artifacts:
@@ -72,7 +77,11 @@ build-job-riscv64:  # This job runs in the build stage, which runs second.
     - echo "Compiling the code ..."
     # Note: To use opencv static libraries, one'd better set OpenCV_DIR variable instead of OPENCV_INC and OPENCV_LIB variables.
     - mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_STATIC_DIR}/lib/cmake/opencv4 -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=ON && make install -j`nproc` VERBOSE=1 && popd
-    #- mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DORT_HOME=${ORT_HOME} -DOPENCV_INC=${OPENCV_SHARED_DIR}/include/opencv4 -DOPENCV_LIB=${OPENCV_SHARED_DIR}/lib -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=ON -DUSE_OPENCV_SHARED_LIBS=ON && make install -j`nproc` VERBOSE=1 && popd
+    # copy demo and data
+    - if [[ "${CI_INSTALL_OPTION}" =~ "--with-demo" ]]; then cp -rdf demo ${BUILD_DIR}/${INSTALL_PREFIX} && cp -rdf data ${BUILD_DIR}/${INSTALL_PREFIX}/demo; fi
+    # copy onnxruntime
+    - if [[ "${CI_INSTALL_OPTION}" =~ "--with-ort" ]]; then mkdir -p ${BUILD_DIR}/${INSTALL_PREFIX}/lib/3rdparty/onnxruntime && cp -rdf ${ORT_HOME}/* ${BUILD_DIR}/${INSTALL_PREFIX}/lib/3rdparty/onnxruntime; fi
+  #  - mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DORT_HOME=${ORT_HOME} -DOPENCV_INC=${OPENCV_SHARED_DIR}/include/opencv4 -DOPENCV_LIB=${OPENCV_SHARED_DIR}/lib -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=ON -DUSE_OPENCV_SHARED_LIBS=ON && make install -j`nproc` VERBOSE=1 && popd
     - pushd demo && mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DBIANBUAI_HOME=$(pwd)/../../${BUILD_DIR}/${INSTALL_PREFIX} -DORT_HOME=${ORT_HOME} -DOPENCV_INC=${OPENCV_SHARED_DIR}/include/opencv4 -DOPENCV_LIB=${OPENCV_SHARED_DIR}/lib -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} && make -j`nproc` VERBOSE=1 && popd
   #  - echo "Compile complete."
   artifacts:
@@ -120,6 +129,40 @@ package:
     paths:
       - output
   <<: *only-defaults
+
+package-bianbu-deb:
+  stage: package
+  image: harbor.bianbu.xyz/gitlab/ci-pack
+  script:
+    # TODO: replace by shell script
+    - echo "Building for tag $CI_COMMIT_TAG"
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan gitlab.dc.com >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - git config --global user.email "bianbu-ci@spacemit.com"
+    - git config --global user.name "bianbu-ci"
+    # prepare bianbu-dev toolkits
+    - cd ..
+    - git clone git@gitlab.dc.com:bianbu/bianbu-devscripts.git
+    - export PATH=$CI_PROJECT_DIR/../bianbu-devscripts:$PATH
+    # prepare source code
+    - cd $CI_PROJECT_DIR
+    - git checkout ${CI_COMMIT_TAG%%/*}  
+    - bianbu-pkg -u local -w . -t $CI_COMMIT_TAG
+    - changes_file=$(find ../ -maxdepth 1 -type f -name "*.changes" | head -n 1)
+    # upload
+    - ssh-keyscan reprepro-headless-service.buildsystem.svc.cluster.local >> ~/.ssh/known_hosts
+    - bianbu-dev upload $changes_file
+    # change proxy as ssh
+    - git remote set-url origin git@gitlab.dc.com:$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME.git
+    - git push origin --all
+    # status
+    - echo "Bianbu devscripts successfully packaged."
+  only:
+    - tags
 
 lint-test-job:   # This job also runs in the test stage.
   stage: test    # It can run at the same time as unit-test-job (in parallel).

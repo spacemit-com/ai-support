@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <unistd.h>
+#include <unistd.h>  //for getopt
 
 #include <chrono>
 #include <cmath>
@@ -79,25 +79,32 @@ class Detector {
   float scoreThreshold_;
   float nmsThreshold_;
 };
-
 class DataLoader {
  public:
-  DataLoader() { enable = true; }
+  DataLoader(const int& resize_height, const int& resize_width) {
+    enable = true;
+    resize_height_ = resize_height;
+    resize_width_ = resize_width;
+  }
   ~DataLoader() {}
   bool ifenable() { return enable; }
+  void set_disable() { enable = false; }
+  int get_resize_height() { return resize_height_; }
+  int get_resize_width() { return resize_width_; }
   virtual cv::Mat fetch_frame() = 0;
   virtual cv::Mat peek_frame() = 0;
-  virtual std::shared_ptr<cv::Mat> fetch_frame_v2() = 0;
-  virtual std::shared_ptr<cv::Mat> clone_frame() = 0;
 
  private:
   bool enable;
+  int resize_height_;
+  int resize_width_;
 };
 
 // 独占式
 class ExclusiveDataLoader : public DataLoader {
  public:
-  ExclusiveDataLoader() {}
+  ExclusiveDataLoader(const int& resize_height, const int& resize_width)
+      : DataLoader(resize_height, resize_width) {}
   ~ExclusiveDataLoader() {}
   int init(const std::string& path) {
     capture_.open(path);
@@ -131,7 +138,8 @@ class ExclusiveDataLoader : public DataLoader {
 // 共享式
 class SharedDataLoader : public DataLoader {
  public:
-  SharedDataLoader() {}
+  SharedDataLoader(const int& resize_height, const int& resize_width)
+      : DataLoader(resize_height, resize_width) {}
   ~SharedDataLoader() {}
   int init(const std::string& path) {
     capture_.open(path);
@@ -160,38 +168,19 @@ class SharedDataLoader : public DataLoader {
     }
   }
 
-  std::shared_ptr<cv::Mat> fetch_frame_v2() {
-    cv::Mat _frame, temp;
-    capture_.read(_frame);
-    resize_unscale(_frame, temp, 320, 320);
-    frame_mutex_.lock();
-    frame = std::make_shared<cv::Mat>(temp);
-    frame_mutex_.unlock();
-    return frame;
-  }
-  std::shared_ptr<cv::Mat> clone_frame() {
-    frame_mutex_.lock();
-    std::shared_ptr<cv::Mat> ptr = std::make_shared<cv::Mat>(frame->clone());
-    frame_mutex_.unlock();
-    return ptr;
-  }
   cv::Mat fetch_frame() {
     cv::Mat frame, temp;
     capture_.read(frame);
-    resize_unscale(frame, temp, 320, 320);
-    if (!frame.empty()) {
-      frame_mutex_.lock();
-      frame_ = temp.clone();
-      frame_mutex_.unlock();
-    }
+    resize_unscale(frame, temp, get_resize_height(), get_resize_width());
+    frame_mutex_.lock();
+    frame_ = temp.clone();
+    frame_mutex_.unlock();
     return frame;
   }
   cv::Mat peek_frame() {
     cv::Mat frame;
     frame_mutex_.lock();
-    if (!frame_.empty()) {
-      frame = frame_.clone();  // 深拷贝
-    }
+    frame = frame_.clone();  // 深拷贝
     frame_mutex_.unlock();
     return frame;
   }
@@ -211,18 +200,19 @@ void Detection(DataLoader& dataloader, Detector& detector) {
     return;
   }
   cv::Mat frame;
+  int flag;
   while (dataloader.ifenable()) {
     frame = dataloader.peek_frame();  // 取(拷贝)一帧数据
-    // std::shared_ptr<cv::Mat> frame = dataloader.clone_frame();
     if ((frame).empty()) {
       continue;
     }
     int flag = detector.infer(frame);  // 推理并保存检测结果
     if (flag == -1) {
-      std::cout << "detection thread quit" << std::endl;
+      std::cout << "[Error] infer frame failed" << std::endl;
       break;  // 摄像头结束拍摄或者故障
     }
   }
+  std::cout << "detection thread quit" << std::endl;
 }
 
 // 预览线程
@@ -233,7 +223,6 @@ void Preview(DataLoader& dataloader, Detector& detector) {
   objs.timestamp = now;
   while (dataloader.ifenable()) {
     frame = dataloader.fetch_frame();  // 取(搬走)一帧数据
-    // std::shared_ptr<cv::Mat> frame = dataloader.fetch_frame_v2();
     if ((frame).empty()) {
       break;
     }
@@ -243,8 +232,8 @@ void Preview(DataLoader& dataloader, Detector& detector) {
       // 是否有检测结果
       objs = detector.get_object();  // 取(搬走)检测结果(移动赋值)
       if (objs.result_bboxes.size()) {
-        int input_height = 320;
-        int input_width = 320;
+        int input_height = dataloader.get_resize_height();
+        int input_width = dataloader.get_resize_width();
         int img_height = frame.rows;
         int img_width = frame.cols;
         float resize_ratio = std::min(
@@ -262,44 +251,51 @@ void Preview(DataLoader& dataloader, Detector& detector) {
           objs.result_bboxes[i].y2 =
               (objs.result_bboxes[i].y2 - dh) / resize_ratio;
         }
-        {
+      }
+      {
 #ifdef DEBUG
-          TimeWatcher t("|-- Output result");
+        TimeWatcher t("|-- Output result");
 #endif
-          for (int i = 0; i < objs.result_bboxes.size(); i++) {
-            std::cout << "bbox[" << std::setw(2) << i << "]"
-                      << " "
-                      << "x1y1x2y2: "
-                      << "(" << std::setw(4) << objs.result_bboxes[i].x1 << ","
-                      << std::setw(4) << objs.result_bboxes[i].y1 << ","
-                      << std::setw(4) << objs.result_bboxes[i].x2 << ","
-                      << std::setw(4) << objs.result_bboxes[i].y2 << ")"
-                      << ", "
-                      << "score: " << std::fixed << std::setprecision(3)
-                      << std::setw(4) << objs.result_bboxes[i].score << ", "
-                      << "label_text: " << objs.result_bboxes[i].label_text
-                      << std::endl;
-          }
+        for (int i = 0; i < objs.result_bboxes.size(); i++) {
+          std::cout << "bbox[" << std::setw(2) << i << "]"
+                    << " "
+                    << "x1y1x2y2: "
+                    << "(" << std::setw(4) << objs.result_bboxes[i].x1 << ","
+                    << std::setw(4) << objs.result_bboxes[i].y1 << ","
+                    << std::setw(4) << objs.result_bboxes[i].x2 << ","
+                    << std::setw(4) << objs.result_bboxes[i].y2 << ")"
+                    << ", "
+                    << "score: " << std::fixed << std::setprecision(3)
+                    << std::setw(4) << objs.result_bboxes[i].score << ", "
+                    << "label_text: " << objs.result_bboxes[i].label_text
+                    << std::endl;
         }
       }
-    }  // 调用 detector.detected 和 detector.get_object 期间,
-       // 检测结果依然可能被刷新
+    }
+    // 调用 detector.detected 和 detector.get_object 期间,
+    // 检测结果依然可能被刷新
     now = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
         now - objs.timestamp);
-    if (duration.count() < 1000000) {
+    if (duration.count() < 1000) {
       draw_boxes_inplace((frame), objs.result_bboxes);  // 画框
     }
     cv::imshow("Detection", (frame));
-    cv::waitKey(25);
+    cv::waitKey(10);
+    if (cv::getWindowProperty("Detection", cv::WND_PROP_VISIBLE) < 1) {
+      dataloader.set_disable();
+      break;
+    }
   }
+  std::cout << "preview thread quit" << std::endl;
+  cv::destroyAllWindows();
 }
 
 int main(int argc, char* argv[]) {
   std::string filePath, labelFilepath, input, inputType;
   bool disable_spacemit_ep{false};
   float score_threshold{0.4}, nms_threshold{0.5};
-  int intra_threads_num{1};
+  int intra_threads_num{1}, resize_height{320}, resize_width{320};
   if (argc == 5) {
     filePath = argv[1];
     labelFilepath = argv[2];
@@ -310,26 +306,27 @@ int main(int argc, char* argv[]) {
     labelFilepath = argv[2];
     input = argv[3];
     inputType = argv[4];
-    std::string str_d, str_t, str_s, str_n;
     int o;
-    const char* optstring = "d:t:s:n:";
+    const char* optstring = "d:t:s:n:w:h:";
     while ((o = getopt(argc, argv, optstring)) != -1) {
       switch (o) {
         case 'd':
-          str_d = optarg;
-          disable_spacemit_ep = std::stoi(str_d);
+          disable_spacemit_ep = atoi(optarg);
           break;
         case 't':
-          str_t = optarg;
-          intra_threads_num = std::stoi(str_t);
+          intra_threads_num = atoi(optarg);
           break;
         case 's':
-          str_s = optarg;
-          score_threshold = std::stof(str_s);
+          score_threshold = atof(optarg);
           break;
         case 'n':
-          str_n = optarg;
-          nms_threshold = std::stof(str_n);
+          nms_threshold = atof(optarg);
+          break;
+        case 'w':
+          resize_width = atoi(optarg);
+          break;
+        case 'h':
+          resize_height = atoi(optarg);
           break;
         case '?':
           std::cout << "[Errot] Unsupported usage" << std::endl;
@@ -342,12 +339,13 @@ int main(int argc, char* argv[]) {
                  "or cameraId)  option(-d <disable_spacemit_ep>) option(-t "
                  "<intra_threads_num>) "
                  "option(-s score_threshold) option(-n nms_threshold) "
+                 "option(-h resize_height) option(-w resize_width)"
               << std::endl;
     return -1;
   }
   Detector detector{filePath,          labelFilepath,   disable_spacemit_ep,
                     intra_threads_num, score_threshold, nms_threshold};
-  SharedDataLoader dataloader;
+  SharedDataLoader dataloader{resize_height, resize_width};
   if (inputType == "video") {
     if (dataloader.init(input) != 0) {
       std::cout << "[ERROR] dataloader init error" << std::endl;

@@ -1,7 +1,8 @@
 #include <stdlib.h>
-#include <unistd.h>
+#include <unistd.h>  //for getopt
 
 #include <iomanip>  // for setprecision
+#include <iostream>
 
 #include "task/vision/object_detection_task.h"
 #include "utils/box_utils.h"
@@ -131,7 +132,6 @@ int main(int argc, char* argv[]) {
     // cv::imshow("detected.jpg",imgRaw);
     // cv::waitKey(0);
   } else if (argc > 5) {
-    std::string str_d, str_t, str_s, str_n;
     filePath = argv[1];
     imageFilepath = argv[2];
     saveImgpath = argv[3];
@@ -160,20 +160,16 @@ int main(int argc, char* argv[]) {
     while ((o = getopt(argc, argv, optstring)) != -1) {
       switch (o) {
         case 'd':
-          str_d = optarg;
-          disable_spacemit_ep = std::stoi(str_d);
+          disable_spacemit_ep = atoi(optarg);
           break;
         case 't':
-          str_t = optarg;
-          intra_threads_num = std::stoi(str_t);
+          intra_threads_num = atoi(optarg);
           break;
         case 's':
-          str_s = optarg;
-          score_threshold = std::stof(str_s);
+          score_threshold = atof(optarg);
           break;
         case 'n':
-          str_n = optarg;
-          nms_threshold = std::stof(str_n);
+          nms_threshold = atof(optarg);
           break;
         case '?':
           std::cout << "[Errot] Unsupported usage" << std::endl;

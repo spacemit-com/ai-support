@@ -119,7 +119,7 @@ template <typename T1, typename T2>
 inline cv::Point2i BoundingBoxType<T1, T2>::tl() const {
   __assert_type<value_type, score_type>();
   auto boxi = this->template convert_type<int>();
-  return cv::Point2i(boxi.x1, boxi.y1);
+  return cv::Point2i(boxi.x1, boxi.y1 + 10);
 }
 
 template <typename T1, typename T2>

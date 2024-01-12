@@ -11,7 +11,7 @@ class imageClassificationTask::impl {
 
 imageClassificationTask::imageClassificationTask(
     const std::string& filePath, const std::string& labelFilepath,
-    const bool disable_spacemit_ep, const int intra_threads_num)
+    const bool& disable_spacemit_ep, const int& intra_threads_num)
     : pimpl_(std::make_unique<impl>()) {
   pimpl_->imageclassification_ =
       std::unique_ptr<imageClassification>(new imageClassification());

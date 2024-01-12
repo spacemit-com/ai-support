@@ -51,7 +51,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
 link_directories(${BIANBUAI_HOME}/lib ${ORT_HOME}/lib ${OPENCV_LIB} ${OPENCV_LIB}/3rdparty)
 
 add_executable(classification_demo image_classification_demo.cc)
-target_link_libraries(classification_demo PUBLIC bianbuai opencv_core opencv_imgproc opencv_imgcodecs)
+target_link_libraries(classification_demo PUBLIC bianbuai opencv_core opencv_imgcodecs)
 
 add_executable(detection_demo object_detection_demo.cc)
 target_link_libraries(detection_demo PUBLIC bianbuai opencv_core opencv_imgproc opencv_imgcodecs)

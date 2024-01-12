@@ -1,6 +1,7 @@
-
 #include <stdlib.h>
-#include <unistd.h>
+#include <unistd.h>  //for getopt
+
+#include <iostream>
 
 #include "task/vision/image_classification_task.h"
 #include "utils/check_utils.h"
@@ -9,7 +10,6 @@
 
 int main(int argc, char* argv[]) {
   std::string filePath, labelFilepath, imageFilepath;
-  std::string str_d, str_t;
   bool disable_spacemit_ep{false};
   int intra_threads_num{1};
   if (argc == 4) {
@@ -25,12 +25,10 @@ int main(int argc, char* argv[]) {
     while ((o = getopt(argc, argv, optstring)) != -1) {
       switch (o) {
         case 'd':
-          str_d = optarg;
-          disable_spacemit_ep = std::stoi(str_d);
+          disable_spacemit_ep = atoi(optarg);
           break;
         case 't':
-          str_t = optarg;
-          intra_threads_num = std::stoi(str_t);
+          intra_threads_num = atoi(optarg);
           break;
         case '?':
           std::cout << "[Errot] Unsupported usage" << std::endl;

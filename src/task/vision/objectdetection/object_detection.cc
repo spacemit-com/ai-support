@@ -22,7 +22,7 @@ ObjectDetectionResult ObjectDetection::Detect(const cv::Mat &raw_img) {
     return DetectYolov4(raw_img);
   } else if (modelFilepath_.find("yolov6") != modelFilepath_.npos) {
     return DetectYolov6(raw_img);
-  } else if (modelFilepath_.find("nanodet") != modelFilepath_.npos) {
+  } else if (modelFilepath_.find("nanodet-plus") != modelFilepath_.npos) {
     return DetectNanoDetPlus(raw_img);
   } else {
     std::cout << "[ ERROR ] Unsupported model" << std::endl;

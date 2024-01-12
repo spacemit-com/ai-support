@@ -23,6 +23,7 @@ int OrtWrapper::Init(std::string instanceName, std::string modelFilepath,
   } else {
 #ifdef HAS_SPACEMIT_EP
     SessionOptionsSpaceMITEnvInit(sessionOptions_);
+    // auto providers = Ort::GetAvailableProviders();
     std::cout << "Enable spacemit ep now" << std::endl;
 #else
     std::cout << "[Warning] Unsupport spacemit ep now" << std::endl;
@@ -57,6 +58,7 @@ int OrtWrapper::Init(json config) {
       config["disable_spcacemit_ep"] == false) {
 #ifdef HAS_SPACEMIT_EP
     SessionOptionsSpaceMITEnvInit(sessionOptions_);
+    // auto providers = Ort::GetAvailableProviders();
     std::cout << "Enable spacemit ep now" << std::endl;
 #else
     std::cout << "[Warning] Unsupport spacemit ep now" << std::endl;

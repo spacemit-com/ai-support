@@ -11,10 +11,10 @@ class objectDetectionTask::impl {
 
 objectDetectionTask::objectDetectionTask(const std::string &filePath,
                                          const std::string &labelFilepath,
-                                         const bool disable_spacemit_ep,
-                                         const int intra_threads_num,
-                                         const float score_threshold,
-                                         const float nms_threshold)
+                                         const bool &disable_spacemit_ep,
+                                         const int &intra_threads_num,
+                                         const float &score_threshold,
+                                         const float &nms_threshold)
     : pimpl_(std::make_unique<impl>()) {
   pimpl_->objectdetection_ =
       std::unique_ptr<ObjectDetection>(new ObjectDetection());

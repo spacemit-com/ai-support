@@ -1,6 +1,7 @@
 #include "src/processor/detection_postprocessor.h"
 
 #include "utils/time.h"
+#include "utils/utils.h"
 
 void DetectionPostprocessor::Postprocess(
     std::vector<Ort::Value> output_tensors, std::vector<Boxi> &result_boxes,
@@ -110,10 +111,11 @@ void DetectionPostprocessor::PostprocessYolov6(
   const float input_width = static_cast<float>(input_dims[0][3]);   // e.g 640
   const float resize_ratio =
       std::min(input_height / img_height, input_width / img_width);
-  Ort::Value &pred0 = output_tensors.at(0);  // batch*13*13*3*85
-  Ort::Value &pred1 = output_tensors.at(1);  // batch*13*13*3*85
-  Ort::Value &pred2 = output_tensors.at(2);
-  auto outputInfo = pred0.GetTensorTypeAndShapeInfo();
+  Ort::Value &num_dets = output_tensors.at(0);  // batch*13*13*3*85
+  Ort::Value &boxes = output_tensors.at(1);     // batch*13*13*3*85
+  Ort::Value &scores = output_tensors.at(2);
+  Ort::Value &output_labels = output_tensors.at(3);
+  auto outputInfo = boxes.GetTensorTypeAndShapeInfo();
   auto pred_dims = outputInfo.GetShape();
   float dw = (input_width - resize_ratio * img_width) / 2;
   float dh = (input_height - resize_ratio * img_height) / 2;
@@ -121,15 +123,18 @@ void DetectionPostprocessor::PostprocessYolov6(
   int num = pred_dims[1];
   for (int i = 0; i < num; i++) {
     Boxi result_box;
-    result_box.x1 = int((pred0.At<float>({0, i, 0}) - dw) / resize_ratio);
-    result_box.y1 = int((pred0.At<float>({0, i, 1}) - dh) / resize_ratio);
-    result_box.x2 = int((pred0.At<float>({0, i, 2}) - dw) / resize_ratio);
-    result_box.y2 = int((pred0.At<float>({0, i, 3}) - dh) / resize_ratio);
-    if (pred1.At<int>({0, i}) < 0) {
+    result_box.score = scores.At<float>({0, i});
+    if (result_box.score < 0.4) {
       continue;
     }
-    result_box.label = pred1.At<int>({0, i});
-    result_box.score = pred2.At<float>({0, i, 0});
+    result_box.x1 = int((boxes.At<float>({0, i, 0}) - dw) / resize_ratio);
+    result_box.y1 = int((boxes.At<float>({0, i, 1}) - dh) / resize_ratio);
+    result_box.x2 = int((boxes.At<float>({0, i, 2}) - dw) / resize_ratio);
+    result_box.y2 = int((boxes.At<float>({0, i, 3}) - dh) / resize_ratio);
+    if (output_labels.At<int>({0, i}) < 0) {
+      continue;
+    }
+    result_box.label = output_labels.At<int>({0, i});
     result_box.label_text = labels[result_box.label].c_str();
     result_box.flag = true;
     result_boxes.push_back(result_box);

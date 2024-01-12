@@ -2,6 +2,7 @@
 #include <unistd.h>
 
 #include <chrono>
+#include <cmath>
 #include <iostream>
 #include <mutex>
 #include <queue>
@@ -160,10 +161,11 @@ class SharedDataLoader : public DataLoader {
   }
 
   std::shared_ptr<cv::Mat> fetch_frame_v2() {
-    cv::Mat _frame;
+    cv::Mat _frame, temp;
     capture_.read(_frame);
+    resize_unscale(_frame, temp, 320, 320);
     frame_mutex_.lock();
-    frame = std::make_shared<cv::Mat>(_frame);
+    frame = std::make_shared<cv::Mat>(temp);
     frame_mutex_.unlock();
     return frame;
   }
@@ -174,14 +176,15 @@ class SharedDataLoader : public DataLoader {
     return ptr;
   }
   cv::Mat fetch_frame() {
-    cv::Mat temp;
-    capture_.read(temp);
-    if (!temp.empty()) {
+    cv::Mat frame, temp;
+    capture_.read(frame);
+    resize_unscale(frame, temp, 320, 320);
+    if (!frame.empty()) {
       frame_mutex_.lock();
       frame_ = temp.clone();
       frame_mutex_.unlock();
     }
-    return temp;
+    return frame;
   }
   cv::Mat peek_frame() {
     cv::Mat frame;
@@ -207,14 +210,14 @@ void Detection(DataLoader& dataloader, Detector& detector) {
     std::cout << "[ERROR] detector init error" << std::endl;
     return;
   }
-  // cv::Mat frame;
+  cv::Mat frame;
   while (dataloader.ifenable()) {
-    // frame = dataloader.peek_frame();   // 取(拷贝)一帧数据
-    std::shared_ptr<cv::Mat> frame = dataloader.clone_frame();
-    if ((*frame).empty()) {
+    frame = dataloader.peek_frame();  // 取(拷贝)一帧数据
+    // std::shared_ptr<cv::Mat> frame = dataloader.clone_frame();
+    if ((frame).empty()) {
       continue;
     }
-    int flag = detector.infer(*frame);  // 推理并保存检测结果
+    int flag = detector.infer(frame);  // 推理并保存检测结果
     if (flag == -1) {
       std::cout << "detection thread quit" << std::endl;
       break;  // 摄像头结束拍摄或者故障
@@ -224,14 +227,14 @@ void Detection(DataLoader& dataloader, Detector& detector) {
 
 // 预览线程
 void Preview(DataLoader& dataloader, Detector& detector) {
-  // cv::Mat frame;
+  cv::Mat frame;
   ObjectDetectionResult objs;
   auto now = std::chrono::high_resolution_clock::now();
   objs.timestamp = now;
   while (dataloader.ifenable()) {
-    // frame = dataloader.fetch_frame();  // 取(搬走)一帧数据
-    std::shared_ptr<cv::Mat> frame = dataloader.fetch_frame_v2();
-    if ((*frame).empty()) {
+    frame = dataloader.fetch_frame();  // 取(搬走)一帧数据
+    // std::shared_ptr<cv::Mat> frame = dataloader.fetch_frame_v2();
+    if ((frame).empty()) {
       break;
     }
     if (detector.detected())  // 判断原因: detector.detected 不用锁,
@@ -240,23 +243,41 @@ void Preview(DataLoader& dataloader, Detector& detector) {
       // 是否有检测结果
       objs = detector.get_object();  // 取(搬走)检测结果(移动赋值)
       if (objs.result_bboxes.size()) {
-        std::vector<Boxi> resultBoxes = objs.result_bboxes;
+        int input_height = 320;
+        int input_width = 320;
+        int img_height = frame.rows;
+        int img_width = frame.cols;
+        float resize_ratio = std::min(
+            static_cast<float>(input_height) / static_cast<float>(img_height),
+            static_cast<float>(input_width) / static_cast<float>(img_width));
+        float dw = (input_width - resize_ratio * img_width) / 2;
+        float dh = (input_height - resize_ratio * img_height) / 2;
+        for (int i = 0; i < objs.result_bboxes.size(); i++) {
+          objs.result_bboxes[i].x1 =
+              (objs.result_bboxes[i].x1 - dw) / resize_ratio;
+          objs.result_bboxes[i].x2 =
+              (objs.result_bboxes[i].x2 - dw) / resize_ratio;
+          objs.result_bboxes[i].y1 =
+              (objs.result_bboxes[i].y1 - dh) / resize_ratio;
+          objs.result_bboxes[i].y2 =
+              (objs.result_bboxes[i].y2 - dh) / resize_ratio;
+        }
         {
 #ifdef DEBUG
           TimeWatcher t("|-- Output result");
 #endif
-          for (int i = 0; i < resultBoxes.size(); i++) {
+          for (int i = 0; i < objs.result_bboxes.size(); i++) {
             std::cout << "bbox[" << std::setw(2) << i << "]"
                       << " "
                       << "x1y1x2y2: "
-                      << "(" << std::setw(4) << resultBoxes[i].x1 << ","
-                      << std::setw(4) << resultBoxes[i].y1 << ","
-                      << std::setw(4) << resultBoxes[i].x2 << ","
-                      << std::setw(4) << resultBoxes[i].y2 << ")"
+                      << "(" << std::setw(4) << objs.result_bboxes[i].x1 << ","
+                      << std::setw(4) << objs.result_bboxes[i].y1 << ","
+                      << std::setw(4) << objs.result_bboxes[i].x2 << ","
+                      << std::setw(4) << objs.result_bboxes[i].y2 << ")"
                       << ", "
                       << "score: " << std::fixed << std::setprecision(3)
-                      << std::setw(4) << resultBoxes[i].score << ", "
-                      << "label_text: " << resultBoxes[i].label_text
+                      << std::setw(4) << objs.result_bboxes[i].score << ", "
+                      << "label_text: " << objs.result_bboxes[i].label_text
                       << std::endl;
           }
         }
@@ -267,18 +288,18 @@ void Preview(DataLoader& dataloader, Detector& detector) {
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
         now - objs.timestamp);
     if (duration.count() < 1000000) {
-      draw_boxes_inplace((*frame), objs.result_bboxes);  // 画框
+      draw_boxes_inplace((frame), objs.result_bboxes);  // 画框
     }
-    cv::imshow("Detection", (*frame));
-    cv::waitKey(30);
+    cv::imshow("Detection", (frame));
+    cv::waitKey(25);
   }
 }
 
 int main(int argc, char* argv[]) {
   std::string filePath, labelFilepath, input, inputType;
-  bool disable_spacemit_ep;
-  float score_threshold, nms_threshold;
-  int intra_threads_num;
+  bool disable_spacemit_ep{false};
+  float score_threshold{0.4}, nms_threshold{0.5};
+  int intra_threads_num{1};
   if (argc == 5) {
     filePath = argv[1];
     labelFilepath = argv[2];
@@ -289,28 +310,26 @@ int main(int argc, char* argv[]) {
     labelFilepath = argv[2];
     input = argv[3];
     inputType = argv[4];
-    std::string argv5, argv6, argv7, argv8;
+    std::string str_d, str_t, str_s, str_n;
     int o;
-    const char* optstring =
-        "d:t:s:n:";  // 有三个选项-abc，其中c选项后有两个冒号，表示后面可选参数
+    const char* optstring = "d:t:s:n:";
     while ((o = getopt(argc, argv, optstring)) != -1) {
       switch (o) {
         case 'd':
-          argv5 = optarg;
-          disable_spacemit_ep = std::stoi(argv5);
+          str_d = optarg;
+          disable_spacemit_ep = std::stoi(str_d);
           break;
         case 't':
-          argv6 = optarg;
-          std::cout << argv6 << std::endl;
-          intra_threads_num = std::stoi(argv6);
+          str_t = optarg;
+          intra_threads_num = std::stoi(str_t);
           break;
         case 's':
-          argv7 = optarg;
-          score_threshold = std::stof(argv7);
+          str_s = optarg;
+          score_threshold = std::stof(str_s);
           break;
         case 'n':
-          argv8 = optarg;
-          nms_threshold = std::stof(argv8);
+          str_n = optarg;
+          nms_threshold = std::stof(str_n);
           break;
         case '?':
           std::cout << "[Errot] Unsupported usage" << std::endl;
@@ -320,18 +339,11 @@ int main(int argc, char* argv[]) {
   } else {
     std::cout << "run with " << argv[0]
               << " <modelFilepath> <labelFilepath> <input> <inputType> (video "
-                 "or cameraId)"
+                 "or cameraId)  option(-d <disable_spacemit_ep>) option(-t "
+                 "<intra_threads_num>) "
+                 "option(-s score_threshold) option(-n nms_threshold) "
               << std::endl;
     return -1;
-  }
-  if (intra_threads_num == 0) {
-    intra_threads_num = 1;
-  }
-  if (score_threshold == 0.0) {
-    score_threshold = 0.5;
-  }
-  if (nms_threshold == 0.0) {
-    nms_threshold = 0.5;
   }
   Detector detector{filePath,          labelFilepath,   disable_spacemit_ep,
                     intra_threads_num, score_threshold, nms_threshold};

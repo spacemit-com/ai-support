@@ -11,11 +11,11 @@
 
 int main(int argc, char* argv[]) {
   std::vector<Boxi> resultBoxes;
-  bool disable_spacemit_ep;
   std::string filePath, modelFilepath, imageFilepath, saveImgpath,
       labelFilepath, configFilepath;
-  float score_threshold, nms_threshold;
-  int intra_threads_num;
+  bool disable_spacemit_ep{false};
+  float score_threshold{0.4}, nms_threshold{0.5};
+  int intra_threads_num{1};
   cv::Mat imgRaw;
 #ifdef DEBUG
   std::cout << "." << std::endl;
@@ -131,7 +131,7 @@ int main(int argc, char* argv[]) {
     // cv::imshow("detected.jpg",imgRaw);
     // cv::waitKey(0);
   } else if (argc > 5) {
-    std::string argv5, argv6, argv7, argv8;
+    std::string str_d, str_t, str_s, str_n;
     filePath = argv[1];
     imageFilepath = argv[2];
     saveImgpath = argv[3];
@@ -156,40 +156,29 @@ int main(int argc, char* argv[]) {
       imgRaw = cv::imread(imageFilepath);
     }
     int o;
-    const char* optstring =
-        "d:t:s:n:";  // 有三个选项-abc，其中c选项后有两个冒号，表示后面可选参数
+    const char* optstring = "d:t:s:n:";
     while ((o = getopt(argc, argv, optstring)) != -1) {
       switch (o) {
         case 'd':
-          argv5 = optarg;
-          disable_spacemit_ep = std::stoi(argv5);
+          str_d = optarg;
+          disable_spacemit_ep = std::stoi(str_d);
           break;
         case 't':
-          argv6 = optarg;
-          std::cout << argv6 << std::endl;
-          intra_threads_num = std::stoi(argv6);
+          str_t = optarg;
+          intra_threads_num = std::stoi(str_t);
           break;
         case 's':
-          argv7 = optarg;
-          score_threshold = std::stof(argv7);
+          str_s = optarg;
+          score_threshold = std::stof(str_s);
           break;
         case 'n':
-          argv8 = optarg;
-          nms_threshold = std::stof(argv8);
+          str_n = optarg;
+          nms_threshold = std::stof(str_n);
           break;
         case '?':
           std::cout << "[Errot] Unsupported usage" << std::endl;
           break;
       }
-    }
-    if (intra_threads_num == 0) {
-      intra_threads_num = 1;
-    }
-    if (score_threshold == 0.0) {
-      score_threshold = 0.4;
-    }
-    if (nms_threshold == 0.0) {
-      nms_threshold = 0.5;
     }
     std::unique_ptr<objectDetectionTask> objectdetectiontask =
         std::unique_ptr<objectDetectionTask>(new objectDetectionTask(
@@ -227,7 +216,9 @@ int main(int argc, char* argv[]) {
   } else {
     std::cout
         << "run with " << argv[0]
-        << " <modelFilepath> <imageFilepath> <saveImgpath> <labelFilepath> or "
+        << " <modelFilepath> <imageFilepath> <saveImgpath> <labelFilepath> "
+           "option(-d <disable_spacemit_ep>) option(-t <intra_threads_num>) "
+           "option(-s score_threshold) option(-n nms_threshold) or "
         << argv[0] << " <configFilepath> <imageFilepath> <saveImgpath>"
         << std::endl;
     return -1;

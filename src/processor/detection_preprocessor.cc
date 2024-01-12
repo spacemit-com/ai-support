@@ -1,6 +1,7 @@
 #include "src/processor/detection_preprocessor.h"
 
 #include "utils/time.h"
+#include "utils/utils.h"
 
 void DetectionPreprocessor::PreprocessNanoDetPlus(
     const cv::Mat& mat, std::vector<std::vector<int64_t>>& input_node_dims,
@@ -14,6 +15,8 @@ void DetectionPreprocessor::PreprocessNanoDetPlus(
 #endif
     if (input_height != mat.cols || input_width != mat.rows) {
       resize_unscale(mat, resizedImage, input_height, input_width);
+    } else {
+      resizedImage = mat;
     }
   }
   {
@@ -54,7 +57,16 @@ void DetectionPreprocessor::Preprocess(
 
     // resize & unscale
     cv::Mat resizedImageBGR, resizedImageRGB, resizedImage, preprocessedImage;
-    resize_unscale(mat, resizedImageBGR, input_height, input_width);
+    {
+#ifdef DEBUG
+      TimeWatcher t("| |-- Resize unscale");
+#endif
+      if (input_height != mat.cols || input_width != mat.rows) {
+        resize_unscale(mat, resizedImageBGR, input_height, input_width);
+      } else {
+        resizedImageBGR = mat;
+      }
+    }
     cv::cvtColor(resizedImageBGR, resizedImageRGB, cv::COLOR_BGR2RGB);
     resizedImageRGB.convertTo(resizedImage, CV_32F, 1.0 / 255);
     const unsigned int target_tensor_size = 3 * input_height * input_width;
@@ -72,9 +84,12 @@ void DetectionPreprocessor::Preprocess(
 #ifdef DEBUG
       TimeWatcher t("| |-- Resize unscale");
 #endif
-      resize_unscale(mat, resizedImageBGR, input_height, input_width);
+      if (input_height != mat.cols || input_width != mat.rows) {
+        resize_unscale(mat, resizedImageBGR, input_height, input_width);
+      } else {
+        resizedImageBGR = mat;
+      }
     }
-
     {
 #ifdef DEBUG
       TimeWatcher t("| |-- Convert to RGB");
@@ -86,7 +101,7 @@ void DetectionPreprocessor::Preprocess(
 #ifdef DEBUG
       TimeWatcher t("| |-- Convert to fp32");
 #endif
-      resizedImageRGB.convertTo(resizedImage, CV_32F, 1.0);
+      resizedImageRGB.convertTo(resizedImage, CV_32F, 1.0 / 255);
     }
     {
 #ifdef DEBUG
@@ -99,7 +114,7 @@ void DetectionPreprocessor::Preprocess(
       int channel = 3;
       std::vector<float> input_tensor_value;
       for (int i = 0; i < channel; i++) {
-        channels[i] = (channels[i] - mean_vals[i]) * scale_vals[i];
+        // channels[i] = (channels[i] - mean_vals[i]) * scale_vals[i];
         std::vector<float> data = std::vector<float>(channels[i].reshape(1, 1));
         input_tensor_value.insert(input_tensor_value.end(), data.begin(),
                                   data.end());

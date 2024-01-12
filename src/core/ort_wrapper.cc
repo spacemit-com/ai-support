@@ -15,6 +15,9 @@ int OrtWrapper::Init(std::string instanceName, std::string modelFilepath,
   // Creation: The Ort::Session is created here
   env_ = std::move(env);
   sessionOptions_.SetIntraOpNumThreads(intra_threads_num);
+  sessionOptions_.AddConfigEntry("session.intra_op.allow_spinning", "0");
+  sessionOptions_.SetInterOpNumThreads(intra_threads_num);
+  sessionOptions_.AddConfigEntry("session.inter_op.allow_spinning", "0");
   if (disable_spacemit_ep == true) {
     std::cout << "Disable spacemit ep now" << std::endl;
   } else {
@@ -32,8 +35,8 @@ int OrtWrapper::Init(std::string instanceName, std::string modelFilepath,
   // removals) ORT_ENABLE_EXTENDED -> To enable extended optimizations
   // (Includes level 1 + more complex optimizations like node fusions)
   // ORT_ENABLE_ALL -> To Enable All possible optimizations
-  sessionOptions_.SetGraphOptimizationLevel(
-      GraphOptimizationLevel::ORT_DISABLE_ALL);
+  // sessionOptions_.SetGraphOptimizationLevel(
+  // GraphOptimizationLevel::ORT_DISABLE_ALL);
   std::unique_ptr<Ort::Session> session(
       new Ort::Session(*env_, modelFilepath.c_str(), sessionOptions_));
   session_ = std::move(session);
@@ -64,9 +67,13 @@ int OrtWrapper::Init(json config) {
   if (config.contains("intra_threads_num")) {
     int intraThreadsnum = config["intra_threads_num"];
     sessionOptions_.SetIntraOpNumThreads(intraThreadsnum);
+    sessionOptions_.AddConfigEntry("session.intra_op.allow_spinning", "0");
   } else {
     sessionOptions_.SetIntraOpNumThreads(4);
+    sessionOptions_.AddConfigEntry("session.intra_op.allow_spinning", "0");
   }
+  sessionOptions_.SetInterOpNumThreads(1);
+  sessionOptions_.AddConfigEntry("session.inter_op.allow_spinning", "0");
   if (config.contains("profiling_projects")) {
     std::string profiling_projects = config["profiling_projects"];
     if (profiling_projects != "") {

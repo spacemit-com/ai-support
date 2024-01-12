@@ -1,3 +1,7 @@
+
+#include <stdlib.h>
+#include <unistd.h>
+
 #include "task/vision/image_classification_task.h"
 #include "utils/check_utils.h"
 #include "utils/time.h"
@@ -5,10 +9,34 @@
 
 int main(int argc, char* argv[]) {
   std::string filePath, labelFilepath, imageFilepath;
+  std::string str_d, str_t;
+  bool disable_spacemit_ep{false};
+  int intra_threads_num{1};
   if (argc == 4) {
     filePath = argv[1];
     labelFilepath = argv[2];
     imageFilepath = argv[3];
+  } else if (argc > 4) {
+    filePath = argv[1];
+    labelFilepath = argv[2];
+    imageFilepath = argv[3];
+    int o;
+    const char* optstring = "d:t:";
+    while ((o = getopt(argc, argv, optstring)) != -1) {
+      switch (o) {
+        case 'd':
+          str_d = optarg;
+          disable_spacemit_ep = std::stoi(str_d);
+          break;
+        case 't':
+          str_t = optarg;
+          intra_threads_num = std::stoi(str_t);
+          break;
+        case '?':
+          std::cout << "[Errot] Unsupported usage" << std::endl;
+          break;
+      }
+    }
     if (!checkImageFileExtension(imageFilepath)) {
       std::cout << "[ ERROR ] The ImageFilepath is not correct. Make sure you "
                    "are setting the path to an imgae file (.jpg/.jpeg/.png)"
@@ -23,14 +51,15 @@ int main(int argc, char* argv[]) {
     }
   } else {
     std::cout << "run with " << argv[0]
-              << " <modelFilepath> <labelFilepath> <imageFilepath>"
+              << " <modelFilepath> <labelFilepath> <imageFilepath> option(-d "
+                 "<disable_spacemit_ep>) option(-t <intra_threads_num>)"
               << std::endl;
     return -1;
   }
   cv::Mat imgRaw;
   std::unique_ptr<imageClassificationTask> imageclassification =
-      std::unique_ptr<imageClassificationTask>(
-          new imageClassificationTask(filePath, labelFilepath));
+      std::unique_ptr<imageClassificationTask>(new imageClassificationTask(
+          filePath, labelFilepath, disable_spacemit_ep, intra_threads_num));
 #ifdef DEBUG
   std::cout << "." << std::endl;
 #endif

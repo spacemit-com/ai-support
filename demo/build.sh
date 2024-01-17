@@ -7,7 +7,7 @@
 set -e
 
 # Note: update the following settings if necessary
-SDK=$(dirname $(which bianbu)) #$(dirname ${BASH_SOURCE[0]})
+SDK=$(dirname $(which cuspace)) #$(dirname ${BASH_SOURCE[0]})
 
 function config_native() {
   BIANBUAI_HOME=$SDK/bianbu-ai-support
@@ -49,7 +49,7 @@ task_prepare=(
   "if [[ ! -d data ]]; then echo '[Error] Can not find data directory!'; exit 0; fi"
   "mkdir -p data/models"
   # TODO: add md5sum checking
-  "if [[ ! -f data/models/squeezenet1.1-7.onnx ]]; then wget https://media.githubusercontent.com/media/onnx/models/main/archive/vision/classification/squeezenet/model/squeezenet1.1-7.onnx -O data/models/squeezenet1.1-7.onnx; fi"
+  "if [[ ! -f data/models/squeezenet1.1-7.onnx ]]; then wget https://media.githubusercontent.com/media/onnx/models/main/validated/vision/classification/squeezenet/model/squeezenet1.1-7.onnx -O data/models/squeezenet1.1-7.onnx; fi"
   "if [[ ! -f data/models/nanodet-plus-m_320.onnx ]]; then wget https://bj.bcebos.com/paddlehub/fastdeploy/nanodet-plus-m_320.onnx -O data/models/nanodet-plus-m_320.onnx; fi"
 )
 task_classification=(

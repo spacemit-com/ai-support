@@ -1,7 +1,7 @@
-FROM bianbu-ai-support:v1.0.0
+FROM bianbu-ai-support:v1.1.0
 
 # install spacemit-ai-sdk
-COPY spacemit-ai-sdk.v0.5.1.x /opt/
+COPY spacemit-ai-sdk /opt/
 
 # Build/Update bianbu-ai-support:v1.0.1 image:
 # $ docker build -t bianbu-ai-support:v1.0.1 -f dockerfile.riscv64 .

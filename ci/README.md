@@ -24,6 +24,7 @@ deb [signed-by=/usr/share/keyrings/bianbu-archive-keyring.gpg] https://archive.b
 deb-src [signed-by=/usr/share/keyrings/bianbu-archive-keyring.gpg] https://archive.bianbu.xyz/bianbu-ports/ mantic-spacemit main universe multiverse restricted
 EOF
 exit
+apt update
 
 # quick start: check toolkit version
 PATH=$(pwd):$PATH

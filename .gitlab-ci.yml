@@ -22,7 +22,7 @@ stages:             # List of stages for jobs, and their order of execution
   - package
   - deploy
 
-image: harbor.bianbu.xyz/bianbu-ai/bianbu-ai-support@sha256:7606f892304a1430e0ff0389f35ef7093b758d2cb46914cf652e840711961136
+image: harbor.bianbu.xyz/bianbu-ai/bianbu-ai-support:v1.1.1
 
 .only-defaults: &only-defaults
   only:
@@ -37,6 +37,7 @@ variables:
   SYSROOT: "$SDK/spacemit-gcc/sysroot"
   QEMU_CMD: "$SDK/qemu/bin/qemu-riscv64 -L $SYSROOT"
   ORT_HOME_X86: "/home/workspace/onnxruntime-linux-x64-1.15.1"
+  CI_NEXUS_URL: "https://nexus.bianbu.xyz/service/rest/repository/browse/bianbu-ai/onnxruntime/"
   CI_INSTALL_OPTION: "--with-demo --with-ort"
 
 build-job-x86_64:   # This job runs in the build stage, which runs first.
@@ -66,13 +67,19 @@ build-job-riscv64:  # This job runs in the build stage, which runs second.
   stage: build
   variables:
     BUILD_DIR: "build.riscv64"
-    ORT_HOME: "$SDK/spacemit-ort"
+    ORT_HOME: "${CI_PROJECT_DIR}/spacemit-ort"
     # TODO: fix opencv.v4.6.0 output precision error
     OPENCV_SHARED_DIR: "$SDK/bianbu-ai-support/3rdparty/opencv.v4.7.0.shared" # v4.6.0.shared.qt5
     OPENCV_STATIC_DIR: "$SDK/bianbu-ai-support/3rdparty/opencv.v4.7.0.static"
     INSTALL_PREFIX: "bianbu-ai-support.riscv64"
   before_script:
     - echo "Before scripts ..."
+    #- set -x
+    #- echo "CI_BUILDS_DIR  ${CI_BUILDS_DIR}"
+    #- echo "CI_PROJECT_DIR ${CI_PROJECT_DIR}"
+    - echo "Downloading latest spacemit-ort ..."
+    - wget $(curl -X GET ${CI_NEXUS_URL} | grep -oP 'https:[^>]*.rv64.v[\d\.]*tar.gz' | tail -n 1) -O spacemit-ort.latest.tar.gz --no-check-certificate
+    - tar xzf spacemit-ort.latest.tar.gz && tree -L 3 .
   script:
     - echo "Compiling the code ..."
     # Note: To use opencv static libraries, one'd better set OpenCV_DIR variable instead of OPENCV_INC and OPENCV_LIB variables.
@@ -87,6 +94,7 @@ build-job-riscv64:  # This job runs in the build stage, which runs second.
   artifacts:
     paths:
       - ${BUILD_DIR}
+      - spacemit-ort
       - demo/${BUILD_DIR}
   <<: *only-defaults
 

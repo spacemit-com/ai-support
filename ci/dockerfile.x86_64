@@ -8,12 +8,19 @@ ENV LANG=C.UTF-8 TZ=Asia/Shanghai
 RUN sed -i'' 's/archive\.ubuntu\.com/us\.archive\.ubuntu\.com/' /etc/apt/sources.list
 RUN apt -y update
 
-# install dependencies
-RUN DEBIAN_FRONTEND=noninteractive apt install -y libopencv-dev wget cmake tree build-essential gcc g++ --fix-missing
+# install tools for support library and ai toolkit cicd
+RUN DEBIAN_FRONTEND=noninteractive apt install -y \
+    cmake build-essential gcc g++ libglib2.0-0 \
+    libopencv-dev python3 python3-pip \
+    curl wget ca-certificates tree --fix-missing
 
 # install onnxruntime
-COPY onnxruntime-linux-x64-1.15.1.tgz /tmp/
-RUN tar xzf /tmp/onnxruntime-linux-x64-1.15.1.tgz -C /home/workspace && rm /tmp/onnxruntime-linux-x64-1.15.1.tgz
+COPY onnxruntime-linux-x64-*.tgz /tmp/
+RUN tar xzf /tmp/onnxruntime-linux-x64-1.15.1.tgz -C . && rm /tmp/onnxruntime-linux-x64-1.15.1.tgz
+RUN tar xzf /tmp/onnxruntime-linux-x64-1.16.3.tgz -C . && rm /tmp/onnxruntime-linux-x64-1.16.3.tgz
+
+# install spacemit ca-certificates
+RUN wget https://nexus.bianbu.xyz/repository/software/dc.com-CA-Root-Base64.crt -O /usr/local/share/ca-certificates/dc.com-CA-Root-Base64.crt --no-check-certificate && update-ca-certificates
 
 # Build bianbu-ai-support:v1.0.0 image:
 # $ docker build -t bianbu-ai-support:v1.0.0 -f dockerfile.x86_64 .

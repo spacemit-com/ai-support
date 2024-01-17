@@ -1,0 +1,40 @@
+#!/bin/bash
+
+ai_xdg_dirs=/usr/share
+ai_xdg_dir=
+
+function ai_demo_init() {
+  set -e
+}
+
+function ai_demo_remove() {
+  if [ -x /usr/bin/update-mime-database ] ; then
+    : #update-mime-database "${ai_xdg_dir}/mime"
+  fi
+
+  if [ -x /usr/bin/update-desktop-database ] ; then
+    : #update-desktop-database -q "${ai_xdg_dir}/applications"
+  fi
+
+  for HOMEDIR in /home/*; do
+    :
+  done
+}
+
+function ai_demo_main() {
+  if [ $# -eq 0 ] ; then
+    return;
+  fi
+
+  ai_demo_init
+  case $1 in
+    remove | upgrade )  shift; ai_demo_remove $@;;
+    purge )             ;;
+    abort-install )     ;;
+    abort-upgrade )     ;;
+    failed-upgrade )    ;;
+  esac
+}
+
+args="$@"
+ai_demo_main $@

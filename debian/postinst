@@ -1,0 +1,64 @@
+#!/bin/bash
+
+set -e
+#set -x
+
+export XDG_DATA_HOME=${XDG_DATA_HOME:-/usr/share/}
+
+function copy_install_to_desktop() {
+  if [ $# -ne 3 ]; then
+    return;
+  fi
+  local curFileName=$1
+  local aiDesktopName=$2
+  local curUserName=$3
+  if [ -e "/usr/share/applications/${aiDesktopName}" ]; then
+    cp -f /usr/share/applications/${aiDesktopName} "${curFileName}/${gDesktopName}/${wpsDesktopName}"
+    if test $? -eq 0; then
+      chmod +x "${curFileName}/${gDesktopName}/${aiDesktopName}"
+      chown ${curUserName} "${curFileName}/${gDesktopName}/${aiDesktopName}"
+    fi
+  fi
+}
+
+aiDesktop=(
+  "object-detection.desktop"
+  #"hand-tracker.desktop"
+  #"pose-tracker.desktop"
+)
+function ai_config_desktop() {
+  gDesktopName="桌面"
+  if [ -d "/root/桌面" ]; then
+    gDesktopName="桌面"
+  elif [ -d "/root/Desktop" ]; then
+    gDesktopName="Desktop"
+  fi
+
+  for FILENAME in /home/*; do
+
+    if [ -f "${FILENAME}/.config/user-dirs.dirs" ]; then
+      if [ ! $HOME ]; then HOME=${FILENAME}; fi
+      source "${FILENAME}/.config/user-dirs.dirs"
+      if [ ! -d "${XDG_DESKTOP_DIR}" ]; then
+        mkdir -p "${XDG_DESKTOP_DIR}" >/dev/null 2>&1 || true
+      fi
+      gDesktopName="${XDG_DESKTOP_DIR//${HOME}\//}"
+    else
+      if [ -d "${FILENAME}/桌面" ]; then
+        gDesktopName="桌面"
+      elif [ -d "${FILENAME}/Desktop" ]; then
+        gDesktopName="Desktop"
+      fi
+    fi
+
+    if [ -d "${FILENAME}/${gDesktopName}" ]; then
+      local curUserName=$(echo ${FILENAME} | awk '{print substr($FILENAME, 7, 32)}')
+      for desktop in "${aiDesktop[@]}"; do
+        rm -rf ${FILENAME}/${gDesktopName}/${desktop}
+        copy_install_to_desktop ${FILENAME} ${desktop} ${curUserName}
+      done
+    fi
+  done
+}
+
+ai_config_desktop

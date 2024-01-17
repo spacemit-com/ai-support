@@ -52,6 +52,16 @@ bianbu-dev import . --suite mantic-spacemit --new-version 1.0.1
 
 # -------------------------------------------------------------
 
+# do sth ...
+git checkout -b bianbu-23.10 # switch to bianbu-23.10
+bianbu-dev tag
+bianbu-dev pack -a  # same as `bianbu-dev pack && bianbu-dev build` (pack 1st, then build)
+
+# -------------------------------------------------------------
+
+# enter develop env
+bianbu-dev chroot   # apt install onnxruntime, libopencv-dev
+
 # build package with dpkg(Note: install dependencies 1st plz, e.g. onnxruntime, opencv)
 dpkg-buildpackage -tc -b -uc
 # ..
@@ -61,10 +71,6 @@ dpkg-buildpackage -tc -b -uc
 # |-- bianbu-ai-support_1.0.1_amd64.deb
 
 # -------------------------------------------------------------
-
-bianbu-dev chroot   # apt install onnxruntime, libopencv-dev
-bianbu-dev tag
-bianbu-dev pack -a  # same as `bianbu-dev pack && bianbu-dev build`
 
 # check https://archive.bianbu.xyz/bianbu-ports/logs/ for upload events
 bianbu-dev upload onnxruntime_1.15.1_amd64.deb --suite mantic-porting

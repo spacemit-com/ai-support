@@ -85,10 +85,16 @@ class DataLoader {
     enable = true;
     resize_height_ = resize_height;
     resize_width_ = resize_width;
+    preview_fps_ = 0;
+    detection_fps_ = 0;
   }
   ~DataLoader() {}
   bool ifenable() { return enable; }
   void set_disable() { enable = false; }
+  void set_preview_fps(int preview_fps) { preview_fps_ = preview_fps; }
+  void set_detection_fps(int detection_fps) { detection_fps_ = detection_fps; }
+  int get_preview_fps() { return preview_fps_; }
+  int get_detection_fps() { return detection_fps_; }
   int get_resize_height() { return resize_height_; }
   int get_resize_width() { return resize_width_; }
   virtual cv::Mat fetch_frame() = 0;
@@ -98,6 +104,8 @@ class DataLoader {
   bool enable;
   int resize_height_;
   int resize_width_;
+  int preview_fps_;
+  int detection_fps_;
 };
 
 // 独占式
@@ -216,11 +224,16 @@ void Detection(DataLoader& dataloader, Detector& detector) {
   cv::Mat frame;
   int flag;
   while (dataloader.ifenable()) {
+    auto start = std::chrono::high_resolution_clock::now();
     frame = dataloader.peek_frame();  // 取(拷贝)一帧数据
     if ((frame).empty()) {
       continue;
     }
     int flag = detector.infer(frame);  // 推理并保存检测结果
+    auto end = std::chrono::high_resolution_clock::now();
+    auto detection_duration =
+        std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    dataloader.set_detection_fps(1000 / (detection_duration.count()));
     if (flag == -1) {
       std::cout << "[Error] infer frame failed" << std::endl;
       break;  // 摄像头结束拍摄或者故障
@@ -236,6 +249,7 @@ void Preview(DataLoader& dataloader, Detector& detector) {
   auto now = std::chrono::high_resolution_clock::now();
   objs.timestamp = now;
   while (dataloader.ifenable()) {
+    auto start = std::chrono::high_resolution_clock::now();
     frame = dataloader.fetch_frame();  // 取(搬走)一帧数据
     if ((frame).empty()) {
       break;
@@ -294,8 +308,20 @@ void Preview(DataLoader& dataloader, Detector& detector) {
     if (duration.count() < 1000) {
       draw_boxes_inplace((frame), objs.result_bboxes);  // 画框
     }
+    int preview_fps = dataloader.get_preview_fps();
+    int detection_fps = dataloader.get_detection_fps();
+    cv::putText(frame, "preview fps: " + std::to_string(preview_fps),
+                cv::Point(0, 15), cv::FONT_HERSHEY_SIMPLEX, 1.0,
+                cv::Scalar(0, 255, 0), 1, cv::LINE_AA);
+    cv::putText(frame, "detection fps: " + std::to_string(detection_fps),
+                cv::Point(500, 15), cv::FONT_HERSHEY_SIMPLEX, 1.0,
+                cv::Scalar(0, 255, 0), 1, cv::LINE_AA);
     cv::imshow("Detection", (frame));
     cv::waitKey(10);
+    auto end = std::chrono::high_resolution_clock::now();
+    auto preview_duration =
+        std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    dataloader.set_preview_fps(1000 / (preview_duration.count()));
     if (cv::getWindowProperty("Detection", cv::WND_PROP_VISIBLE) < 1) {
       dataloader.set_disable();
       break;

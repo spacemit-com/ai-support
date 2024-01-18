@@ -249,7 +249,7 @@ void Preview(DataLoader& dataloader, Detector& detector) {
   auto now = std::chrono::high_resolution_clock::now();
   objs.timestamp = now;
   while (dataloader.ifenable()) {
-    auto start = std::chrono::high_resolution_clock::now();
+    // auto start = std::chrono::high_resolution_clock::now();
     frame = dataloader.fetch_frame();  // 取(搬走)一帧数据
     if ((frame).empty()) {
       break;
@@ -310,18 +310,20 @@ void Preview(DataLoader& dataloader, Detector& detector) {
     }
     int preview_fps = dataloader.get_preview_fps();
     int detection_fps = dataloader.get_detection_fps();
+    /*
     cv::putText(frame, "preview fps: " + std::to_string(preview_fps),
                 cv::Point(0, 15), cv::FONT_HERSHEY_SIMPLEX, 0.5f,
                 cv::Scalar(0, 255, 0), 1, cv::LINE_AA);
+                */
     cv::putText(frame, "detection fps: " + std::to_string(detection_fps),
                 cv::Point(500, 15), cv::FONT_HERSHEY_SIMPLEX, 0.5f,
                 cv::Scalar(0, 255, 0), 1, cv::LINE_AA);
     cv::imshow("Detection", (frame));
     cv::waitKey(10);
-    auto end = std::chrono::high_resolution_clock::now();
-    auto preview_duration =
-        std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    dataloader.set_preview_fps(1000 / (preview_duration.count()));
+    // auto end = std::chrono::high_resolution_clock::now();
+    // auto preview_duration =
+    // std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    // dataloader.set_preview_fps(1000 / (preview_duration.count()));
     if (cv::getWindowProperty("Detection", cv::WND_PROP_VISIBLE) < 1) {
       dataloader.set_disable();
       break;

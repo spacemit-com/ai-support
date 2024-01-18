@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
           intra_threads_num = atoi(optarg);
           break;
         case '?':
-          std::cout << "[Errot] Unsupported usage" << std::endl;
+          std::cout << "[ERROR] Unsupported usage" << std::endl;
           break;
       }
     }

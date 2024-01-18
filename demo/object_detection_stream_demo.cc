@@ -156,6 +156,20 @@ class SharedDataLoader : public DataLoader {
   }
   int init(int cameraId) {
     capture_.open(cameraId);
+    if (!capture_.isOpened()) {
+      std::cout
+          << "Open camera capture failed, try to figure out right cameraId"
+          << std::endl;
+      std::string path = "/dev/video";
+      for (int i = 0; i <= 100; ++i) {
+        std::string device_path = path + std::to_string(i);
+        if (is_valid_camera(device_path)) {
+          cameraId = i;
+          break;
+        }
+      }
+    }
+    capture_.open(cameraId);
     if (capture_.isOpened()) {
       int width = 640;
       int height = 480;
@@ -329,7 +343,7 @@ int main(int argc, char* argv[]) {
           resize_height = atoi(optarg);
           break;
         case '?':
-          std::cout << "[Errot] Unsupported usage" << std::endl;
+          std::cout << "[ERROR] Unsupported usage" << std::endl;
           break;
       }
     }

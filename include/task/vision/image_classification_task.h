@@ -11,7 +11,7 @@ class imageClassificationTask {
  public:
   imageClassificationTask(const std::string& filePath,
                           const std::string& labelFilepath,
-                          const bool& disable_spacemit_ep = true,
+                          const bool& disable_spacemit_ep = false,
                           const int& intra_threads_num = 4);
   ~imageClassificationTask() = default;
   ImageClassificationResult Classify(const cv::Mat& img_raw);

@@ -172,7 +172,7 @@ int main(int argc, char* argv[]) {
           nms_threshold = atof(optarg);
           break;
         case '?':
-          std::cout << "[Errot] Unsupported usage" << std::endl;
+          std::cout << "[ERROR] Unsupported usage" << std::endl;
           break;
       }
     }

@@ -1,3 +1,10 @@
+bianbu-ai-support (1.0.4) mantic-spacemit; urgency=medium
+
+  [ bianbu-ci ]
+  * Sync change from bianbu-23.10/1.0.4
+
+ -- qinhongjie <hongjie.qin@spacemit.com>  Thu, 19 Jan 2024 17:26:18 +0800
+
 bianbu-ai-support (1.0.3) mantic-spacemit; urgency=medium
 
   [ bianbu-ci ]

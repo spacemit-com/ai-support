@@ -22,7 +22,7 @@ stages:             # List of stages for jobs, and their order of execution
   - package
   - deploy
 
-image: harbor.bianbu.xyz/bianbu-ai/bianbu-ai-support:v1.1.1
+image: harbor.bianbu.xyz/spacemit-ai/bianbu-ai-support:v1.1.1
 
 .only-defaults: &only-defaults
   only:

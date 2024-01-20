@@ -57,7 +57,7 @@ if [[ $@ =~ "--qemu" ]]; then
     exit 0
   fi
   SYSROOT=$SDK/spacemit-gcc/sysroot
-  QEMU_CMD="$SDK/qemu/bin/qemu-riscv64 -L $SYSROOT"
+  QEMU_CMD="$SDK/spacemit-qemu/bin/qemu-riscv64 -L $SYSROOT"
 fi
 
 BIN_DIR=${BIANBUAI_HOME}/bin

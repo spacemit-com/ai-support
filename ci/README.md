@@ -18,13 +18,14 @@ bash install-scripts-depends.sh
 apt-get -y install ca-certificates wget && wget https://nexus.bianbu.xyz/repository/software/dc.com-CA-Root-Base64.crt -O /usr/local/share/ca-certificates/dc.com-CA-Root-Base64.crt --no-check-certificate && update-ca-certificates
 # preparation: add bianbu source list
 bianbu-dev chroot
+# add mantic-spacemit(similar for mantic-porting, mantic-customization)
 cat <<EOF >>/etc/apt/sources.list.d/bianbu.list
 # mantic-spacemit
 deb [signed-by=/usr/share/keyrings/bianbu-archive-keyring.gpg] https://archive.bianbu.xyz/bianbu-ports/ mantic-spacemit main universe multiverse restricted
 deb-src [signed-by=/usr/share/keyrings/bianbu-archive-keyring.gpg] https://archive.bianbu.xyz/bianbu-ports/ mantic-spacemit main universe multiverse restricted
 EOF
-exit
 apt update
+exit # quit chroot
 
 # quick start: check toolkit version
 PATH=$(pwd):$PATH

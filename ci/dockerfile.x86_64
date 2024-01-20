@@ -24,6 +24,6 @@ RUN wget https://nexus.bianbu.xyz/repository/software/dc.com-CA-Root-Base64.crt 
 
 # Build bianbu-ai-support:v1.0.0 image:
 # $ docker build -t bianbu-ai-support:v1.0.0 -f dockerfile.x86_64 .
-# $ docker tag bianbu-ai-support:v1.0.0 harbor.bianbu.xyz/bianbu-ai/bianbu-ai-support:v1.0.0
-# $ docker push harbor.bianbu.xyz/bianbu-ai/bianbu-ai-support:v1.0.0
+# $ docker tag bianbu-ai-support:v1.0.0 harbor.bianbu.xyz/spacemit-ai/bianbu-ai-support:v1.0.0
+# $ docker push harbor.bianbu.xyz/spacemit-ai/bianbu-ai-support:v1.0.0
 # v1.0.0: digest: sha256:3a8d345662fc0e264de5d630335e778e4ce86c8b79493bb84d63fc11d5aa2b7c size: 1790

@@ -34,6 +34,7 @@ class ObjectDetection : public BaseVisionTaskApi<ObjectDetectionResult> {
   ObjectDetectionResult DetectYolov4(const cv::Mat &raw_img);
   ObjectDetectionResult DetectYolov6(const cv::Mat &raw_img);
   ObjectDetectionResult DetectNanoDetPlus(const cv::Mat &raw_img);
+  ObjectDetectionResult DetectRtmDet(const cv::Mat &raw_img);
   ObjectDetectionResult Postprocess() override;
 
  private:

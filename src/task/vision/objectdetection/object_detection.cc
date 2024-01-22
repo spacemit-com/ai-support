@@ -24,6 +24,8 @@ ObjectDetectionResult ObjectDetection::Detect(const cv::Mat &raw_img) {
     return DetectYolov6(raw_img);
   } else if (modelFilepath_.find("nanodet-plus") != modelFilepath_.npos) {
     return DetectNanoDetPlus(raw_img);
+  } else if (modelFilepath_.find("rtmdet") != modelFilepath_.npos) {
+    return DetectRtmDet(raw_img);
   } else {
     std::cout << "[ ERROR ] Unsupported model" << std::endl;
     return result_;
@@ -66,8 +68,8 @@ ObjectDetectionResult ObjectDetection::DetectYolov6(const cv::Mat &raw_img) {
     processor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
   }
   postprocessor_.PostprocessYolov6(Infer(input_tensors_), result_boxes_,
-                                   inputDims_, img_height_, img_width_,
-                                   labels_);
+                                   inputDims_, img_height_, img_width_, labels_,
+                                   score_threshold_);
 
   result_.result_bboxes = result_boxes_;
   result_.timestamp = std::chrono::high_resolution_clock::now();
@@ -93,6 +95,28 @@ ObjectDetectionResult ObjectDetection::DetectYolov4(const cv::Mat &raw_img) {
   result_.timestamp = std::chrono::high_resolution_clock::now();
   return result_;
 }
+
+ObjectDetectionResult ObjectDetection::DetectRtmDet(const cv::Mat &raw_img) {
+  result_boxes_.clear();
+  input_tensors_.clear();
+  img_height_ = raw_img.rows;
+  img_width_ = raw_img.cols;
+  {
+#ifdef DEBUG
+    std::cout << "|-- Preprocess" << std::endl;
+    TimeWatcher t("|--");
+#endif
+    processor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
+  }
+  postprocessor_.PostprocessRtmDet(Infer(input_tensors_), result_boxes_,
+                                   inputDims_, img_height_, img_width_, labels_,
+                                   score_threshold_, nms_threshold_);
+
+  result_.result_bboxes = result_boxes_;
+  result_.timestamp = std::chrono::high_resolution_clock::now();
+  return result_;
+}
+
 ObjectDetectionResult ObjectDetection::Postprocess() {
   postprocessor_.Postprocess(Infer(input_tensors_), result_boxes_, inputDims_,
                              img_height_, img_width_, labels_);

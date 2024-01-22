@@ -63,9 +63,9 @@ void DetectionPostprocessor::Postprocess(
           box.y1 = (cy - h / 2.f - dh) / resize_ratio;
           box.y1 = std::max(box.y1, .0f);
           box.x2 = (cx + w / 2.f - dw) / resize_ratio;
-          box.x2 = std::min(box.x2, float(img_width - 1));
+          box.x2 = std::min(box.x2, static_cast<float>(img_width - 1));
           box.y2 = (cy + h / 2.f - dh) / resize_ratio;
-          box.y2 = std::min(box.y2, float(img_height - 1));
+          box.y2 = std::min(box.y2, static_cast<float>(img_height - 1));
           box.score = conf;
           box.label = label;
           box.label_text = labels[label].c_str();
@@ -85,10 +85,10 @@ void DetectionPostprocessor::Postprocess(
   int detected_boxes_num = detected_boxes.size();
   for (int i = 0; i < detected_boxes_num; i++) {
     Boxi result_box;
-    result_box.x1 = int(detected_boxes[i].x1);
-    result_box.y1 = int(detected_boxes[i].y1);
-    result_box.x2 = int(detected_boxes[i].x2);
-    result_box.y2 = int(detected_boxes[i].y2);
+    result_box.x1 = static_cast<int>(detected_boxes[i].x1);
+    result_box.y1 = static_cast<int>(detected_boxes[i].y1);
+    result_box.x2 = static_cast<int>(detected_boxes[i].x2);
+    result_box.y2 = static_cast<int>(detected_boxes[i].y2);
     result_box.label = detected_boxes[i].label;
     result_box.score = detected_boxes[i].score;
     result_box.label_text = detected_boxes[i].label_text;
@@ -100,19 +100,20 @@ void DetectionPostprocessor::Postprocess(
 void DetectionPostprocessor::PostprocessYolov6(
     std::vector<Ort::Value> output_tensors, std::vector<Boxi> &result_boxes,
     std::vector<std::vector<int64_t>> &input_dims, int img_height,
-    int img_width, std::vector<std::string> &labels) {
+    int img_width, std::vector<std::string> &labels,
+    const float &score_threshold) {
 #ifdef DEBUG
   TimeWatcher t("|-- Postprocess");
 #endif
   std::vector<Boxf> bbox_collection;
   bbox_collection.clear();
   unsigned int count = 0;
-  const float input_height = static_cast<float>(input_dims[0][2]);  // e.g 640
-  const float input_width = static_cast<float>(input_dims[0][3]);   // e.g 640
+  const float input_height = static_cast<float>(input_dims[0][2]);
+  const float input_width = static_cast<float>(input_dims[0][3]);
   const float resize_ratio =
       std::min(input_height / img_height, input_width / img_width);
-  Ort::Value &num_dets = output_tensors.at(0);  // batch*13*13*3*85
-  Ort::Value &boxes = output_tensors.at(1);     // batch*13*13*3*85
+  Ort::Value &num_dets = output_tensors.at(0);
+  Ort::Value &boxes = output_tensors.at(1);
   Ort::Value &scores = output_tensors.at(2);
   Ort::Value &output_labels = output_tensors.at(3);
   auto outputInfo = boxes.GetTensorTypeAndShapeInfo();
@@ -124,13 +125,17 @@ void DetectionPostprocessor::PostprocessYolov6(
   for (int i = 0; i < num; i++) {
     Boxi result_box;
     result_box.score = scores.At<float>({0, i});
-    if (result_box.score < 0.4) {
+    if (result_box.score < score_threshold) {
       continue;
     }
-    result_box.x1 = int((boxes.At<float>({0, i, 0}) - dw) / resize_ratio);
-    result_box.y1 = int((boxes.At<float>({0, i, 1}) - dh) / resize_ratio);
-    result_box.x2 = int((boxes.At<float>({0, i, 2}) - dw) / resize_ratio);
-    result_box.y2 = int((boxes.At<float>({0, i, 3}) - dh) / resize_ratio);
+    result_box.x1 =
+        static_cast<int>((boxes.At<float>({0, i, 0}) - dw) / resize_ratio);
+    result_box.y1 =
+        static_cast<int>((boxes.At<float>({0, i, 1}) - dh) / resize_ratio);
+    result_box.x2 =
+        static_cast<int>((boxes.At<float>({0, i, 2}) - dw) / resize_ratio);
+    result_box.y2 =
+        static_cast<int>((boxes.At<float>({0, i, 3}) - dh) / resize_ratio);
     if (output_labels.At<int>({0, i}) < 0) {
       continue;
     }
@@ -152,11 +157,11 @@ void DetectionPostprocessor::PostprocessNanoDetPlus(
   std::vector<Boxf> bbox_collection;
   bbox_collection.clear();
   const int cls_num = 80;
-  const float input_height = static_cast<float>(input_dims[0][2]);  // e.g 640
-  const float input_width = static_cast<float>(input_dims[0][3]);   // e.g 640
+  const float input_height = static_cast<float>(input_dims[0][2]);
+  const float input_width = static_cast<float>(input_dims[0][3]);
   const float resize_ratio =
       std::min(input_height / img_height, input_width / img_width);
-  Ort::Value &pred = output_tensors.at(0);  // batch*2125*112
+  Ort::Value &pred = output_tensors.at(0);
   const float *output_pred_ptr = pred.GetTensorData<float>();
   auto outputInfo = pred.GetTensorTypeAndShapeInfo();
   auto pred_dims = outputInfo.GetShape();
@@ -210,9 +215,9 @@ void DetectionPostprocessor::PostprocessNanoDetPlus(
         box.y1 = ((ct_y - dis_pred[1]) * strides[i] - dh) / resize_ratio;
         box.y1 = std::max(box.y1, .0f);
         box.x2 = ((ct_x + dis_pred[2]) * strides[i] - dw) / resize_ratio;
-        box.x2 = std::min(box.x2, float(img_width - 1));
+        box.x2 = std::min(box.x2, static_cast<float>(img_width - 1));
         box.y2 = ((ct_y + dis_pred[3]) * strides[i] - dh) / resize_ratio;
-        box.y2 = std::min(box.y2, float(img_height - 1));
+        box.y2 = std::min(box.y2, static_cast<float>(img_height - 1));
         bbox_collection.push_back(box);
       }
     }
@@ -225,10 +230,81 @@ void DetectionPostprocessor::PostprocessNanoDetPlus(
   int detected_boxes_num = detected_boxes.size();
   for (int i = 0; i < detected_boxes_num; i++) {
     Boxi result_box;
-    result_box.x1 = int(detected_boxes[i].x1);
-    result_box.y1 = int(detected_boxes[i].y1);
-    result_box.x2 = int(detected_boxes[i].x2);
-    result_box.y2 = int(detected_boxes[i].y2);
+    result_box.x1 = static_cast<int>(detected_boxes[i].x1);
+    result_box.y1 = static_cast<int>(detected_boxes[i].y1);
+    result_box.x2 = static_cast<int>(detected_boxes[i].x2);
+    result_box.y2 = static_cast<int>(detected_boxes[i].y2);
+    result_box.label = detected_boxes[i].label;
+    result_box.score = detected_boxes[i].score;
+    result_box.label_text = detected_boxes[i].label_text;
+    result_box.flag = detected_boxes[i].flag;
+    result_boxes.push_back(result_box);
+  }
+}
+void DetectionPostprocessor::PostprocessRtmDet(
+    std::vector<Ort::Value> output_tensors, std::vector<Boxi> &result_boxes,
+    std::vector<std::vector<int64_t>> &input_dims, int img_height,
+    int img_width, std::vector<std::string> &labels,
+    const float &score_threshold, const float &nms_threshold) {
+#ifdef DEBUG
+  TimeWatcher t("|-- Postprocess");
+#endif
+  std::vector<Boxf> bbox_collection;
+  bbox_collection.clear();
+  unsigned int count = 0;
+  const float input_height = static_cast<float>(input_dims[0][2]);  // e.g 320
+  const float input_width = static_cast<float>(input_dims[0][3]);   // e.g 320
+  const float resize_ratio =
+      std::min(input_height / img_height, input_width / img_width);
+  Ort::Value &boxes = output_tensors.at(0);
+  Ort::Value &output_labels = output_tensors.at(1);
+  std::vector<int64_t> det_result_dims =
+      boxes.GetTensorTypeAndShapeInfo().GetShape();
+  std::vector<int64_t> label_result_dims =
+      output_labels.GetTensorTypeAndShapeInfo().GetShape();
+
+  assert(det_result_dims.size() == 3 && label_result_dims.size() == 2);
+  int batch_size =
+      det_result_dims[0] == label_result_dims[0] ? det_result_dims[0] : 0;
+  int num_dets =
+      det_result_dims[1] == label_result_dims[1] ? det_result_dims[1] : 0;
+  int reshap_dims = det_result_dims[2];
+  const float *det_result = boxes.GetTensorData<float>();
+  const int *label_result = output_labels.GetTensorData<int>();
+  float dw = (input_width - resize_ratio * img_width) / 2;
+  float dh = (input_height - resize_ratio * img_height) / 2;
+
+  for (int i = 0; i < num_dets; ++i) {
+    int classes = label_result[i];
+    if (classes != 0) continue;
+    Boxf box;
+    box.flag = true;
+    box.score = det_result[i * reshap_dims + 4];
+    if (box.score < score_threshold) continue;  // filter
+    box.x1 = (det_result[i * reshap_dims] - dw) / resize_ratio;
+    box.x1 = std::max(box.x1, .0f);
+    box.y1 = (det_result[i * reshap_dims + 1] - dh) / resize_ratio;
+    box.y1 = std::max(box.y1, .0f);
+    box.x2 = (det_result[i * reshap_dims + 2] - dw) / resize_ratio;
+    box.x2 = std::min(box.x2, static_cast<float>(img_width - 1));
+    box.y2 = (det_result[i * reshap_dims + 3] - dh) / resize_ratio;
+    box.y2 = std::min(box.y2, static_cast<float>(img_height - 1));
+    box.label = label_result[i];
+    box.label_text = labels[box.label].c_str();
+    bbox_collection.push_back(box);
+  }
+
+  std::vector<Boxf> detected_boxes;
+  // 4. hard|blend|offset nms with topk.
+  nms(bbox_collection, detected_boxes, nms_threshold, 100, OFFSET);
+
+  int detected_boxes_num = detected_boxes.size();
+  for (int i = 0; i < detected_boxes_num; i++) {
+    Boxi result_box;
+    result_box.x1 = static_cast<int>(detected_boxes[i].x1);
+    result_box.y1 = static_cast<int>(detected_boxes[i].y1);
+    result_box.x2 = static_cast<int>(detected_boxes[i].x2);
+    result_box.y2 = static_cast<int>(detected_boxes[i].y2);
     result_box.label = detected_boxes[i].label;
     result_box.score = detected_boxes[i].score;
     result_box.label_text = detected_boxes[i].label_text;

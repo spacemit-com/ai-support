@@ -19,9 +19,9 @@ function config_x86_riscv64() {
   CROSS_TOOL=$SDK/spacemit-gcc/bin/riscv64-unknown-linux-gnu-
   SYSROOT=$SDK/spacemit-gcc/sysroot
   BIANBUAI_HOME=$SDK/bianbu-ai-support
-  ORT_HOME=$SDK/spacemit-ort
+  ORT_HOME=$SDK/cuspace-ai
   OPENCV_DIR=$SDK/bianbu-ai-support/lib/3rdparty/opencv4/lib/cmake/opencv4
-  QEMU_CMD="$SDK/qemu/bin/qemu-riscv64 -L $SYSROOT"
+  QEMU_CMD="$SDK/spacemit-qemu/bin/qemu-riscv64 -L $SYSROOT"
 }
 
 # config

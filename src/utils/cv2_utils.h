@@ -62,4 +62,61 @@ static void normalize_inplace(cv::Mat &mat_inplace, const float *mean,
   }
 }
 
+static cv::Mat GetAffineTransform(float center_x, float center_y,
+                                  float scale_width, float scale_height,
+                                  int output_image_width,
+                                  int output_image_height,
+                                  bool inverse = false) {
+  // solve the affine transformation matrix
+
+  // get the three points corresponding to the source picture and the target
+  // picture
+  cv::Point2f src_point_1;
+  src_point_1.x = center_x;
+  src_point_1.y = center_y;
+
+  cv::Point2f src_point_2;
+  src_point_2.x = center_x;
+  src_point_2.y = center_y - scale_width * 0.5;
+
+  cv::Point2f src_point_3;
+  src_point_3.x = src_point_2.x - (src_point_1.y - src_point_2.y);
+  src_point_3.y = src_point_2.y + (src_point_1.x - src_point_2.x);
+
+  float alphapose_image_center_x = output_image_width / 2;
+  float alphapose_image_center_y = output_image_height / 2;
+
+  cv::Point2f dst_point_1;
+  dst_point_1.x = alphapose_image_center_x;
+  dst_point_1.y = alphapose_image_center_y;
+
+  cv::Point2f dst_point_2;
+  dst_point_2.x = alphapose_image_center_x;
+  dst_point_2.y = alphapose_image_center_y - output_image_width * 0.5;
+
+  cv::Point2f dst_point_3;
+  dst_point_3.x = dst_point_2.x - (dst_point_1.y - dst_point_2.y);
+  dst_point_3.y = dst_point_2.y + (dst_point_1.x - dst_point_2.x);
+
+  cv::Point2f srcPoints[3];
+  srcPoints[0] = src_point_1;
+  srcPoints[1] = src_point_2;
+  srcPoints[2] = src_point_3;
+
+  cv::Point2f dstPoints[3];
+  dstPoints[0] = dst_point_1;
+  dstPoints[1] = dst_point_2;
+  dstPoints[2] = dst_point_3;
+
+  // get affine matrix
+  cv::Mat affineTransform;
+  if (inverse) {
+    affineTransform = cv::getAffineTransform(dstPoints, srcPoints);
+  } else {
+    affineTransform = cv::getAffineTransform(srcPoints, dstPoints);
+  }
+
+  return affineTransform;
+}
+
 #endif  // SUPPORT_SRC_UTILS_CV2_UTILS_H_

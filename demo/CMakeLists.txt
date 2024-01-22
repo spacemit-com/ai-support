@@ -62,7 +62,10 @@ target_link_libraries(detection_video_demo PUBLIC bianbuai opencv_core opencv_im
 add_executable(detection_stream_demo object_detection_stream_demo.cc)
 target_link_libraries(detection_stream_demo PUBLIC bianbuai pthread opencv_core opencv_imgproc opencv_videoio opencv_imgcodecs opencv_highgui)
 
-install(TARGETS detection_demo classification_demo detection_stream_demo detection_video_demo
+add_executable(estimation_demo pose_estimation_demo.cc)
+target_link_libraries(estimation_demo PUBLIC bianbuai opencv_core opencv_imgproc opencv_imgcodecs)
+
+install(TARGETS detection_demo classification_demo detection_stream_demo detection_video_demo estimation_demo
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)

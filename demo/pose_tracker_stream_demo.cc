@@ -1,3 +1,4 @@
+#include <pthread.h>
 #include <stdlib.h>
 #include <unistd.h>  //for getopt
 
@@ -337,6 +338,10 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
   cv::destroyAllWindows();
 }
 
+void setThreadName(std::thread& thread, const char* name) {
+  pthread_setname_np(thread.native_handle(), name);
+}
+
 int main(int argc, char* argv[]) {
   std::string detFilePath, poseFilePath, labelFilepath, input, inputType;
   bool disable_spacemit_ep{false};
@@ -414,6 +419,8 @@ int main(int argc, char* argv[]) {
   std::thread t1(Preview, std::ref(dataloader), std::ref(tracker));
   // std::this_thread::sleep_for(std::chrono::seconds(5));
   std::thread t2(Track, std::ref(dataloader), std::ref(tracker));
+  setThreadName(t1, "PreviewThread");
+  setThreadName(t2, "TrackerThread");
   t1.join();
   t2.join();
   return 0;

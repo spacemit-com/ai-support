@@ -225,13 +225,13 @@ void Detection(DataLoader& dataloader, Detector& detector) {
   cv::Mat frame;
   int flag;
   while (dataloader.ifenable()) {
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start = std::chrono::steady_clock::now();
     frame = dataloader.peek_frame();  // 取(拷贝)一帧数据
     if ((frame).empty()) {
       continue;
     }
     int flag = detector.infer(frame);  // 推理并保存检测结果
-    auto end = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::steady_clock::now();
     auto detection_duration =
         std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     dataloader.set_detection_fps(1000 / (detection_duration.count()));
@@ -247,10 +247,10 @@ void Detection(DataLoader& dataloader, Detector& detector) {
 void Preview(DataLoader& dataloader, Detector& detector) {
   cv::Mat frame;
   ObjectDetectionResult objs;
-  auto now = std::chrono::high_resolution_clock::now();
+  auto now = std::chrono::steady_clock::now();
   objs.timestamp = now;
   while (dataloader.ifenable()) {
-    // auto start = std::chrono::high_resolution_clock::now();
+    // auto start = std::chrono::steady_clock::now();
     frame = dataloader.fetch_frame();  // 取(搬走)一帧数据
     if ((frame).empty()) {
       break;
@@ -303,7 +303,7 @@ void Preview(DataLoader& dataloader, Detector& detector) {
     }
     // 调用 detector.detected 和 detector.get_object 期间,
     // 检测结果依然可能被刷新
-    now = std::chrono::high_resolution_clock::now();
+    now = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
         now - objs.timestamp);
     if (duration.count() < 1000) {
@@ -321,7 +321,7 @@ void Preview(DataLoader& dataloader, Detector& detector) {
                 cv::Scalar(0, 255, 0), 1, cv::LINE_AA);
     cv::imshow("Detection", (frame));
     cv::waitKey(10);
-    // auto end = std::chrono::high_resolution_clock::now();
+    // auto end = std::chrono::steady_clock::now();
     // auto preview_duration =
     // std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     // dataloader.set_preview_fps(1000 / (preview_duration.count()));

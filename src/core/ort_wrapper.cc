@@ -7,7 +7,7 @@
 #include "spacemit_ort_env.h"
 #endif
 
-int OrtWrapper::Init(std::string instanceName, std::string modelFilepath,
+int OrtWrapper::Init(std::string instanceName, std::basic_string<ORTCHAR_T> modelFilepath,
                      const int intra_threads_num,
                      const bool disable_spacemit_ep) {
   std::unique_ptr<Ort::Env> env(new Ort::Env(
@@ -49,7 +49,7 @@ int OrtWrapper::Init(json config) {
   if (config.contains("instance_name")) {
     instanceName = config["instance_name"];
   }
-  std::string modelFilepath = config["model_path"];
+  std::basic_string<ORTCHAR_T> modelFilepath = config["model_path"];
   std::unique_ptr<Ort::Env> env(new Ort::Env(
       OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING, instanceName.c_str()));
   // Creation: The Ort::Session is created here
@@ -77,14 +77,14 @@ int OrtWrapper::Init(json config) {
   sessionOptions_.SetInterOpNumThreads(1);
   sessionOptions_.AddConfigEntry("session.inter_op.allow_spinning", "0");
   if (config.contains("profiling_projects")) {
-    std::string profiling_projects = config["profiling_projects"];
-    if (profiling_projects != "") {
-      sessionOptions_.EnableProfiling(ORT_TSTR(profiling_projects.c_str()));
+    std::basic_string<ORTCHAR_T> profiling_projects = config["profiling_projects"];
+    if (profiling_projects.size()) {
+      sessionOptions_.EnableProfiling(profiling_projects.c_str());
     }
   }
   if (config.contains("opt_model_path")) {
-    std::string opt_model_path = config["opt_model_path"];
-    if (opt_model_path != "") {
+    std::basic_string<ORTCHAR_T> opt_model_path = config["opt_model_path"];
+    if (opt_model_path.size()) {
       sessionOptions_.SetOptimizedModelFilePath(opt_model_path.c_str());
     }
   }

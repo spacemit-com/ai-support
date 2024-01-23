@@ -17,7 +17,7 @@ class OrtWrapper {
  public:
   OrtWrapper() {}
   ~OrtWrapper() {}
-  int Init(std::string instanceName, std::string modelFilepath,
+  int Init(std::string instanceName, std::basic_string<ORTCHAR_T> modelFilepath,
            const int intra_threads_num, const bool disable_spacemit_ep);
   int Init(json config);
   size_t GetInputCount() { return session_->GetInputCount(); }

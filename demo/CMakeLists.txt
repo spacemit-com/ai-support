@@ -5,6 +5,13 @@ project(bianbuai-demo)
 set(CMAKE_CXX_STANDARD 14)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 
+if (WIN32)
+  set(ext_src_pattern
+    "utils/win_getopt/mb/*.cc")
+  file(GLOB ext_src CONFIGURE_DEPENDS ${ext_src_pattern})
+  include_directories("utils/win_getopt/mb/include")
+endif()
+
 # TODO: update cc files with '#ifndef NDEBUG'
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
@@ -50,16 +57,16 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath-link,${BIANBUAI
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
 link_directories(${BIANBUAI_HOME}/lib ${ORT_HOME}/lib ${OPENCV_LIB} ${OPENCV_LIB}/3rdparty)
 
-add_executable(classification_demo image_classification_demo.cc)
+add_executable(classification_demo image_classification_demo.cc ${ext_src})
 target_link_libraries(classification_demo PUBLIC bianbuai opencv_core opencv_imgcodecs)
 
-add_executable(detection_demo object_detection_demo.cc)
+add_executable(detection_demo object_detection_demo.cc ${ext_src})
 target_link_libraries(detection_demo PUBLIC bianbuai opencv_core opencv_imgproc opencv_imgcodecs)
 
-add_executable(detection_video_demo object_detection_video_demo.cc)
+add_executable(detection_video_demo object_detection_video_demo.cc ${ext_src})
 target_link_libraries(detection_video_demo PUBLIC bianbuai opencv_core opencv_imgproc opencv_videoio opencv_highgui)
 
-add_executable(detection_stream_demo object_detection_stream_demo.cc)
+add_executable(detection_stream_demo object_detection_stream_demo.cc ${ext_src})
 target_link_libraries(detection_stream_demo PUBLIC bianbuai pthread opencv_core opencv_imgproc opencv_videoio opencv_imgcodecs opencv_highgui)
 
 add_executable(estimation_demo pose_estimation_demo.cc)

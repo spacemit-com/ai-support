@@ -6,7 +6,6 @@
 #include <iostream>
 #include <string>
 
-// 计时器定义
 class TimeWatcher {
  public:
   TimeWatcher(const std::string& name) : msg_(name) {

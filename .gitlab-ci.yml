@@ -20,12 +20,14 @@ stages:             # List of stages for jobs, and their order of execution
   - build
   - test
   - package
+  - upload
   - deploy
 
 image: harbor.bianbu.xyz/spacemit-ai/bianbu-ai-support:v1.1.1
 
 .only-defaults: &only-defaults
   only:
+    - tags
     - main
     - cicd
     - merge_requests
@@ -56,7 +58,7 @@ build-job-x86_64:   # This job runs in the build stage, which runs first.
     # copy onnxruntime
     - if [[ "${CI_INSTALL_OPTION}" =~ "--with-ort" ]]; then mkdir -p ${BUILD_DIR}/${INSTALL_PREFIX}/lib/3rdparty/onnxruntime && cp -rdf ${ORT_HOME}/* ${BUILD_DIR}/${INSTALL_PREFIX}/lib/3rdparty/onnxruntime; fi
     - pushd demo && mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DBIANBUAI_HOME=$(pwd)/../../${BUILD_DIR}/${INSTALL_PREFIX} -DORT_HOME=${ORT_HOME} && make -j`nproc` VERBOSE=1 && popd
-  #  - echo "Compile complete."
+    - echo "Compile complete."
   artifacts:
     paths:
       - ${BUILD_DIR}
@@ -132,14 +134,25 @@ package:
     # make tar ball
     - pushd build.x86_64 && tar czf ../output/bianbu-ai-support.x86_64.$(date +"%Y%m%d_%H%M%S").tar.gz bianbu-ai-support.x86_64 && popd
     - pushd build.riscv64 && tar czf ../output/bianbu-ai-support.riscv64.$(date +"%Y%m%d_%H%M%S").tar.gz bianbu-ai-support.riscv64 && popd
-    - rm -rf build.x86_64 build.riscv64 demo
+    #- rm -rf build.x86_64 build.riscv64 demo
   artifacts:
     paths:
       - output
   <<: *only-defaults
 
+upload-nexus:
+  stage: upload
+  script:
+    - tag=v${CI_COMMIT_REF_NAME#*/}
+    - pushd build.x86_64 && tar czf bianbu-ai-support.x86_64.${tag}.tar.gz bianbu-ai-support.x86_64 && popd
+    - pushd build.x86_64 && curl -k -u $NEXUS_USERNAME:$NEXUS_PASSWORD --upload-file bianbu-ai-support.x86_64.${tag}.tar.gz https://nexus.bianbu.xyz/repository/bianbu-ai/support-library/bianbu-ai-support.x86_64.${tag}.tar.gz && popd
+    - pushd build.riscv64 && tar czf bianbu-ai-support.riscv64.${tag}.tar.gz bianbu-ai-support.riscv64 && popd
+    - pushd build.riscv64 && curl -k -u $NEXUS_USERNAME:$NEXUS_PASSWORD --upload-file bianbu-ai-support.riscv64.${tag}.tar.gz https://nexus.bianbu.xyz/repository/bianbu-ai/support-library/bianbu-ai-support.riscv64.${tag}.tar.gz && popd
+  only:
+    - tags
+
 package-bianbu-deb:
-  stage: package
+  stage: upload
   image: harbor.bianbu.xyz/gitlab/ci-pack
   script:
     # TODO: replace by shell script

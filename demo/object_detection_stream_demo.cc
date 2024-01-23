@@ -1,6 +1,10 @@
-﻿﻿#include <stdlib.h>
+﻿#include <stdlib.h>
 #include <pthread.h>
-#include <unistd.h>  //for getopt
+#ifdef _WIN32
+#include "getopt.h"
+#else
+#include <unistd.h> // for: getopt
+#endif
 
 #include <chrono>
 #include <cmath>
@@ -164,7 +168,8 @@ class SharedDataLoader : public DataLoader {
     }
   }
   int init(int cameraId) {
-    capture_.open(cameraId);
+#ifndef _WIN32
+      capture_.open(cameraId);
     if (!capture_.isOpened()) {
       std::cout
           << "Open camera capture failed, try to figure out right cameraId"
@@ -178,6 +183,8 @@ class SharedDataLoader : public DataLoader {
         }
       }
     }
+#endif
+
     capture_.open(cameraId);
     if (capture_.isOpened()) {
       int width = 640;

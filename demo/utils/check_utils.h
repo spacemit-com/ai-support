@@ -1,11 +1,6 @@
 #ifndef SUPPORT_DEMO_UTILS_CHECK_UTILS_H_
 #define SUPPORT_DEMO_UTILS_CHECK_UTILS_H_
 
-#include <fcntl.h>
-#include <linux/videodev2.h>
-#include <sys/ioctl.h>
-#include <unistd.h>  //for close
-
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -33,6 +28,13 @@ static bool isNumber(const std::string& str) {
   return true;
 }
 
+#ifndef _WIN32
+
+#include <fcntl.h>
+#include <linux/videodev2.h>
+#include <sys/ioctl.h>
+#include <unistd.h>  //for close
+
 static bool is_valid_camera(const std::string& path) {
   int fd = open(path.c_str(), O_RDWR);
   if (fd == -1) {
@@ -46,5 +48,7 @@ static bool is_valid_camera(const std::string& path) {
   close(fd);
   return (cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) != 0;
 }
+
+#endif
 
 #endif  // SUPPORT_DEMO_UTILS_CHECK_UTILS_H_

@@ -42,8 +42,6 @@ class PoseEstimation : public BaseVisionTaskApi<PoseEstimationResult> {
   EstimationPostprocessor postprocessor_;
   std::vector<PosePoint> result_points_;
   PoseEstimationResult result_;
-  int img_height_;
-  int img_width_;
   int initFlag_;
   std::pair<cv::Mat, cv::Mat> crop_result_pair_;
 };

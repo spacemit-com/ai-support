@@ -36,12 +36,10 @@ static bool isNumber(const std::string& str) {
 static bool is_valid_camera(const std::string& path) {
   int fd = open(path.c_str(), O_RDWR);
   if (fd == -1) {
-    std::cerr << "Cannot open " << path << std::endl;
     return false;
   }
   struct v4l2_capability cap;
   if (ioctl(fd, VIDIOC_QUERYCAP, &cap) == -1) {
-    std::cerr << "Cannot query capabilities of " << path << std::endl;
     close(fd);
     return false;
   }

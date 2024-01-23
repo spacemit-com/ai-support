@@ -68,14 +68,29 @@ int main(int argc, char* argv[]) {
         continue;
       }
       resultPoints = poseestimationtask->Estimate(img, box).result_points;
+      if (resultPoints.size()) {
+        int input_height = 320;
+        int input_width = 320;
+        int img_height = imgRaw.rows;
+        int img_width = imgRaw.cols;
+        float resize_ratio = std::min(
+            static_cast<float>(input_height) / static_cast<float>(img_height),
+            static_cast<float>(input_width) / static_cast<float>(img_width));
+        float dw = (input_width - resize_ratio * img_width) / 2;
+        float dh = (input_height - resize_ratio * img_height) / 2;
+        for (int i = 0; i < resultPoints.size(); i++) {
+          resultPoints[i].x = (resultPoints[i].x - dw) / resize_ratio;
+          resultPoints[i].y = (resultPoints[i].y - dh) / resize_ratio;
+        }
+      }
       for (int i = 0; i < resultPoints.size(); ++i) {
-        cv::circle(img, cv::Point(resultPoints[i].x, resultPoints[i].y), 2,
+        cv::circle(imgRaw, cv::Point(resultPoints[i].x, resultPoints[i].y), 2,
                    cv::Scalar{0, 0, 255}, 2, cv::LINE_AA);
       }
 
       for (int i = 0; i < coco_17_joint_links.size(); ++i) {
         std::pair<int, int> joint_links = coco_17_joint_links[i];
-        cv::line(img,
+        cv::line(imgRaw,
                  cv::Point(resultPoints[joint_links.first].x,
                            resultPoints[joint_links.first].y),
                  cv::Point(resultPoints[joint_links.second].x,
@@ -83,7 +98,7 @@ int main(int argc, char* argv[]) {
                  cv::Scalar{0, 255, 0}, 2, cv::LINE_AA);
       }
     }
-    cv::imwrite(saveImgpath, img);
+    cv::imwrite(saveImgpath, imgRaw);
   } else if (argc > 6) {
     detFilePath = argv[1];
     poseFilePath = argv[2];
@@ -162,11 +177,12 @@ int main(int argc, char* argv[]) {
                  cv::Scalar{0, 255, 0}, 2, cv::LINE_AA);
       }
     }
-    cv::imwrite(saveImgpath, imgRaw);
+    cv::imwrite(saveImgpath, img);
   } else {
     std::cout
         << "run with " << argv[0]
-        << " <modelFilepath> <imageFilepath> <saveImgpath> <labelFilepath> "
+        << " <detModelFilepath> <poseModelFilepath> <imageFilepath> "
+           "<saveImgpath> <labelFilepath> "
            "option(-d <disable_spacemit_ep>) option(-t <intra_threads_num>) "
            "option(-s score_threshold) option(-n nms_threshold) or "
         << argv[0] << " <configFilepath> <imageFilepath> <saveImgpath>"

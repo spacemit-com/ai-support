@@ -34,8 +34,6 @@ PoseEstimationResult PoseEstimation::EstimateRtmPose(const cv::Mat &raw_img,
                                                      const Boxi &box) {
   result_points_.clear();
   input_tensors_.clear();
-  img_height_ = raw_img.rows;
-  img_width_ = raw_img.cols;
   {
 #ifdef DEBUG
     std::cout << "|-- Preprocess" << std::endl;

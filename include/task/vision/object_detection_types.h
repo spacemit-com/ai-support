@@ -159,7 +159,7 @@ BoundingBoxType<T1, T2>::area() const {
 
 struct ObjectDetectionResult {
   std::vector<Boxi> result_bboxes;
-  std::chrono::_V2::system_clock::time_point timestamp;
+  std::chrono::time_point< std::chrono::steady_clock > timestamp;
 };
 
 #endif  // SUPPORT_INCLUDE_TASK_VISION_OBJECT_DETECTION_TYPES_H_

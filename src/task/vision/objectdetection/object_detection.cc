@@ -51,10 +51,10 @@ ObjectDetectionResult ObjectDetection::DetectNanoDetPlus(
       labels_, score_threshold_, nms_threshold_);
 
   result_.result_bboxes = result_boxes_;
-  result_.timestamp = std::chrono::high_resolution_clock::now();
+  result_.timestamp = std::chrono::steady_clock::now();
   return result_;
 }
-auto start = std::chrono::high_resolution_clock::now();
+auto start = std::chrono::steady_clock::now();
 ObjectDetectionResult ObjectDetection::DetectYolov6(const cv::Mat &raw_img) {
   result_boxes_.clear();
   input_tensors_.clear();
@@ -72,7 +72,7 @@ ObjectDetectionResult ObjectDetection::DetectYolov6(const cv::Mat &raw_img) {
                                    score_threshold_);
 
   result_.result_bboxes = result_boxes_;
-  result_.timestamp = std::chrono::high_resolution_clock::now();
+  result_.timestamp = std::chrono::steady_clock::now();
   return result_;
 }
 
@@ -92,7 +92,7 @@ ObjectDetectionResult ObjectDetection::DetectYolov4(const cv::Mat &raw_img) {
                              img_height_, img_width_, labels_);
 
   result_.result_bboxes = result_boxes_;
-  result_.timestamp = std::chrono::high_resolution_clock::now();
+  result_.timestamp = std::chrono::steady_clock::now();
   return result_;
 }
 
@@ -113,7 +113,7 @@ ObjectDetectionResult ObjectDetection::DetectRtmDet(const cv::Mat &raw_img) {
                                    score_threshold_, nms_threshold_);
 
   result_.result_bboxes = result_boxes_;
-  result_.timestamp = std::chrono::high_resolution_clock::now();
+  result_.timestamp = std::chrono::steady_clock::now();
   return result_;
 }
 

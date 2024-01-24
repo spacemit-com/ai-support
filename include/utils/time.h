@@ -11,7 +11,7 @@ class TimeWatcher {
   TimeWatcher(const std::string& name) : msg_(name) {
     start_ = std::chrono::steady_clock::now();
   }
-  float DurationWithMicroSecond() {
+  int64_t DurationWithMicroSecond() {
     return std::chrono::duration_cast<std::chrono::milliseconds>(end_ - start_)
         .count();
   }

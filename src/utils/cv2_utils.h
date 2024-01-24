@@ -26,9 +26,9 @@ static cv::Mat normalize(const cv::Mat &mat, const float *mean,
     mat.convertTo(mat_copy, CV_32FC3);
   else
     mat_copy = mat.clone();
-  for (unsigned int i = 0; i < mat_copy.rows; ++i) {
+  for (int i = 0; i < mat_copy.rows; ++i) {
     cv::Vec3f *p = mat_copy.ptr<cv::Vec3f>(i);
-    for (unsigned int j = 0; j < mat_copy.cols; ++j) {
+    for (int j = 0; j < mat_copy.cols; ++j) {
       p[j][0] = (p[j][0] - mean[0]) * scale[0];
       p[j][1] = (p[j][1] - mean[1]) * scale[1];
       p[j][2] = (p[j][2] - mean[2]) * scale[2];
@@ -52,9 +52,9 @@ static void normalize_inplace(cv::Mat &mat_inplace, const float *mean,
                               const float *scale) {
   if (mat_inplace.type() != CV_32FC3)
     mat_inplace.convertTo(mat_inplace, CV_32FC3);
-  for (unsigned int i = 0; i < mat_inplace.rows; ++i) {
+  for (int i = 0; i < mat_inplace.rows; ++i) {
     cv::Vec3f *p = mat_inplace.ptr<cv::Vec3f>(i);
-    for (unsigned int j = 0; j < mat_inplace.cols; ++j) {
+    for (int j = 0; j < mat_inplace.cols; ++j) {
       p[j][0] = (p[j][0] - mean[0]) * scale[0];
       p[j][1] = (p[j][1] - mean[1]) * scale[1];
       p[j][2] = (p[j][2] - mean[2]) * scale[2];

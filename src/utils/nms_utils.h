@@ -15,7 +15,7 @@ static void hard_nms(std::vector<Boxf> &input, std::vector<Boxf> &output,
   if (input.empty()) return;
   std::sort(input.begin(), input.end(),
             [](const Boxf &a, const Boxf &b) { return a.score > b.score; });
-  const unsigned int box_num = input.size();
+  const size_t box_num = input.size();
   std::vector<int> merged(box_num, 0);
 
   unsigned int count = 0;
@@ -48,7 +48,7 @@ static void blending_nms(std::vector<Boxf> &input, std::vector<Boxf> &output,
   if (input.empty()) return;
   std::sort(input.begin(), input.end(),
             [](const Boxf &a, const Boxf &b) { return a.score > b.score; });
-  const unsigned int box_num = input.size();
+  const size_t box_num = input.size();
   std::vector<int> merged(box_num, 0);
 
   unsigned int count = 0;
@@ -97,7 +97,7 @@ static void offset_nms(std::vector<Boxf> &input, std::vector<Boxf> &output,
   if (input.empty()) return;
   std::sort(input.begin(), input.end(),
             [](const Boxf &a, const Boxf &b) { return a.score > b.score; });
-  const unsigned int box_num = input.size();
+  const size_t box_num = input.size();
   std::vector<int> merged(box_num, 0);
 
   const float offset = 4096.f;

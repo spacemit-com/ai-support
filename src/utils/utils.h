@@ -87,7 +87,7 @@ static float fast_exp(float x) {
     uint32_t i;
     float f;
   } v{};
-  v.i = (1 << 23) * (1.4426950409 * x + 126.93490512f);
+  v.i = static_cast<uint32_t>((1 << 23) * (1.4426950409 * x + 126.93490512f));
   return v.f;
 }
 

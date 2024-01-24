@@ -12,7 +12,7 @@ void DetectionPostprocessor::Postprocess(
   TimeWatcher t("|-- Postprocess");
 #endif
   int STRIDES[3] = {8, 16, 32};
-  float XYSCALE[3] = {1.2, 1.1, 1.05};
+  float XYSCALE[3] = {1.2f, 1.1f, 1.05f};
   int anchors[3][3][2] = {{{12, 16}, {19, 36}, {40, 28}},
                           {{36, 75}, {76, 55}, {72, 146}},
                           {{142, 110}, {192, 243}, {459, 401}}};
@@ -27,18 +27,18 @@ void DetectionPostprocessor::Postprocess(
     Ort::Value &pred = output_tensors.at(s);  // batch*13*13*3*85
     auto outputInfo = pred.GetTensorTypeAndShapeInfo();
     auto pred_dims = outputInfo.GetShape();
-    const unsigned int num_classes = pred_dims.at(4) - 5;  // 80
-    for (unsigned int i = 0; i < pred_dims[1]; ++i) {
-      for (unsigned int j = 0; j < pred_dims[2]; ++j) {
+    const auto num_classes = pred_dims.at(4) - 5;  // 80
+    for (auto i = 0; i < pred_dims[1]; ++i) {
+      for (auto j = 0; j < pred_dims[2]; ++j) {
         int grid_x = j;
         int grid_y = i;
-        for (unsigned int k = 0; k < pred_dims[3]; ++k) {
+        for (auto k = 0; k < pred_dims[3]; ++k) {
           float obj_conf = pred.At<float>({0, i, j, k, 4});
           if (obj_conf < score_threshold) continue;  // filter first.
 
           float cls_conf = pred.At<float>({0, i, j, k, 5});
           unsigned int label = 0;
-          for (unsigned int h = 0; h < num_classes; ++h) {
+          for (auto h = 0; h < num_classes; ++h) {
             float tmp_conf = pred.At<float>({0, i, j, k, h + 5});
             if (tmp_conf > cls_conf) {
               cls_conf = tmp_conf;
@@ -48,10 +48,10 @@ void DetectionPostprocessor::Postprocess(
           float conf = obj_conf * cls_conf;      // cls_conf (0.,1.)
           if (conf < score_threshold) continue;  // filter
           float cx = (sigmoid(pred.At<float>({0, i, j, k, 0})) * XYSCALE[s] -
-                      0.5 * (XYSCALE[s] - 1) + grid_x) *
+                      0.5f * (XYSCALE[s] - 1) + grid_x) *
                      STRIDES[s];
           float cy = (sigmoid(pred.At<float>({0, i, j, k, 1})) * XYSCALE[s] -
-                      0.5 * (XYSCALE[s] - 1) + grid_y) *
+                      0.5f * (XYSCALE[s] - 1) + grid_y) *
                      STRIDES[s];
           float w = exp(pred.At<float>({0, i, j, k, 2})) * anchors[s][k][0];
           float h = exp(pred.At<float>({0, i, j, k, 3})) * anchors[s][k][1];
@@ -82,8 +82,8 @@ void DetectionPostprocessor::Postprocess(
   // 4. hard|blend|offset nms with topk.
   nms(bbox_collection, detected_boxes, iou_threshold, topk, nms_type);
 
-  int detected_boxes_num = detected_boxes.size();
-  for (int i = 0; i < detected_boxes_num; i++) {
+  auto detected_boxes_num = detected_boxes.size();
+  for (auto i = 0; i < detected_boxes_num; i++) {
     Boxi result_box;
     result_box.x1 = static_cast<int>(detected_boxes[i].x1);
     result_box.y1 = static_cast<int>(detected_boxes[i].y1);
@@ -121,8 +121,8 @@ void DetectionPostprocessor::PostprocessYolov6(
   float dw = (input_width - resize_ratio * img_width) / 2;
   float dh = (input_height - resize_ratio * img_height) / 2;
 
-  int num = pred_dims[1];
-  for (int i = 0; i < num; i++) {
+  auto num = pred_dims[1];
+  for (auto i = 0; i < num; i++) {
     Boxi result_box;
     result_box.score = scores.At<float>({0, i});
     if (result_box.score < score_threshold) {
@@ -168,16 +168,16 @@ void DetectionPostprocessor::PostprocessNanoDetPlus(
   std::vector<int> hw = {40, 20, 10, 5};
   std::vector<int> strides = {8, 16, 32, 64};
   int num = -1;
-  for (unsigned int i = 0; i < 4; i++) {
-    for (unsigned int y = 0; y < hw[i]; y++) {
-      for (unsigned int x = 0; x < hw[i]; x++) {
+  for (auto i = 0; i < 4; i++) {
+    for (auto y = 0; y < hw[i]; y++) {
+      for (auto x = 0; x < hw[i]; x++) {
         num++;
         int ct_x = x;
         int ct_y = y;
         const float *scores = output_pred_ptr + num * 112;  // row ptr
         float cls_conf = pred.At<float>({0, num, 0});
         unsigned int label = 0;
-        for (unsigned int h = 0; h < cls_num; h++) {
+        for (auto h = 0; h < cls_num; h++) {
           float tmp_conf = scores[h];
           if (tmp_conf > cls_conf) {
             cls_conf = tmp_conf;
@@ -227,8 +227,8 @@ void DetectionPostprocessor::PostprocessNanoDetPlus(
   // 4. hard|blend|offset nms with topk.
   nms(bbox_collection, detected_boxes, nms_threshold, 100, OFFSET);
 
-  int detected_boxes_num = detected_boxes.size();
-  for (int i = 0; i < detected_boxes_num; i++) {
+  size_t detected_boxes_num = detected_boxes.size();
+  for (size_t i = 0; i < detected_boxes_num; i++) {
     Boxi result_box;
     result_box.x1 = static_cast<int>(detected_boxes[i].x1);
     result_box.y1 = static_cast<int>(detected_boxes[i].y1);
@@ -264,17 +264,15 @@ void DetectionPostprocessor::PostprocessRtmDet(
       output_labels.GetTensorTypeAndShapeInfo().GetShape();
 
   assert(det_result_dims.size() == 3 && label_result_dims.size() == 2);
-  int batch_size =
-      det_result_dims[0] == label_result_dims[0] ? det_result_dims[0] : 0;
-  int num_dets =
+  int64_t num_dets =
       det_result_dims[1] == label_result_dims[1] ? det_result_dims[1] : 0;
-  int reshap_dims = det_result_dims[2];
+  int64_t reshap_dims = det_result_dims[2];
   const float *det_result = boxes.GetTensorData<float>();
   const int *label_result = output_labels.GetTensorData<int>();
   float dw = (input_width - resize_ratio * img_width) / 2;
   float dh = (input_height - resize_ratio * img_height) / 2;
 
-  for (int i = 0; i < num_dets; ++i) {
+  for (int64_t i = 0; i < num_dets; ++i) {
     int classes = label_result[i];
     if (classes != 0) continue;
     Boxf box;
@@ -298,8 +296,8 @@ void DetectionPostprocessor::PostprocessRtmDet(
   // 4. hard|blend|offset nms with topk.
   nms(bbox_collection, detected_boxes, nms_threshold, 100, OFFSET);
 
-  int detected_boxes_num = detected_boxes.size();
-  for (int i = 0; i < detected_boxes_num; i++) {
+  size_t detected_boxes_num = detected_boxes.size();
+  for (size_t i = 0; i < detected_boxes_num; i++) {
     Boxi result_box;
     result_box.x1 = static_cast<int>(detected_boxes[i].x1);
     result_box.y1 = static_cast<int>(detected_boxes[i].y1);

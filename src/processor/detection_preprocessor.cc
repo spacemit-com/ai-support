@@ -6,8 +6,8 @@
 void DetectionPreprocessor::PreprocessNanoDetPlus(
     const cv::Mat& mat, std::vector<std::vector<int64_t>>& input_node_dims,
     std::vector<std::vector<float>>& input_tensor_values) {
-  const int input_height = input_node_dims[0][2];
-  const int input_width = input_node_dims[0][3];
+  const int input_height = (int)input_node_dims[0][2];
+  const int input_width = (int)input_node_dims[0][3];
   cv::Mat resizedImageBGR, resizedImage, preprocessedImage;
   {
 #ifdef DEBUG
@@ -32,8 +32,8 @@ void DetectionPreprocessor::PreprocessNanoDetPlus(
 #endif
     cv::Mat channels[3];
     cv::split(resizedImage, channels);
-    const float mean_vals[3] = {103.53, 116.28, 123.675};
-    const float scale_vals[3] = {57.375, 57.12, 58.395};
+    const float mean_vals[3] = {103.53f, 116.28f, 123.675f};
+    const float scale_vals[3] = {57.375f, 57.12f, 58.395f};
     int channel = 3;
     std::vector<float> input_tensor_value;
     for (int i = 0; i < channel; i++) {
@@ -52,8 +52,8 @@ void DetectionPreprocessor::Preprocess(
     unsigned int data_format) {
   if (mat.empty()) return;
   if (data_format == 1) {
-    const int input_height = input_node_dims[0][1];
-    const int input_width = input_node_dims[0][2];
+    const int input_height = static_cast<int>(input_node_dims[0][1]);
+    const int input_width = static_cast<int>(input_node_dims[0][2]);
 
     // resize & unscale
     cv::Mat resizedImageBGR, resizedImageRGB, resizedImage, preprocessedImage;
@@ -76,8 +76,8 @@ void DetectionPreprocessor::Preprocess(
                 target_tensor_size * sizeof(float));
     input_tensor_values.push_back(input_tensor_value);
   } else {
-    const int input_height = input_node_dims[0][2];
-    const int input_width = input_node_dims[0][3];
+    const int input_height = static_cast<int>(input_node_dims[0][2]);
+    const int input_width = static_cast<int>(input_node_dims[0][3]);
 
     cv::Mat resizedImageBGR, resizedImageRGB, resizedImage, preprocessedImage;
     {

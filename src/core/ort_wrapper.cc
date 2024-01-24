@@ -123,10 +123,10 @@ int OrtWrapper::Init(json config) {
 }
 
 std::vector<std::vector<int64_t>> OrtWrapper::GetInputDims() {
-  int num_inputs = session_->GetInputCount();
+  size_t num_inputs = session_->GetInputCount();
   std::vector<std::vector<int64_t>> input_node_dims;
   input_node_dims.resize(num_inputs);
-  for (unsigned int i = 0; i < num_inputs; ++i) {
+  for (size_t i = 0; i < num_inputs; ++i) {
     Ort::TypeInfo input_type_info = session_->GetInputTypeInfo(i);
     auto input_tensor_info = input_type_info.GetTensorTypeAndShapeInfo();
     auto input_dims = input_tensor_info.GetShape();
@@ -138,10 +138,10 @@ std::vector<std::vector<int64_t>> OrtWrapper::GetInputDims() {
 }
 
 std::vector<std::vector<int64_t>> OrtWrapper::GetOutputDims() {
-  int num_outputs = session_->GetOutputCount();
+  size_t num_outputs = session_->GetOutputCount();
   std::vector<std::vector<int64_t>> output_node_dims;
   output_node_dims.resize(num_outputs);
-  for (unsigned int i = 0; i < num_outputs; ++i) {
+  for (size_t i = 0; i < num_outputs; ++i) {
     Ort::TypeInfo output_type_info = session_->GetOutputTypeInfo(i);
     auto output_tensor_info = output_type_info.GetTensorTypeAndShapeInfo();
     auto output_dims = output_tensor_info.GetShape();
@@ -161,13 +161,13 @@ std::vector<Ort::Value> OrtWrapper::Invoke(
   // input names initial and build
   std::vector<const char *> input_node_names;
   std::vector<std::string> input_names;
-  int num_inputs = session_->GetInputCount();
+  size_t num_inputs = session_->GetInputCount();
   input_node_names.resize(num_inputs);
-  for (int i = 0; i < num_inputs; i++) {
+  for (size_t i = 0; i < num_inputs; i++) {
     input_names.push_back(std::string(""));
   }
 
-  for (unsigned int i = 0; i < num_inputs; ++i) {
+  for (size_t i = 0; i < num_inputs; ++i) {
     auto input_name = session_->GetInputNameAllocated(i, allocator);
     input_names[i].append(input_name.get());
     input_node_names[i] = input_names[i].c_str();
@@ -177,11 +177,11 @@ std::vector<Ort::Value> OrtWrapper::Invoke(
   auto input_node_dims = GetInputDims();
 
   // input tensor size
-  std::vector<int> input_tensor_size;
+  std::vector<size_t> input_tensor_size;
   input_tensor_size.resize(input_node_dims.size());
-  for (unsigned int i = 0; i < num_inputs; ++i) {
+  for (size_t i = 0; i < num_inputs; ++i) {
     input_tensor_size[i] = 1;
-    for (unsigned int j = 0; j < input_node_dims[i].size(); ++j) {
+    for (size_t j = 0; j < input_node_dims[i].size(); ++j) {
       input_tensor_size[i] *= input_node_dims[i][j];
     }
   }
@@ -189,13 +189,13 @@ std::vector<Ort::Value> OrtWrapper::Invoke(
   // output names initial and build
   std::vector<const char *> output_node_names;
   std::vector<std::string> output_names;
-  int num_outputs = session_->GetOutputCount();
+  size_t num_outputs = session_->GetOutputCount();
   output_node_names.resize(num_outputs);
-  for (int i = 0; i < num_outputs; i++) {
+  for (size_t i = 0; i < num_outputs; i++) {
     output_names.push_back(std::string(""));
   }
 
-  for (unsigned int i = 0; i < num_outputs; ++i) {
+  for (size_t i = 0; i < num_outputs; ++i) {
     auto output_name = session_->GetOutputNameAllocated(i, allocator);
     output_names[i].append(output_name.get());
     output_node_names[i] = output_names[i].c_str();

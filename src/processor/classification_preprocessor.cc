@@ -11,7 +11,7 @@ void ClassificationPreprocessor::Preprocess(
     TimeWatcher t("| |-- Resize image");
 #endif
     cv::resize(imageBGR, resizedImageBGR,
-               cv::Size(inputDims[0][3], inputDims[0][2]),
+               cv::Size(static_cast<int>(inputDims[0][3]), static_cast<int>(inputDims[0][2])),
                cv::InterpolationFlags::INTER_CUBIC);
   }
 
@@ -25,8 +25,8 @@ void ClassificationPreprocessor::Preprocess(
   // step 5: Split the RGB channels from the image.
   cv::Mat channels[3];
   cv::split(resizedImage, channels);
-  const float mean_vals[3] = {0.485, 0.456, 0.406};
-  const float scale_vals[3] = {0.229, 0.224, 0.225};
+  const float mean_vals[3] = {0.485f, 0.456f, 0.406f};
+  const float scale_vals[3] = {0.229f, 0.224f, 0.225f};
 
   int channel = 3;
   std::vector<float> input_tensor_value;

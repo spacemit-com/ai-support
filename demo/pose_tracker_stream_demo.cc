@@ -317,13 +317,15 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
     }
     // int preview_fps = dataloader.get_preview_fps();
     int detection_fps = dataloader.get_detection_fps();
-
-    cv::putText(frame, "preview fps: " + std::to_string(preview_fps),
-                cv::Point(0, 15), cv::FONT_HERSHEY_SIMPLEX, 0.5f,
-                cv::Scalar(0, 255, 0), 1, cv::LINE_AA);
-    cv::putText(frame, "detection fps: " + std::to_string(detection_fps),
-                cv::Point(500, 15), cv::FONT_HERSHEY_SIMPLEX, 0.5f,
-                cv::Scalar(0, 255, 0), 1, cv::LINE_AA);
+    const char* showfps = getenv("SHOWFPS");
+    if (showfps != nullptr) {
+      cv::putText(frame, "preview fps: " + std::to_string(preview_fps),
+                  cv::Point(0, 15), cv::FONT_HERSHEY_SIMPLEX, 0.5f,
+                  cv::Scalar(0, 255, 0), 1, cv::LINE_AA);
+      cv::putText(frame, "detection fps: " + std::to_string(detection_fps),
+                  cv::Point(500, 15), cv::FONT_HERSHEY_SIMPLEX, 0.5f,
+                  cv::Scalar(0, 255, 0), 1, cv::LINE_AA);
+    }
     cv::imshow("Track", (frame));
     cv::waitKey(10);
     auto end = std::chrono::high_resolution_clock::now();

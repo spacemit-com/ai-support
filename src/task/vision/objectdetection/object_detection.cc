@@ -15,8 +15,8 @@ void ObjectDetection::Preprocess(std::vector<std::vector<float>> &input_tensors,
 ObjectDetectionResult ObjectDetection::Detect(const cv::Mat &raw_img) {
   if (initFlag_ != 0) {
     std::cout << "[ ERROR ] Init fail return empty result" << std::endl;
-    ObjectDetectionResult empty_result;
-    return empty_result;
+    result_.result_bboxes.clear();
+    return result_;
   }
   if (modelFilepath_.find("yolov4") != modelFilepath_.npos) {
     return DetectYolov4(raw_img);

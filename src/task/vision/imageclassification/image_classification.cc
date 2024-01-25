@@ -29,7 +29,7 @@ ImageClassificationResult imageClassification::Classify(
     const cv::Mat &img_raw) {
   if (initFlag_ != 0) {
     std::cout << "[ ERROR ] Init fail return empty result" << std::endl;
-    ImageClassificationResult empty_result;
+    ImageClassificationResult empty_result{"", -1, .0f};
     return empty_result;
   } else {
     img_raw_ = img_raw;

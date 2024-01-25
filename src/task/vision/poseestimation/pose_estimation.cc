@@ -11,8 +11,7 @@ using json = nlohmann::json;
 void PoseEstimation::Preprocess(std::vector<std::vector<float>> &input_tensors,
                                 const cv::Mat &img_raw) {
   Boxi box;
-  processor_.Preprocess(img_raw, box, inputDims_, input_tensors_,
-                        crop_result_pair_, CHW);
+  processor_.Preprocess(img_raw, box, input_tensors, crop_result_pair_, CHW);
 }
 
 PoseEstimationResult PoseEstimation::Estimate(const cv::Mat &raw_img,
@@ -39,8 +38,7 @@ PoseEstimationResult PoseEstimation::EstimateRtmPose(const cv::Mat &raw_img,
     std::cout << "|-- Preprocess" << std::endl;
     TimeWatcher t("|--");
 #endif
-    processor_.Preprocess(raw_img, box, inputDims_, input_tensors_,
-                          crop_result_pair_, CHW);
+    processor_.Preprocess(raw_img, box, input_tensors_, crop_result_pair_, CHW);
   }
   postprocessor_.Postprocess(Infer(input_tensors_), crop_result_pair_,
                              result_points_);

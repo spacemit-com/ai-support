@@ -23,7 +23,7 @@ ImageClassificationResult ClassificationPostprocessor::Postprocess(
   float expSum = 0;
   /* The inference result could be found in the buffer for the output tensors,
   which are usually the buffer from std::vector instances. */
-  for (int i = 0; i < labels.size(); i++) {
+  for (int i = 0; i < static_cast<int>(labels.size()); i++) {
     activation = output_tensors[0].At<float>({0, i});
     expSum += std::exp(activation);
     if (activation > maxActivation) {

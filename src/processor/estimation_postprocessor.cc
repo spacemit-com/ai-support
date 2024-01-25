@@ -16,7 +16,7 @@ void EstimationPostprocessor::Postprocess(
 
   assert(simcc_x_dims.size() == 3 && simcc_y_dims.size() == 3);
 
-  int batch_size = simcc_x_dims[0] == simcc_y_dims[0] ? simcc_x_dims[0] : 0;
+  // int batch_size = simcc_x_dims[0] == simcc_y_dims[0] ? simcc_x_dims[0] : 0;
   int joint_num = simcc_x_dims[1] == simcc_y_dims[1] ? simcc_x_dims[1] : 0;
   int extend_width = simcc_x_dims[2];
   int extend_height = simcc_y_dims[2];
@@ -62,7 +62,7 @@ void EstimationPostprocessor::Postprocess(
   // anti affine transformation to obtain the coordinates on the original
   // picture
   cv::Mat affine_transform_reverse = crop_result_pair.second;
-  for (int i = 0; i < result_points.size(); ++i) {
+  for (int i = 0; i < static_cast<int>(result_points.size()); ++i) {
     cv::Mat origin_point_Mat = cv::Mat::ones(3, 1, CV_64FC1);
     origin_point_Mat.at<double>(0, 0) = result_points[i].x;
     origin_point_Mat.at<double>(1, 0) = result_points[i].y;

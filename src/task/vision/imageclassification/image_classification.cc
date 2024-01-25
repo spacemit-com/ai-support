@@ -18,7 +18,7 @@ int imageClassification::Init(const std::string modelFilepath,
 void imageClassification::Preprocess(
     std::vector<std::vector<float>> &input_tensors, const cv::Mat &img_raw) {
   auto input_dims = GetInputShape();
-  preprocessor_.Preprocess(img_raw_, input_dims, input_tensors_);
+  preprocessor_.Preprocess(img_raw, input_dims, input_tensors);
 }
 
 ImageClassificationResult imageClassification::Postprocess() {

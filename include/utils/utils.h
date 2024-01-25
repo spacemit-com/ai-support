@@ -8,10 +8,8 @@
 
 #include "opencv2/opencv.hpp"
 
-static bool exists_check(const std::string &name) {
-  struct stat buffer;
-  return (stat(name.c_str(), &buffer) == 0);
-}
+bool exists_check(const std::string &name);
+
 void resize_unscale(const cv::Mat &mat, cv::Mat &mat_rs, int target_height,
                     int target_width);
 

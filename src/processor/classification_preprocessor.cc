@@ -3,7 +3,7 @@
 #include "utils/time.h"
 
 void ClassificationPreprocessor::Preprocess(
-    cv::Mat& imageBGR, std::vector<std::vector<int64_t>> inputDims,
+    const cv::Mat& imageBGR, std::vector<std::vector<int64_t>> inputDims,
     std::vector<std::vector<float>>& input_tensor_values) {
   cv::Mat resizedImageBGR, resizedImageRGB, resizedImage, preprocessedImage;
   {
@@ -11,7 +11,8 @@ void ClassificationPreprocessor::Preprocess(
     TimeWatcher t("| |-- Resize image");
 #endif
     cv::resize(imageBGR, resizedImageBGR,
-               cv::Size(static_cast<int>(inputDims[0][3]), static_cast<int>(inputDims[0][2])),
+               cv::Size(static_cast<int>(inputDims[0][3]),
+                        static_cast<int>(inputDims[0][2])),
                cv::InterpolationFlags::INTER_CUBIC);
   }
 

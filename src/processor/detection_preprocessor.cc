@@ -109,8 +109,8 @@ void DetectionPreprocessor::Preprocess(
 #endif
       cv::Mat channels[3];
       cv::split(resizedImage, channels);
-      const float mean_vals[3] = {116.28f, 116.28f, 116.28f};
-      const float scale_vals[3] = {0.017429f, 0.017429f, 0.017429f};
+      // const float mean_vals[3] = {116.28f, 116.28f, 116.28f};
+      // const float scale_vals[3] = {0.017429f, 0.017429f, 0.017429f};
       int channel = 3;
       std::vector<float> input_tensor_value;
       for (int i = 0; i < channel; i++) {

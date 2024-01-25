@@ -37,6 +37,9 @@ objectDetectionTask::objectDetectionTask(const std::string &filePath,
         int flag = pimpl_->objectdetection_->InitFromCommand(
             filePath, labelFilepath, disable_spacemit_ep, intra_threads_num,
             score_threshold, nms_threshold);
+        if (flag != 0) {
+          std::cout << "[Error] Init fail" << std::endl;
+        }
       }
     } else if (strcmp(suffixStr.c_str(), "json") == 0) {
       if (!checkConfigFileExtension(filePath)) {
@@ -49,6 +52,9 @@ objectDetectionTask::objectDetectionTask(const std::string &filePath,
                   << std::endl;
       } else {
         int flag = pimpl_->objectdetection_->InitFromConfig(filePath);
+        if (flag != 0) {
+          std::cout << "[Error] Init fail" << std::endl;
+        }
       }
     } else {
       std::cout << "[ ERROR ] Unsupport file" << std::endl;
@@ -75,6 +81,9 @@ objectDetectionTask::objectDetectionTask(const std::string &filePath)
                   << std::endl;
       } else {
         int flag = pimpl_->objectdetection_->InitFromConfig(filePath);
+        if (flag != 0) {
+          std::cout << "[Error] Init fail" << std::endl;
+        }
       }
     } else {
       std::cout << "[ ERROR ] Unsupport file" << std::endl;

@@ -23,7 +23,7 @@ void DetectionPostprocessor::Postprocess(
   const float input_width = static_cast<float>(input_dims[0][1]);   // e.g 640
   const float resize_ratio =
       std::min(input_height / img_height, input_width / img_width);
-  for (int s = 0; s < output_tensors.size(); s++) {
+  for (int s = 0; s < static_cast<int>(output_tensors.size()); s++) {
     Ort::Value &pred = output_tensors.at(s);  // batch*13*13*3*85
     auto outputInfo = pred.GetTensorTypeAndShapeInfo();
     auto pred_dims = outputInfo.GetShape();
@@ -82,8 +82,8 @@ void DetectionPostprocessor::Postprocess(
   // 4. hard|blend|offset nms with topk.
   nms(bbox_collection, detected_boxes, iou_threshold, topk, nms_type);
 
-  auto detected_boxes_num = detected_boxes.size();
-  for (auto i = 0; i < detected_boxes_num; i++) {
+  int detected_boxes_num = detected_boxes.size();
+  for (auto i = 0; i < static_cast<int>(detected_boxes_num); i++) {
     Boxi result_box;
     result_box.x1 = static_cast<int>(detected_boxes[i].x1);
     result_box.y1 = static_cast<int>(detected_boxes[i].y1);
@@ -107,12 +107,11 @@ void DetectionPostprocessor::PostprocessYolov6(
 #endif
   std::vector<Boxf> bbox_collection;
   bbox_collection.clear();
-  unsigned int count = 0;
   const float input_height = static_cast<float>(input_dims[0][2]);
   const float input_width = static_cast<float>(input_dims[0][3]);
   const float resize_ratio =
       std::min(input_height / img_height, input_width / img_width);
-  Ort::Value &num_dets = output_tensors.at(0);
+  // Ort::Value &num_dets = output_tensors.at(0);
   Ort::Value &boxes = output_tensors.at(1);
   Ort::Value &scores = output_tensors.at(2);
   Ort::Value &output_labels = output_tensors.at(3);
@@ -251,7 +250,6 @@ void DetectionPostprocessor::PostprocessRtmDet(
 #endif
   std::vector<Boxf> bbox_collection;
   bbox_collection.clear();
-  unsigned int count = 0;
   const float input_height = static_cast<float>(input_dims[0][2]);  // e.g 320
   const float input_width = static_cast<float>(input_dims[0][3]);   // e.g 320
   const float resize_ratio =

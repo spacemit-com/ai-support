@@ -30,6 +30,9 @@ imageClassificationTask::imageClassificationTask(
   } else {
     int flag = pimpl_->imageclassification_->Init(
         filePath, labelFilepath, disable_spacemit_ep, intra_threads_num);
+    if (flag != 0) {
+      std::cout << "[Error] Init fail" << std::endl;
+    }
   }
 }
 

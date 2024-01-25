@@ -9,7 +9,7 @@ using json = nlohmann::json;
 
 void ObjectDetection::Preprocess(std::vector<std::vector<float>> &input_tensors,
                                  const cv::Mat &img_raw) {
-  processor_.Preprocess(img_raw, inputDims_, input_tensors_, CHW);
+  processor_.Preprocess(img_raw, inputDims_, input_tensors, CHW);
 }
 
 ObjectDetectionResult ObjectDetection::Detect(const cv::Mat &raw_img) {

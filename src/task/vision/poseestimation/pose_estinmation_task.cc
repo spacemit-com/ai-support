@@ -28,6 +28,9 @@ poseEstimationTask::poseEstimationTask(const std::string &filePath,
       } else {
         int flag = pimpl_->poseestimation_->InitFromCommand(
             filePath, disable_spacemit_ep, intra_threads_num);
+        if (flag != 0) {
+          std::cout << "[Error] Init fail" << std::endl;
+        }
       }
     } else {
       std::cout << "[ ERROR ] Unsupport file" << std::endl;

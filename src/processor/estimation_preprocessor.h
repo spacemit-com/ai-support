@@ -16,7 +16,6 @@ class EstimationPreprocessor : public Preprocessor {
   ~EstimationPreprocessor() {}
   // Function to validate the input image file extension.
   void Preprocess(const cv::Mat& mat, const Boxi& box,
-                  std::vector<std::vector<int64_t>>& input_node_dims,
                   std::vector<std::vector<float>>& input_tensor_values,
                   std::pair<cv::Mat, cv::Mat>& crop_result_pair,
                   unsigned int data_format);

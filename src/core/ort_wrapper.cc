@@ -7,7 +7,8 @@
 #include "spacemit_ort_env.h"
 #endif
 
-int OrtWrapper::Init(std::string instanceName, std::basic_string<ORTCHAR_T> modelFilepath,
+int OrtWrapper::Init(std::string instanceName,
+                     std::basic_string<ORTCHAR_T> modelFilepath,
                      const int intra_threads_num,
                      const bool disable_spacemit_ep) {
   std::unique_ptr<Ort::Env> env(new Ort::Env(
@@ -77,7 +78,8 @@ int OrtWrapper::Init(json config) {
   sessionOptions_.SetInterOpNumThreads(1);
   sessionOptions_.AddConfigEntry("session.inter_op.allow_spinning", "0");
   if (config.contains("profiling_projects")) {
-    std::basic_string<ORTCHAR_T> profiling_projects = config["profiling_projects"];
+    std::basic_string<ORTCHAR_T> profiling_projects =
+        config["profiling_projects"];
     if (profiling_projects.size()) {
       sessionOptions_.EnableProfiling(profiling_projects.c_str());
     }
@@ -206,7 +208,7 @@ std::vector<Ort::Value> OrtWrapper::Invoke(
   Ort::MemoryInfo memoryInfo = Ort::MemoryInfo::CreateCpu(
       OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
 
-  for (int i = 0; i < num_inputs; i++) {
+  for (int i = 0; i < static_cast<int>(num_inputs); i++) {
     input_tensors.push_back(Ort::Value::CreateTensor<float>(
         memoryInfo, input_tensor_values[i].data(), input_tensor_size[i],
         input_node_dims[i].data(), input_node_dims[i].size()));

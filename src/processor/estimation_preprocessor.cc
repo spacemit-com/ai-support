@@ -7,13 +7,12 @@
 
 void EstimationPreprocessor::Preprocess(
     const cv::Mat& mat, const Boxi& box,
-    std::vector<std::vector<int64_t>>& input_node_dims,
     std::vector<std::vector<float>>& input_tensor_values,
     std::pair<cv::Mat, cv::Mat>& crop_result_pair, unsigned int data_format) {
   if (mat.empty()) return;
   if (data_format == 0) {
-    const int input_height = input_node_dims[0][2];
-    const int input_width = input_node_dims[0][3];
+    // const int input_height = input_node_dims[0][2];
+    // const int input_width = input_node_dims[0][3];
     crop_result_pair = CropImageByDetectBox(mat, box);
 
     cv::Mat crop_matBGR = crop_result_pair.first;

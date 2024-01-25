@@ -78,9 +78,9 @@ add_executable(estimation_demo pose_estimation_demo.cc ${ext_src})
 target_link_libraries(estimation_demo PUBLIC bianbuai opencv_core opencv_imgproc opencv_imgcodecs)
 
 add_executable(tracker_stream_demo pose_tracker_stream_demo.cc ${ext_src})
-target_link_libraries(tracker_stream_demo PUBLIC bianbuai pthread opencv_core opencv_imgproc opencv_videoio opencv_imgcodecs opencv_highgui)
+target_link_libraries(tracker_stream_demo PUBLIC bianbuai Threads::Threads opencv_core opencv_imgproc opencv_videoio opencv_imgcodecs opencv_highgui)
 
-install(TARGETS detection_demo classification_demo detection_stream_demo detection_video_demo estimation_demo
+install(TARGETS detection_demo classification_demo detection_stream_demo detection_video_demo estimation_demo tracker_stream_demo
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)

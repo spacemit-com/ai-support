@@ -1,4 +1,4 @@
-#include <pthread.h>
+﻿#include <pthread.h>
 #include <stdlib.h>
 #include <unistd.h>  //for getopt
 
@@ -82,8 +82,8 @@ class Tracker {
   int estimated() { return poses_array_.size(); }
 
   // 移走检测结果
-  PoseEstimationResult get_pose() {
-    PoseEstimationResult poses_moved;
+  struct PoseEstimationResult get_pose() {
+    struct PoseEstimationResult poses_moved;
     poses_mutex_.lock();
     poses_moved = poses_array_.front();
     poses_array_.pop();  // 移走后 objs_array_ 为空数组
@@ -93,7 +93,7 @@ class Tracker {
 
  private:
   std::mutex poses_mutex_;
-  std::queue<PoseEstimationResult> poses_array_;
+  std::queue<struct PoseEstimationResult> poses_array_;
   std::unique_ptr<objectDetectionTask> objectdetectiontask_;
   std::unique_ptr<poseEstimationTask> poseestimationtask_;
   std::string poseFilePath_;
@@ -189,6 +189,7 @@ class SharedDataLoader : public DataLoader {
     }
   }
   int init(int cameraId) {
+#ifndef _WIN32
     capture_.open(cameraId);
     if (!capture_.isOpened()) {
       std::cout
@@ -203,6 +204,8 @@ class SharedDataLoader : public DataLoader {
         }
       }
     }
+#endif
+
     capture_.open(cameraId);
     if (capture_.isOpened()) {
       int width = 640;
@@ -249,13 +252,13 @@ void Track(DataLoader& dataloader, Tracker& tracker) {
   }
   cv::Mat frame;
   while (dataloader.ifenable()) {
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start = std::chrono::steady_clock::now();
     frame = dataloader.peek_frame();  // 取(拷贝)一帧数据
     if ((frame).empty()) {
       continue;
     }
     int flag = tracker.infer(frame);  // 推理并保存检测结果
-    auto end = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::steady_clock::now();
     auto detection_duration =
         std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     dataloader.set_detection_fps(1000 / (detection_duration.count()));
@@ -274,12 +277,12 @@ void Track(DataLoader& dataloader, Tracker& tracker) {
 void Preview(DataLoader& dataloader, Tracker& tracker) {
   cv::Mat frame;
   PoseEstimationResult poses;
-  auto now = std::chrono::high_resolution_clock::now();
+  auto now = std::chrono::steady_clock::now();
   poses.timestamp = now;
   int count = 0;
   int dur = 0;
   while (dataloader.ifenable()) {
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start = std::chrono::steady_clock::now();
     frame = dataloader.fetch_frame();  // 取(搬走)一帧数据
     if ((frame).empty()) {
       break;
@@ -309,7 +312,7 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
     }
     // 调用 detector.detected 和 detector.get_object 期间,
     // 检测结果依然可能被刷新
-    now = std::chrono::high_resolution_clock::now();
+    now = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
         now - poses.timestamp);
     if (duration.count() < 1000 && poses.result_points.size()) {
@@ -328,7 +331,7 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
     }
     cv::imshow("Track", (frame));
     cv::waitKey(10);
-    auto end = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::steady_clock::now();
     auto preview_duration =
         std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     count++;
@@ -347,9 +350,11 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
   cv::destroyAllWindows();
 }
 
+#ifndef _WIN32
 void setThreadName(std::thread& thread, const char* name) {
   pthread_setname_np(thread.native_handle(), name);
 }
+#endif
 
 int main(int argc, char* argv[]) {
   std::string detFilePath, poseFilePath, labelFilepath, input, inputType;
@@ -428,8 +433,10 @@ int main(int argc, char* argv[]) {
   std::thread t1(Preview, std::ref(dataloader), std::ref(tracker));
   // std::this_thread::sleep_for(std::chrono::seconds(5));
   std::thread t2(Track, std::ref(dataloader), std::ref(tracker));
+#ifndef _WIN32
   setThreadName(t1, "PreviewThread");
   setThreadName(t2, "TrackerThread");
+#endif
   t1.join();
   t2.join();
   return 0;

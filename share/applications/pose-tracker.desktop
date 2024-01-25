@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+#Encoding=UTF-8
+Version=1.0.3
+Name=pose-tracker
+Exec=/usr/bin/tracker_stream_demo /usr/share/models/rtmdet-nano.q.onnx /usr/share/models/rtmpose-t.q.onnx /usr/share/models/coco.txt 0 cameraId -t 2
+Terminal=true
+Icon=/usr/share/icons/bianbu-ai-demo/pose-tracker.png

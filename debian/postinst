@@ -24,7 +24,7 @@ function copy_install_to_desktop() {
 aiDesktop=(
   "object-detection.desktop"
   #"hand-tracker.desktop"
-  #"pose-tracker.desktop"
+  "pose-tracker.desktop"
 )
 function ai_config_desktop() {
   gDesktopName="桌面"

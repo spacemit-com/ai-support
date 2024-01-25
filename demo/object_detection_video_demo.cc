@@ -42,7 +42,7 @@ int DetectVideo(const std::string &modelFilepath,
 #ifdef DEBUG
       TimeWatcher t("|-- Output result");
 #endif
-      for (int i = 0; i < resultBoxes.size(); i++) {
+      for (int i = 0; i < static_cast<int>(resultBoxes.size()); i++) {
         std::cout << "bbox[" << std::setw(2) << i << "]"
                   << " "
                   << "x1y1x2y2: "
@@ -79,6 +79,9 @@ int main(int argc, char *argv[]) {
     dstFilepath = argv[4];
     int flag =
         DetectVideo(modelFilepath, labelFilepath, videoFilepath, dstFilepath);
+    if (flag != 0) {
+      std::cout << "[Error] Detect fail" << std::endl;
+    }
   } else {
     std::cout << "run with " << argv[0]
               << " <modelFilepath>  <labelFilepath> <videoFilepath> "

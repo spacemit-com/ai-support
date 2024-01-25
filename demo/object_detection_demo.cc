@@ -2,7 +2,7 @@
 #ifdef _WIN32
 #include "getopt.h"
 #else
-#include <unistd.h> // for: getopt
+#include <unistd.h>  // for: getopt
 #endif
 
 #include <iomanip>  // for setprecision
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 #ifdef DEBUG
       TimeWatcher t("|-- Output result");
 #endif
-      for (int i = 0; i < resultBoxes.size(); i++) {
+      for (int i = 0; i < static_cast<int>(resultBoxes.size()); i++) {
         std::cout << "bbox[" << std::setw(2) << i << "]"
                   << " "
                   << "x1y1x2y2: "
@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
 #ifdef DEBUG
       TimeWatcher t("|-- Output result");
 #endif
-      for (int i = 0; i < resultBoxes.size(); i++) {
+      for (int i = 0; i < static_cast<int>(resultBoxes.size()); i++) {
         std::cout << "bbox[" << std::setw(2) << i << "]"
                   << " "
                   << "x1y1x2y2: "
@@ -189,7 +189,7 @@ int main(int argc, char* argv[]) {
 #ifdef DEBUG
       TimeWatcher t("|-- Output result");
 #endif
-      for (int i = 0; i < resultBoxes.size(); i++) {
+      for (int i = 0; i < static_cast<int>(resultBoxes.size()); i++) {
         std::cout << "bbox[" << std::setw(2) << i << "]"
                   << " "
                   << "x1y1x2y2: "

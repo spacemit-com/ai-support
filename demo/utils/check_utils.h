@@ -1,11 +1,11 @@
 #ifndef SUPPORT_DEMO_UTILS_CHECK_UTILS_H_
 #define SUPPORT_DEMO_UTILS_CHECK_UTILS_H_
-
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
 
+#include "check_utils.h"
 static bool checkImageFileExtension(const std::string& filename) {
   size_t pos = filename.rfind('.');
   if (filename.empty()) {
@@ -50,5 +50,4 @@ static bool is_valid_camera(const std::string& path) {
 }
 
 #endif
-
 #endif  // SUPPORT_DEMO_UTILS_CHECK_UTILS_H_

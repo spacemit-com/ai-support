@@ -30,11 +30,11 @@ static void draw_points_inplace(cv::Mat &img,
       {0, 1},   {0, 2},   {1, 3},   {2, 4},  {5, 7},  {7, 9},
       {6, 8},   {8, 10},  {5, 6},   {5, 11}, {6, 12}, {11, 12},
       {11, 13}, {13, 15}, {12, 14}, {14, 16}};
-  for (int i = 0; i < points.size(); ++i) {
+  for (int i = 0; i < static_cast<int>(points.size()); ++i) {
     cv::circle(img, cv::Point(points[i].x, points[i].y), 2,
                cv::Scalar{0, 0, 255}, 2, cv::LINE_AA);
   }
-  for (int i = 0; i < coco_17_joint_links.size(); ++i) {
+  for (int i = 0; i < static_cast<int>(coco_17_joint_links.size()); ++i) {
     std::pair<int, int> joint_links = coco_17_joint_links[i];
     cv::line(
         img,

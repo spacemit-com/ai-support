@@ -59,7 +59,8 @@ class Tracker {
     }
     ObjectDetectionResult objs_temp = objectdetectiontask_->Detect(frame);
     int count{0}, flag{0};
-    for (count = 0; count < objs_temp.result_bboxes.size(); count++) {
+    for (count = 0; count < static_cast<int>(objs_temp.result_bboxes.size());
+         count++) {
       if (objs_temp.result_bboxes[count].label == 0) {
         flag = 1;
         break;
@@ -247,7 +248,6 @@ void Track(DataLoader& dataloader, Tracker& tracker) {
     return;
   }
   cv::Mat frame;
-  int flag;
   while (dataloader.ifenable()) {
     auto start = std::chrono::high_resolution_clock::now();
     frame = dataloader.peek_frame();  // 取(拷贝)一帧数据
@@ -297,7 +297,7 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
             static_cast<float>(input_width) / static_cast<float>(img_width));
         float dw = (input_width - resize_ratio * img_width) / 2;
         float dh = (input_height - resize_ratio * img_height) / 2;
-        for (int i = 0; i < poses.result_points.size(); i++) {
+        for (int i = 0; i < static_cast<int>(poses.result_points.size()); i++) {
           poses.result_points[i].x =
               (poses.result_points[i].x - dw) / resize_ratio;
           poses.result_points[i].y =
@@ -313,7 +313,7 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
     if (duration.count() < 1000 && poses.result_points.size()) {
       draw_points_inplace((frame), poses.result_points);  // 画框
     }
-    int preview_fps = dataloader.get_preview_fps();
+    // int preview_fps = dataloader.get_preview_fps();
     int detection_fps = dataloader.get_detection_fps();
     /*
     cv::putText(frame, "preview fps: " + std::to_string(preview_fps),

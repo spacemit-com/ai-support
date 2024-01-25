@@ -1,9 +1,9 @@
-﻿#include <stdlib.h>
-#include <pthread.h>
+﻿#include <pthread.h>
+#include <stdlib.h>
 #ifdef _WIN32
 #include "getopt.h"
 #else
-#include <unistd.h> // for: getopt
+#include <unistd.h>  // for: getopt
 #endif
 
 #include <chrono>
@@ -169,7 +169,7 @@ class SharedDataLoader : public DataLoader {
   }
   int init(int cameraId) {
 #ifndef _WIN32
-      capture_.open(cameraId);
+    capture_.open(cameraId);
     if (!capture_.isOpened()) {
       std::cout
           << "Open camera capture failed, try to figure out right cameraId"
@@ -230,7 +230,6 @@ void Detection(DataLoader& dataloader, Detector& detector) {
     return;
   }
   cv::Mat frame;
-  int flag;
   while (dataloader.ifenable()) {
     auto start = std::chrono::steady_clock::now();
     frame = dataloader.peek_frame();  // 取(拷贝)一帧数据
@@ -277,7 +276,7 @@ void Preview(DataLoader& dataloader, Detector& detector) {
             static_cast<float>(input_width) / static_cast<float>(img_width));
         float dw = (input_width - resize_ratio * img_width) / 2;
         float dh = (input_height - resize_ratio * img_height) / 2;
-        for (int i = 0; i < objs.result_bboxes.size(); i++) {
+        for (int i = 0; i < static_cast<int>(objs.result_bboxes.size()); i++) {
           objs.result_bboxes[i].x1 =
               (objs.result_bboxes[i].x1 - dw) / resize_ratio;
           objs.result_bboxes[i].x2 =
@@ -292,7 +291,7 @@ void Preview(DataLoader& dataloader, Detector& detector) {
 #ifdef DEBUG
         TimeWatcher t("|-- Output result");
 #endif
-        for (int i = 0; i < objs.result_bboxes.size(); i++) {
+        for (int i = 0; i < static_cast<int>(objs.result_bboxes.size()); i++) {
           std::cout << "bbox[" << std::setw(2) << i << "]"
                     << " "
                     << "x1y1x2y2: "
@@ -316,7 +315,7 @@ void Preview(DataLoader& dataloader, Detector& detector) {
     if (duration.count() < 1000) {
       draw_boxes_inplace((frame), objs.result_bboxes);  // 画框
     }
-    int preview_fps = dataloader.get_preview_fps();
+    // int preview_fps = dataloader.get_preview_fps();
     int detection_fps = dataloader.get_detection_fps();
     /*
     cv::putText(frame, "preview fps: " + std::to_string(preview_fps),

@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
         std::unique_ptr<poseEstimationTask>(new poseEstimationTask(
             poseFilePath, disable_spacemit_ep, intra_threads_num));
     Boxi box;
-    for (int i = 0; i < resultBoxes.size(); i++) {
+    for (int i = 0; i < static_cast<int>(resultBoxes.size()); i++) {
       box = resultBoxes[i];
       if (box.label != 0) {
         continue;
@@ -78,17 +78,17 @@ int main(int argc, char* argv[]) {
             static_cast<float>(input_width) / static_cast<float>(img_width));
         float dw = (input_width - resize_ratio * img_width) / 2;
         float dh = (input_height - resize_ratio * img_height) / 2;
-        for (int i = 0; i < resultPoints.size(); i++) {
+        for (int i = 0; i < static_cast<int>(resultPoints.size()); i++) {
           resultPoints[i].x = (resultPoints[i].x - dw) / resize_ratio;
           resultPoints[i].y = (resultPoints[i].y - dh) / resize_ratio;
         }
       }
-      for (int i = 0; i < resultPoints.size(); ++i) {
+      for (int i = 0; i < static_cast<int>(resultPoints.size()); ++i) {
         cv::circle(imgRaw, cv::Point(resultPoints[i].x, resultPoints[i].y), 2,
                    cv::Scalar{0, 0, 255}, 2, cv::LINE_AA);
       }
 
-      for (int i = 0; i < coco_17_joint_links.size(); ++i) {
+      for (int i = 0; i < static_cast<int>(coco_17_joint_links.size()); ++i) {
         std::pair<int, int> joint_links = coco_17_joint_links[i];
         cv::line(imgRaw,
                  cv::Point(resultPoints[joint_links.first].x,
@@ -156,18 +156,18 @@ int main(int argc, char* argv[]) {
         std::unique_ptr<poseEstimationTask>(new poseEstimationTask(
             poseFilePath, disable_spacemit_ep, intra_threads_num));
     Boxi box;
-    for (int i = 0; i < resultBoxes.size(); i++) {
+    for (int i = 0; i < static_cast<int>(resultBoxes.size()); i++) {
       box = resultBoxes[i];
       if (box.label != 0) {
         continue;
       }
       resultPoints = poseestimationtask->Estimate(img, box).result_points;
-      for (int i = 0; i < resultPoints.size(); ++i) {
+      for (int i = 0; i < static_cast<int>(resultPoints.size()); ++i) {
         cv::circle(img, cv::Point(resultPoints[i].x, resultPoints[i].y), 2,
                    cv::Scalar{0, 0, 255}, 2, cv::LINE_AA);
       }
 
-      for (int i = 0; i < coco_17_joint_links.size(); ++i) {
+      for (int i = 0; i < static_cast<int>(coco_17_joint_links.size()); ++i) {
         std::pair<int, int> joint_links = coco_17_joint_links[i];
         cv::line(img,
                  cv::Point(resultPoints[joint_links.first].x,

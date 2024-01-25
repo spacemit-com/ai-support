@@ -317,7 +317,7 @@ void Preview(DataLoader& dataloader, Detector& detector) {
     if (duration.count() < 1000) {
       draw_boxes_inplace((frame), objs.result_bboxes);  // 画框
     }
-    // int preview_fps = dataloader.get_preview_fps();
+    int preview_fps = dataloader.get_preview_fps();
     int detection_fps = dataloader.get_detection_fps();
     const char* showfps = getenv("SHOWFPS");
     if (showfps != nullptr) {

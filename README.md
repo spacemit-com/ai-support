@@ -41,9 +41,11 @@ cmake .. -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_DIR} \
 
 ```bash
 ./classification_demo <modelFilepath> <labelFilepath> <imageFilepath>
-./detection_stream_demo <modelFilepath> <labelFilepath>
-./detection_demo <modelFilepath> <imageFilepath> <saveImgpath> <labelFilepath>
+./detection_stream_demo <modelFilepath> <labelFilepath> <input> <inputType>
+./detection_demo <modelFilepath> <labelFilepath> <imageFilepath> <saveImgpath>
 or 
 ./detection_demo <configFilepath> <imageFilepath> <saveImgpath>
 ./detection_video_demo <modelFilepath>  <labelFilepath> <videoFilepath> 
+./estimation_demo <detFilepath> <poseFilepath> <labelFilepath> <imageFilepath> <saveImgpath>
+./tracker_stream_demo <detFilepath> <poseFilepath> <labelFilepath> <input> <inputType>
 ```

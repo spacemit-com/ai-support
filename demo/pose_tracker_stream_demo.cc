@@ -399,8 +399,8 @@ int main(int argc, char* argv[]) {
                  "<input> <inputType> (video "
                  "or cameraId)  option(-d <disable_spacemit_ep>) option(-t "
                  "<intra_threads_num>) "
-                 "option(-s score_threshold) option(-n nms_threshold) "
-                 "option(-h resize_height) option(-w resize_width)"
+                 "option(-s <score_threshold>) option(-n <nms_threshold>) "
+                 "option(-h <resize_height>) option(-w <resize_width>)"
               << std::endl;
     return -1;
   }

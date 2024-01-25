@@ -30,9 +30,9 @@ int main(int argc, char* argv[]) {
   if (argc == 6) {
     detFilePath = argv[1];
     poseFilePath = argv[2];
-    imageFilepath = argv[3];
-    saveImgpath = argv[4];
-    labelFilepath = argv[5];
+    labelFilepath = argv[3];
+    imageFilepath = argv[4];
+    saveImgpath = argv[5];
     if (!checkImageFileExtension(imageFilepath) ||
         !checkImageFileExtension(saveImgpath)) {
       std::cout << "[ ERROR ] The ImageFilepath is not correct. Make sure you "
@@ -102,9 +102,9 @@ int main(int argc, char* argv[]) {
   } else if (argc > 6) {
     detFilePath = argv[1];
     poseFilePath = argv[2];
-    imageFilepath = argv[3];
-    saveImgpath = argv[4];
-    labelFilepath = argv[5];
+    labelFilepath = argv[3];
+    imageFilepath = argv[4];
+    saveImgpath = argv[5];
     if (!checkImageFileExtension(imageFilepath) ||
         !checkImageFileExtension(saveImgpath)) {
       std::cout << "[ ERROR ] The ImageFilepath is not correct. Make sure you "
@@ -181,11 +181,11 @@ int main(int argc, char* argv[]) {
   } else {
     std::cout
         << "run with " << argv[0]
-        << " <detModelFilepath> <poseModelFilepath> <imageFilepath> "
-           "<saveImgpath> <labelFilepath> "
+        << " <detModelFilepath> <poseModelFilepath> <labelFilepath> "
+           "<imageFilepath> "
+           "<saveImgpath> "
            "option(-d <disable_spacemit_ep>) option(-t <intra_threads_num>) "
-           "option(-s score_threshold) option(-n nms_threshold) or "
-        << argv[0] << " <configFilepath> <imageFilepath> <saveImgpath>"
+           "option(-s <score_threshold>) option(-n <nms_threshold>)"
         << std::endl;
     return -1;
   }

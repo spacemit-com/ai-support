@@ -5,7 +5,6 @@
 #include <iostream>
 #include <string>
 
-#include "check_utils.h"
 static bool checkImageFileExtension(const std::string& filename) {
   size_t pos = filename.rfind('.');
   if (filename.empty()) {

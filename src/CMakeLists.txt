@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 14)
 if (WIN32)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 else()
-  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
 endif()
 
 # TODO: update cc files with '#ifndef NDEBUG'

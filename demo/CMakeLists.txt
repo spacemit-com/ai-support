@@ -70,8 +70,9 @@ target_link_libraries(detection_demo PUBLIC bianbuai opencv_core opencv_imgproc 
 add_executable(detection_video_demo object_detection_video_demo.cc ${ext_src})
 target_link_libraries(detection_video_demo PUBLIC bianbuai opencv_core opencv_imgproc opencv_videoio opencv_highgui)
 
+find_package(Threads REQUIRED)
 add_executable(detection_stream_demo object_detection_stream_demo.cc ${ext_src})
-target_link_libraries(detection_stream_demo PUBLIC bianbuai pthread opencv_core opencv_imgproc opencv_videoio opencv_imgcodecs opencv_highgui)
+target_link_libraries(detection_stream_demo PUBLIC bianbuai Threads::Threads opencv_core opencv_imgproc opencv_videoio opencv_imgcodecs opencv_highgui)
 
 add_executable(estimation_demo pose_estimation_demo.cc ${ext_src})
 target_link_libraries(estimation_demo PUBLIC bianbuai opencv_core opencv_imgproc opencv_imgcodecs)

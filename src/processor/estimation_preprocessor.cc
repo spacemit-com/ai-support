@@ -53,7 +53,7 @@ void EstimationPreprocessor::Preprocess(
 
 std::pair<cv::Mat, cv::Mat> EstimationPreprocessor::CropImageByDetectBox(
     const cv::Mat& input_image, const Boxi& box) {
-  // auto time_start = std::chrono::high_resolution_clock::now();
+  // auto time_start = std::chrono::steady_clock::now();
   std::pair<cv::Mat, cv::Mat> result_pair;
 
   if (!input_image.data) {

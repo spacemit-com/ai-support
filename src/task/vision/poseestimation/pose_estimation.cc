@@ -44,7 +44,7 @@ PoseEstimationResult PoseEstimation::EstimateRtmPose(const cv::Mat &raw_img,
                              result_points_);
 
   result_.result_points = result_points_;
-  result_.timestamp = std::chrono::high_resolution_clock::now();
+  result_.timestamp = std::chrono::steady_clock::now();
   return result_;
 }
 

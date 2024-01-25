@@ -20,7 +20,7 @@ typedef PosePoint Vector2D;
 
 struct PoseEstimationResult {
   std::vector<PosePoint> result_points;
-  std::chrono::_V2::system_clock::time_point timestamp;
+  std::chrono::time_point< std::chrono::steady_clock > timestamp;
 };
 
 #endif  // SUPPORT_INCLUDE_TASK_VISION_POSE_ESTIMATION_TYPES_H_

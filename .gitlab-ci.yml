@@ -109,7 +109,7 @@ x86_64-test-job:    # This job runs in the test stage.
     - export LD_LIBRARY_PATH=${ORT_HOME_X86}/lib:$LD_LIBRARY_PATH
     - demo/build.x86_64/classification_demo $DATA/models/squeezenet1.1-7.onnx $DATA/labels/synset.txt $DATA/imgs/dog.jpg
     - demo/build.x86_64/detection_demo $DATA/models/nanodet-plus-m_320.onnx $DATA/labels/coco.txt $DATA/imgs/person0.jpg result0.jpg
-    - echo "detection_demo result md5sum:" $(md5sum result0.jpg)
+    - $([[ "3aeb3a152ce55a94c0c7bac303534b8d" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
     - echo "Running x86_64 tests done!"
   <<: *only-defaults
 
@@ -121,7 +121,7 @@ riscv64-test-job:   # This job runs in the test stage.
     - echo "Running unit tests ... (This will take several seconds.)"
     - ${QEMU_CMD} demo/build.riscv64/classification_demo $DATA/models/squeezenet1.1-7.onnx $DATA/labels/synset.txt $DATA/imgs/dog.jpg
     - ${QEMU_CMD} demo/build.riscv64/detection_demo $DATA/models/nanodet-plus-m_320.onnx $DATA/labels/coco.txt $DATA/imgs/person0.jpg result0.jpg
-    - echo "detection_demo result md5sum:" $(md5sum result0.jpg)
+    - $([[ "3aeb3a152ce55a94c0c7bac303534b8d" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
     - echo "Running riscv64 tests done!"
   <<: *only-defaults
 

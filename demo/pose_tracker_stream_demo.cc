@@ -1,6 +1,9 @@
-﻿#include <pthread.h>
+﻿#include "dataloader.hpp"
+#include "pose_estimation.hpp"
+
+#include <pthread.h>
 #include <stdlib.h>
-#include <unistd.h>  //for getopt
+#include <unistd.h> // for: getopt
 
 #include <chrono>
 #include <cmath>
@@ -12,11 +15,7 @@
 
 #include "opencv2/opencv.hpp"
 #include "task/vision/object_detection_task.h"
-#include "task/vision/object_detection_types.h"
 #include "task/vision/pose_estimation_task.h"
-#include "task/vision/pose_estimation_types.h"
-#include "utils/box_utils.h"
-#include "utils/check_utils.h"
 #ifdef DEBUG
 #include "utils/time.h"
 #endif
@@ -103,145 +102,6 @@ class Tracker {
   int intraThreadsNum_;
   float scoreThreshold_;
   float nmsThreshold_;
-};
-
-class DataLoader {
- public:
-  DataLoader(const int& resize_height, const int& resize_width) {
-    enable = true;
-    resize_height_ = resize_height;
-    resize_width_ = resize_width;
-    preview_fps_ = 0;
-    detection_fps_ = 0;
-  }
-  ~DataLoader() {}
-  bool ifenable() { return enable; }
-  void set_disable() { enable = false; }
-  void set_preview_fps(int preview_fps) { preview_fps_ = preview_fps; }
-  void set_detection_fps(int detection_fps) { detection_fps_ = detection_fps; }
-  int get_preview_fps() { return preview_fps_; }
-  int get_detection_fps() { return detection_fps_; }
-  int get_resize_height() { return resize_height_; }
-  int get_resize_width() { return resize_width_; }
-  virtual cv::Mat fetch_frame() = 0;
-  virtual cv::Mat peek_frame() = 0;
-
- private:
-  bool enable;
-  int resize_height_;
-  int resize_width_;
-  int preview_fps_;
-  int detection_fps_;
-};
-
-// 独占式
-class ExclusiveDataLoader : public DataLoader {
- public:
-  ExclusiveDataLoader(const int& resize_height, const int& resize_width)
-      : DataLoader(resize_height, resize_width) {}
-  ~ExclusiveDataLoader() {}
-  int init(const std::string& path) {
-    capture_.open(path);
-    if (capture_.isOpened()) {
-      return 0;
-    } else {
-      std::cout << "Open video capture failed" << std::endl;
-      return -1;
-    }
-  }
-  int init(const int cameraId) {
-    capture_.open(cameraId);
-    if (capture_.isOpened()) {
-      return 0;
-    } else {
-      std::cout << "Open camera capture failed" << std::endl;
-      return -1;
-    }
-  }
-  cv::Mat fetch_frame() {
-    cv::Mat frame;
-    capture_.read(frame);
-    return frame;
-  }
-  cv::Mat peek_frame() { return fetch_frame(); }
-
- private:
-  cv::VideoCapture capture_;
-};
-
-// 共享式
-class SharedDataLoader : public DataLoader {
- public:
-  SharedDataLoader(const int& resize_height, const int& resize_width)
-      : DataLoader(resize_height, resize_width) {}
-  ~SharedDataLoader() {}
-  int init(const std::string& path) {
-    capture_.open(path);
-    if (capture_.isOpened()) {
-      int width = 1280;
-      int height = 720;
-      capture_.set(cv::CAP_PROP_FRAME_WIDTH, width);
-      capture_.set(cv::CAP_PROP_FRAME_HEIGHT, height);
-      return 0;
-    } else {
-      std::cout << "Open video capture failed" << std::endl;
-      return -1;
-    }
-  }
-  int init(int cameraId) {
-#ifndef _WIN32
-    capture_.open(cameraId);
-    if (!capture_.isOpened()) {
-      std::cout
-          << "Open camera capture failed, try to figure out right cameraId"
-          << std::endl;
-      std::string path = "/dev/video";
-      for (int i = 0; i <= 100; ++i) {
-        std::string device_path = path + std::to_string(i);
-        if (is_valid_camera(device_path)) {
-          cameraId = i;
-          break;
-        }
-      }
-    }
-#endif
-
-    capture_.open(cameraId);
-    if (capture_.isOpened()) {
-      int width = 640;
-      int height = 480;
-      capture_.set(cv::CAP_PROP_FRAME_WIDTH, width);
-      capture_.set(cv::CAP_PROP_FRAME_HEIGHT, height);
-      return 0;
-    } else {
-      std::cout << "Open camera capture failed" << std::endl;
-      return -1;
-    }
-  }
-
-  cv::Mat fetch_frame() {
-    cv::Mat frame, temp;
-    capture_.read(frame);
-    resize_unscale(frame, temp, get_resize_height(), get_resize_width());
-    frame_mutex_.lock();
-    frame_ = temp.clone();
-    frame_mutex_.unlock();
-    return frame;
-  }
-  cv::Mat peek_frame() {
-    cv::Mat frame;
-    frame_mutex_.lock();
-    frame = frame_.clone();  // 深拷贝
-    frame_mutex_.unlock();
-    return frame;
-  }
-
- private:
-  std::shared_ptr<cv::Mat> frame;
-  cv::Mat frame_;
-  std::mutex frame_mutex_;
-  cv::VideoCapture capture_;
-  std::queue<cv::Mat> frame_queue_;
 };
 
 // 检测线程
@@ -415,21 +275,11 @@ int main(int argc, char* argv[]) {
                   disable_spacemit_ep, intra_threads_num, score_threshold,
                   nms_threshold};
   SharedDataLoader dataloader{resize_height, resize_width};
-  if (inputType == "video") {
-    if (dataloader.init(input) != 0) {
-      std::cout << "[ERROR] dataloader init error" << std::endl;
-      return -1;
-    }
-  } else if (inputType == "cameraId" && isNumber(input) == 1) {
-    int cameraId = std::stoi(input);
-    if (dataloader.init(cameraId) != 0) {
-      std::cout << "[ERROR] dataloader init error" << std::endl;
-      return -1;
-    }
-  } else {
-    std::cout << "[ERROR] unsupported input type" << std::endl;
+  if (dataloader.init(input) != 0) {
+    std::cout << "[ERROR] dataloader init error" << std::endl;
     return -1;
   }
+
   std::thread t1(Preview, std::ref(dataloader), std::ref(tracker));
   // std::this_thread::sleep_for(std::chrono::seconds(5));
   std::thread t2(Track, std::ref(dataloader), std::ref(tracker));

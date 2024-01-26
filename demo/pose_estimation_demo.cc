@@ -1,12 +1,11 @@
 #include <stdlib.h>
-#include <unistd.h>  //for getopt
+#include <unistd.h> // for: getopt
 
-#include <iomanip>  // for setprecision
+#include <iomanip>  // for: setprecision
 #include <iostream>
 
 #include "task/vision/object_detection_task.h"
 #include "task/vision/pose_estimation_task.h"
-#include "utils/box_utils.h"
 #include "utils/check_utils.h"
 #include "utils/time.h"
 #include "utils/utils.h"

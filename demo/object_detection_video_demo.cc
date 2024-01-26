@@ -1,8 +1,8 @@
-﻿#include <iostream>
+﻿#include "object_detection.hpp"
+
+#include <iostream>
 
 #include "task/vision/object_detection_task.h"
-#include "utils/box_utils.h"
-#include "utils/check_utils.h"
 #ifdef DEBUG
 #include "utils/time.h"
 #endif

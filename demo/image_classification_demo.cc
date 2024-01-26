@@ -1,9 +1,5 @@
 #include <stdlib.h>
-#ifdef _WIN32
-#include "getopt.h"
-#else
 #include <unistd.h> // for: getopt
-#endif
 
 #include <iostream>
 

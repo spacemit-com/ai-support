@@ -20,33 +20,4 @@ static bool checkImageFileExtension(const std::string& filename) {
   }
 }
 
-static bool isNumber(const std::string& str) {
-  for (char const& c : str) {
-    if (std::isdigit(c) == 0) return false;
-  }
-  return true;
-}
-
-#ifndef _WIN32
-
-#include <fcntl.h>
-#include <linux/videodev2.h>
-#include <sys/ioctl.h>
-#include <unistd.h>  //for close
-
-static bool is_valid_camera(const std::string& path) {
-  int fd = open(path.c_str(), O_RDWR);
-  if (fd == -1) {
-    return false;
-  }
-  struct v4l2_capability cap;
-  if (ioctl(fd, VIDIOC_QUERYCAP, &cap) == -1) {
-    close(fd);
-    return false;
-  }
-  close(fd);
-  return (cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) != 0;
-}
-
-#endif
 #endif  // SUPPORT_DEMO_UTILS_CHECK_UTILS_H_

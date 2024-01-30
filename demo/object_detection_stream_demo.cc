@@ -1,10 +1,8 @@
-﻿#include "dataloader.hpp"
-#include "object_detection.hpp"
-
-#include <pthread.h>
+﻿#include <pthread.h>
 #include <stdlib.h>
-#include <unistd.h> // for: getopt
+#include <unistd.h>  // for: getopt
 
+#include <algorithm>  // for: swap
 #include <chrono>
 #include <cmath>
 #include <iostream>
@@ -13,6 +11,8 @@
 #include <string>
 #include <thread>
 
+#include "dataloader.hpp"
+#include "object_detection.hpp"
 #include "opencv2/opencv.hpp"
 #include "task/vision/object_detection_task.h"
 #ifdef DEBUG
@@ -64,15 +64,16 @@ class Detector {
   ObjectDetectionResult get_object() {
     ObjectDetectionResult objs_moved;
     objs_mutex_.lock();
-    objs_moved = objs_array_.front();
-    objs_array_.pop();  // 移走后 objs_array_ 为空数组
+    objs_moved = objs_array_.back();
+    std::queue<struct ObjectDetectionResult> empty;
+    std::swap(empty, objs_array_);
     objs_mutex_.unlock();
     return objs_moved;
   }
 
  private:
   std::mutex objs_mutex_;
-  std::queue<ObjectDetectionResult> objs_array_;
+  std::queue<struct ObjectDetectionResult> objs_array_;
   std::unique_ptr<objectDetectionTask> objectdetectiontask_;
   std::string filePath_;
   std::string labelFilepath_;

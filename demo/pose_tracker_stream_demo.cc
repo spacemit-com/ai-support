@@ -1,10 +1,8 @@
-﻿#include "dataloader.hpp"
-#include "pose_estimation.hpp"
-
-#include <pthread.h>
+﻿#include <pthread.h>
 #include <stdlib.h>
-#include <unistd.h> // for: getopt
+#include <unistd.h>  // for: getopt
 
+#include <algorithm>  // for: swap
 #include <chrono>
 #include <cmath>
 #include <iostream>
@@ -13,7 +11,9 @@
 #include <string>
 #include <thread>
 
+#include "dataloader.hpp"
 #include "opencv2/opencv.hpp"
+#include "pose_estimation.hpp"
 #include "task/vision/object_detection_task.h"
 #include "task/vision/pose_estimation_task.h"
 #ifdef DEBUG
@@ -84,8 +84,9 @@ class Tracker {
   struct PoseEstimationResult get_pose() {
     struct PoseEstimationResult poses_moved;
     poses_mutex_.lock();
-    poses_moved = poses_array_.front();
-    poses_array_.pop();  // 移走后 objs_array_ 为空数组
+    poses_moved = poses_array_.back();
+    std::queue<struct PoseEstimationResult> empty;
+    std::swap(empty, poses_array_);
     poses_mutex_.unlock();
     return poses_moved;
   }

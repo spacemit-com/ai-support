@@ -15,13 +15,13 @@ std::vector<std::vector<float>> ObjectDetection::Process(
     return input_tensors_;
   }
   if (modelFilepath_.find("yolov4") != modelFilepath_.npos) {
-    processor_.Preprocess(raw_img, inputDims_, input_tensors_, HWC);
+    preprocessor_.Preprocess(raw_img, inputDims_, input_tensors_, HWC);
   } else if (modelFilepath_.find("yolov6") != modelFilepath_.npos) {
-    processor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
+    preprocessor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
   } else if (modelFilepath_.find("nanodet-plus") != modelFilepath_.npos) {
-    processor_.PreprocessNanoDetPlus(raw_img, inputDims_, input_tensors_);
+    preprocessor_.PreprocessNanoDetPlus(raw_img, inputDims_, input_tensors_);
   } else if (modelFilepath_.find("rtmdet") != modelFilepath_.npos) {
-    processor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
+    preprocessor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
   } else {
     std::cout << "[ ERROR ] Unsupported model return empty tensors"
               << std::endl;
@@ -50,7 +50,8 @@ ObjectDetectionResult ObjectDetection::Detect(
   }
   if (modelFilepath_.find("yolov4") != modelFilepath_.npos) {
     postprocessor_.Postprocess(Infer(input_tensors_), result_boxes_, inputDims_,
-                               img_height, img_width, labels_);
+                               img_height, img_width, labels_, score_threshold_,
+                               nms_threshold_);
   } else if (modelFilepath_.find("yolov6") != modelFilepath_.npos) {
     postprocessor_.PostprocessYolov6(Infer(input_tensors_), result_boxes_,
                                      inputDims_, img_height, img_width, labels_,
@@ -79,13 +80,13 @@ void ObjectDetection::Preprocess(const cv::Mat &raw_img) {
   img_height_ = raw_img.rows;
   img_width_ = raw_img.cols;
   if (modelFilepath_.find("yolov4") != modelFilepath_.npos) {
-    processor_.Preprocess(raw_img, inputDims_, input_tensors_, HWC);
+    preprocessor_.Preprocess(raw_img, inputDims_, input_tensors_, HWC);
   } else if (modelFilepath_.find("yolov6") != modelFilepath_.npos) {
-    processor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
+    preprocessor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
   } else if (modelFilepath_.find("nanodet-plus") != modelFilepath_.npos) {
-    processor_.PreprocessNanoDetPlus(raw_img, inputDims_, input_tensors_);
+    preprocessor_.PreprocessNanoDetPlus(raw_img, inputDims_, input_tensors_);
   } else if (modelFilepath_.find("rtmdet") != modelFilepath_.npos) {
-    processor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
+    preprocessor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
   } else {
     std::cout << "[ ERROR ] Unsupported model" << std::endl;
   }
@@ -100,7 +101,8 @@ ObjectDetectionResult ObjectDetection::Postprocess() {
   }
   if (modelFilepath_.find("yolov4") != modelFilepath_.npos) {
     postprocessor_.Postprocess(Infer(input_tensors_), result_boxes_, inputDims_,
-                               img_height_, img_width_, labels_);
+                               img_height_, img_width_, labels_,
+                               score_threshold_, nms_threshold_);
   } else if (modelFilepath_.find("yolov6") != modelFilepath_.npos) {
     postprocessor_.PostprocessYolov6(Infer(input_tensors_), result_boxes_,
                                      inputDims_, img_height_, img_width_,

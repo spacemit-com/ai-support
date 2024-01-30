@@ -20,32 +20,30 @@ class DetectionPostprocessor : public Postprocessor {
                    std::vector<Boxi> &result_boxes,
                    std::vector<std::vector<int64_t>> &input_dims,
                    int img_height, int img_width,
-                   std::vector<std::string> &labels,
-                   float score_threshold = 0.25f, float iou_threshold = 0.45f,
-                   unsigned int topk = 100, unsigned int nms_type = OFFSET);
+                   std::vector<std::string> &labels, float score_threshold,
+                   float iou_threshold, unsigned int topk = 100,
+                   unsigned int nms_type = OFFSET);
 
   void PostprocessYolov6(std::vector<Ort::Value> output_tensors,
                          std::vector<Boxi> &result_boxes,
                          std::vector<std::vector<int64_t>> &input_dims,
                          int img_height, int img_width,
                          std::vector<std::string> &labels,
-                         const float &score_threshold);
+                         float &score_threshold);
 
   void PostprocessNanoDetPlus(std::vector<Ort::Value> output_tensors,
                               std::vector<Boxi> &result_boxes,
                               std::vector<std::vector<int64_t>> &input_dims,
                               int img_height, int img_width,
                               std::vector<std::string> &labels,
-                              const float &score_threshold,
-                              const float &nms_threshold);
+                              float &score_threshold, float &nms_threshold);
 
   void PostprocessRtmDet(std::vector<Ort::Value> output_tensors,
                          std::vector<Boxi> &result_boxes,
                          std::vector<std::vector<int64_t>> &input_dims,
                          int img_height, int img_width,
                          std::vector<std::string> &labels,
-                         const float &score_threshold,
-                         const float &nms_threshold);
+                         float &score_threshold, float &nms_threshold);
 
  private:
   void nms(std::vector<Boxf> &input, std::vector<Boxf> &output,

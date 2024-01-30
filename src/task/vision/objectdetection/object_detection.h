@@ -22,10 +22,9 @@ class ObjectDetection : public BaseVisionTaskApi<ObjectDetectionResult> {
   ObjectDetectionResult Detect(const cv::Mat &raw_img);
   int InitFromCommand(const std::string &modelFilepath,
                       const std::string &labelFilepath,
-                      const bool disable_spacemit_ep = true,
-                      const int intra_threads_num = 4,
-                      const float &score_threshold = 0.4,
-                      const float &nms_threshold = 0.5);
+                      const bool disable_spacemit_ep,
+                      const int intra_threads_num, const float &score_threshold,
+                      const float &nms_threshold);
   int InitFromConfig(const std::string &configFilepath);
   std::vector<std::vector<float>> Process(const cv::Mat &raw_img);
   ObjectDetectionResult Detect(
@@ -43,7 +42,7 @@ class ObjectDetection : public BaseVisionTaskApi<ObjectDetectionResult> {
   std::vector<std::string> labels_;
   std::vector<std::vector<int64_t>> inputDims_;
   std::vector<std::vector<float>> input_tensors_;
-  DetectionPreprocessor processor_;
+  DetectionPreprocessor preprocessor_;
   DetectionPostprocessor postprocessor_;
   std::vector<Boxi> result_boxes_;
   ObjectDetectionResult result_;

@@ -11,6 +11,12 @@ void DetectionPostprocessor::Postprocess(
 #ifdef DEBUG
   TimeWatcher t("|-- Postprocess");
 #endif
+  if (score_threshold == -1.f) {
+    score_threshold = 0.25f;
+  }
+  if (iou_threshold == -1.f) {
+    iou_threshold = 0.45f;
+  }
   int STRIDES[3] = {8, 16, 32};
   float XYSCALE[3] = {1.2f, 1.1f, 1.05f};
   int anchors[3][3][2] = {{{12, 16}, {19, 36}, {40, 28}},
@@ -100,11 +106,13 @@ void DetectionPostprocessor::Postprocess(
 void DetectionPostprocessor::PostprocessYolov6(
     std::vector<Ort::Value> output_tensors, std::vector<Boxi> &result_boxes,
     std::vector<std::vector<int64_t>> &input_dims, int img_height,
-    int img_width, std::vector<std::string> &labels,
-    const float &score_threshold) {
+    int img_width, std::vector<std::string> &labels, float &score_threshold) {
 #ifdef DEBUG
   TimeWatcher t("|-- Postprocess");
 #endif
+  if (score_threshold == -1.f) {
+    score_threshold = 0.59f;
+  }
   std::vector<Boxf> bbox_collection;
   bbox_collection.clear();
   const float input_height = static_cast<float>(input_dims[0][2]);
@@ -148,11 +156,17 @@ void DetectionPostprocessor::PostprocessYolov6(
 void DetectionPostprocessor::PostprocessNanoDetPlus(
     std::vector<Ort::Value> output_tensors, std::vector<Boxi> &result_boxes,
     std::vector<std::vector<int64_t>> &input_dims, int img_height,
-    int img_width, std::vector<std::string> &labels,
-    const float &score_threshold, const float &nms_threshold) {
+    int img_width, std::vector<std::string> &labels, float &score_threshold,
+    float &nms_threshold) {
 #ifdef DEBUG
   TimeWatcher t("|-- Postprocess");
 #endif
+  if (score_threshold == -1.f) {
+    score_threshold = 0.4f;
+  }
+  if (nms_threshold == -1.f) {
+    nms_threshold = 0.5f;
+  }
   std::vector<Boxf> bbox_collection;
   bbox_collection.clear();
   const int cls_num = 80;
@@ -243,11 +257,17 @@ void DetectionPostprocessor::PostprocessNanoDetPlus(
 void DetectionPostprocessor::PostprocessRtmDet(
     std::vector<Ort::Value> output_tensors, std::vector<Boxi> &result_boxes,
     std::vector<std::vector<int64_t>> &input_dims, int img_height,
-    int img_width, std::vector<std::string> &labels,
-    const float &score_threshold, const float &nms_threshold) {
+    int img_width, std::vector<std::string> &labels, float &score_threshold,
+    float &nms_threshold) {
 #ifdef DEBUG
   TimeWatcher t("|-- Postprocess");
 #endif
+  if (score_threshold == -1.f) {
+    score_threshold = 0.2f;
+  }
+  if (nms_threshold == -1.f) {
+    nms_threshold = 0.6f;
+  }
   std::vector<Boxf> bbox_collection;
   bbox_collection.clear();
   const float input_height = static_cast<float>(input_dims[0][2]);  // e.g 320

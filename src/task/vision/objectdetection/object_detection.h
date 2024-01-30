@@ -27,14 +27,13 @@ class ObjectDetection : public BaseVisionTaskApi<ObjectDetectionResult> {
                       const float &score_threshold = 0.4,
                       const float &nms_threshold = 0.5);
   int InitFromConfig(const std::string &configFilepath);
-  void Preprocess(std::vector<std::vector<float>> &input_tensors,
-                  const cv::Mat &img_raw) override;
+  std::vector<std::vector<float>> Process(const cv::Mat &raw_img);
+  ObjectDetectionResult Detect(
+      const std::vector<std::vector<float>> &input_tensors,
+      const int img_height, const int img_width);
 
  protected:
-  ObjectDetectionResult DetectYolov4(const cv::Mat &raw_img);
-  ObjectDetectionResult DetectYolov6(const cv::Mat &raw_img);
-  ObjectDetectionResult DetectNanoDetPlus(const cv::Mat &raw_img);
-  ObjectDetectionResult DetectRtmDet(const cv::Mat &raw_img);
+  void Preprocess(const cv::Mat &raw_img) override;
   ObjectDetectionResult Postprocess() override;
 
  private:

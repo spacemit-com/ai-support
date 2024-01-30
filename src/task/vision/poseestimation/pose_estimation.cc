@@ -8,51 +8,49 @@
 
 using json = nlohmann::json;
 
-void PoseEstimation::Preprocess(std::vector<std::vector<float>> &input_tensors,
-                                const cv::Mat &img_raw) {
-  Boxi box;
-  processor_.Preprocess(img_raw, box, input_tensors, crop_result_pair_, CHW);
-}
-
 PoseEstimationResult PoseEstimation::Estimate(const cv::Mat &raw_img,
                                               const Boxi &box) {
-  if (initFlag_ != 0) {
-    std::cout << "[ ERROR ] Init fail return empty result" << std::endl;
-    PoseEstimationResult empty_result;
-    return empty_result;
-  }
-  if (modelFilepath_.find("rtmpose") != modelFilepath_.npos) {
-    return EstimateRtmPose(raw_img, box);
-  } else {
-    std::cout << "[ ERROR ] Unsupported model" << std::endl;
-    return result_;
-  }
-}
-
-PoseEstimationResult PoseEstimation::EstimateRtmPose(const cv::Mat &raw_img,
-                                                     const Boxi &box) {
   result_points_.clear();
   input_tensors_.clear();
+  box_ = box;
   {
 #ifdef DEBUG
     std::cout << "|-- Preprocess" << std::endl;
     TimeWatcher t("|--");
 #endif
-    processor_.Preprocess(raw_img, box, input_tensors_, crop_result_pair_, CHW);
+    Preprocess(raw_img);
   }
-  postprocessor_.Postprocess(Infer(input_tensors_), crop_result_pair_,
-                             result_points_);
+  return Postprocess();
+}
 
-  result_.result_points = result_points_;
-  result_.timestamp = std::chrono::steady_clock::now();
-  return result_;
+void PoseEstimation::Preprocess(const cv::Mat &img_raw) {
+  if (initFlag_ != 0) {
+    std::cout << "[ ERROR ] Init fail" << std::endl;
+    return;
+  }
+  if (modelFilepath_.find("rtmpose") != modelFilepath_.npos) {
+    processor_.Preprocess(img_raw, box_, input_tensors_, crop_result_pair_,
+                          CHW);
+  } else {
+    std::cout << "[ ERROR ] Unsupported model" << std::endl;
+  }
 }
 
 PoseEstimationResult PoseEstimation::Postprocess() {
-  postprocessor_.Postprocess(Infer(input_tensors_), crop_result_pair_,
-                             result_points_);
-
+  if (initFlag_ != 0) {
+    std::cout << "[ ERROR ] Init fail" << std::endl;
+    result_.result_points = result_points_;
+    result_.timestamp = std::chrono::steady_clock::now();
+    return result_;
+  }
+  if (modelFilepath_.find("rtmpose") != modelFilepath_.npos) {
+    postprocessor_.Postprocess(Infer(input_tensors_), crop_result_pair_,
+                               result_points_);
+  } else {
+    std::cout << "[ ERROR ] Unsupported model" << std::endl;
+  }
   result_.result_points = result_points_;
+  result_.timestamp = std::chrono::steady_clock::now();
   return result_;
 }
 

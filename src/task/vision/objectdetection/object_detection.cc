@@ -7,121 +7,117 @@
 #include "utils/time.h"
 using json = nlohmann::json;
 
-void ObjectDetection::Preprocess(std::vector<std::vector<float>> &input_tensors,
-                                 const cv::Mat &img_raw) {
-  processor_.Preprocess(img_raw, inputDims_, input_tensors, CHW);
+std::vector<std::vector<float>> ObjectDetection::Process(
+    const cv::Mat &raw_img) {
+  input_tensors_.clear();
+  if (initFlag_ != 0) {
+    std::cout << "[ ERROR ] Init fail return empty tensors" << std::endl;
+    return input_tensors_;
+  }
+  if (modelFilepath_.find("yolov4") != modelFilepath_.npos) {
+    processor_.Preprocess(raw_img, inputDims_, input_tensors_, HWC);
+  } else if (modelFilepath_.find("yolov6") != modelFilepath_.npos) {
+    processor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
+  } else if (modelFilepath_.find("nanodet-plus") != modelFilepath_.npos) {
+    processor_.PreprocessNanoDetPlus(raw_img, inputDims_, input_tensors_);
+  } else if (modelFilepath_.find("rtmdet") != modelFilepath_.npos) {
+    processor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
+  } else {
+    std::cout << "[ ERROR ] Unsupported model return empty tensors"
+              << std::endl;
+    return input_tensors_;
+  }
+  return input_tensors_;
 }
 
 ObjectDetectionResult ObjectDetection::Detect(const cv::Mat &raw_img) {
+  result_boxes_.clear();
+  input_tensors_.clear();
+  Preprocess(raw_img);
+  return Postprocess();
+}
+
+ObjectDetectionResult ObjectDetection::Detect(
+    const std::vector<std::vector<float>> &input_tensors, const int img_height,
+    const int img_width) {
+  result_boxes_.clear();
+  input_tensors_ = input_tensors;
   if (initFlag_ != 0) {
     std::cout << "[ ERROR ] Init fail return empty result" << std::endl;
-    result_.result_bboxes.clear();
+    result_.result_bboxes = result_boxes_;
+    result_.timestamp = std::chrono::steady_clock::now();
     return result_;
   }
   if (modelFilepath_.find("yolov4") != modelFilepath_.npos) {
-    return DetectYolov4(raw_img);
+    postprocessor_.Postprocess(Infer(input_tensors_), result_boxes_, inputDims_,
+                               img_height, img_width, labels_);
   } else if (modelFilepath_.find("yolov6") != modelFilepath_.npos) {
-    return DetectYolov6(raw_img);
+    postprocessor_.PostprocessYolov6(Infer(input_tensors_), result_boxes_,
+                                     inputDims_, img_height, img_width, labels_,
+                                     score_threshold_);
   } else if (modelFilepath_.find("nanodet-plus") != modelFilepath_.npos) {
-    return DetectNanoDetPlus(raw_img);
+    postprocessor_.PostprocessNanoDetPlus(
+        Infer(input_tensors_), result_boxes_, inputDims_, img_height, img_width,
+        labels_, score_threshold_, nms_threshold_);
   } else if (modelFilepath_.find("rtmdet") != modelFilepath_.npos) {
-    return DetectRtmDet(raw_img);
+    postprocessor_.PostprocessRtmDet(Infer(input_tensors_), result_boxes_,
+                                     inputDims_, img_height, img_width, labels_,
+                                     score_threshold_, nms_threshold_);
+  } else {
+    std::cout << "[ ERROR ] Unsupported model return empty result" << std::endl;
+  }
+  result_.result_bboxes = result_boxes_;
+  result_.timestamp = std::chrono::steady_clock::now();
+  return result_;
+}
+
+void ObjectDetection::Preprocess(const cv::Mat &raw_img) {
+  if (initFlag_ != 0) {
+    std::cout << "[ ERROR ] Init fail" << std::endl;
+    return;
+  }
+  img_height_ = raw_img.rows;
+  img_width_ = raw_img.cols;
+  if (modelFilepath_.find("yolov4") != modelFilepath_.npos) {
+    processor_.Preprocess(raw_img, inputDims_, input_tensors_, HWC);
+  } else if (modelFilepath_.find("yolov6") != modelFilepath_.npos) {
+    processor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
+  } else if (modelFilepath_.find("nanodet-plus") != modelFilepath_.npos) {
+    processor_.PreprocessNanoDetPlus(raw_img, inputDims_, input_tensors_);
+  } else if (modelFilepath_.find("rtmdet") != modelFilepath_.npos) {
+    processor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
   } else {
     std::cout << "[ ERROR ] Unsupported model" << std::endl;
-    return result_;
   }
-}
-
-ObjectDetectionResult ObjectDetection::DetectNanoDetPlus(
-    const cv::Mat &raw_img) {
-  result_boxes_.clear();
-  input_tensors_.clear();
-  img_height_ = raw_img.rows;
-  img_width_ = raw_img.cols;
-
-  {
-#ifdef DEBUG
-    std::cout << "|-- Preprocess " << std::endl;
-    TimeWatcher t("|--");
-#endif
-    processor_.PreprocessNanoDetPlus(raw_img, inputDims_, input_tensors_);
-  }
-  postprocessor_.PostprocessNanoDetPlus(
-      Infer(input_tensors_), result_boxes_, inputDims_, img_height_, img_width_,
-      labels_, score_threshold_, nms_threshold_);
-
-  result_.result_bboxes = result_boxes_;
-  result_.timestamp = std::chrono::steady_clock::now();
-  return result_;
-}
-auto start = std::chrono::steady_clock::now();
-ObjectDetectionResult ObjectDetection::DetectYolov6(const cv::Mat &raw_img) {
-  result_boxes_.clear();
-  input_tensors_.clear();
-  img_height_ = raw_img.rows;
-  img_width_ = raw_img.cols;
-  {
-#ifdef DEBUG
-    std::cout << "|-- Preprocess" << std::endl;
-    TimeWatcher t("|--");
-#endif
-    processor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
-  }
-  postprocessor_.PostprocessYolov6(Infer(input_tensors_), result_boxes_,
-                                   inputDims_, img_height_, img_width_, labels_,
-                                   score_threshold_);
-
-  result_.result_bboxes = result_boxes_;
-  result_.timestamp = std::chrono::steady_clock::now();
-  return result_;
-}
-
-ObjectDetectionResult ObjectDetection::DetectYolov4(const cv::Mat &raw_img) {
-  result_boxes_.clear();
-  input_tensors_.clear();
-  img_height_ = raw_img.rows;
-  img_width_ = raw_img.cols;
-  {
-#ifdef DEBUG
-    std::cout << "|-- Preprocess" << std::endl;
-    TimeWatcher t("|--");
-#endif
-    processor_.Preprocess(raw_img, inputDims_, input_tensors_, HWC);
-  }
-  postprocessor_.Postprocess(Infer(input_tensors_), result_boxes_, inputDims_,
-                             img_height_, img_width_, labels_);
-
-  result_.result_bboxes = result_boxes_;
-  result_.timestamp = std::chrono::steady_clock::now();
-  return result_;
-}
-
-ObjectDetectionResult ObjectDetection::DetectRtmDet(const cv::Mat &raw_img) {
-  result_boxes_.clear();
-  input_tensors_.clear();
-  img_height_ = raw_img.rows;
-  img_width_ = raw_img.cols;
-  {
-#ifdef DEBUG
-    std::cout << "|-- Preprocess" << std::endl;
-    TimeWatcher t("|--");
-#endif
-    processor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
-  }
-  postprocessor_.PostprocessRtmDet(Infer(input_tensors_), result_boxes_,
-                                   inputDims_, img_height_, img_width_, labels_,
-                                   score_threshold_, nms_threshold_);
-
-  result_.result_bboxes = result_boxes_;
-  result_.timestamp = std::chrono::steady_clock::now();
-  return result_;
 }
 
 ObjectDetectionResult ObjectDetection::Postprocess() {
-  postprocessor_.Postprocess(Infer(input_tensors_), result_boxes_, inputDims_,
-                             img_height_, img_width_, labels_);
-
+  if (initFlag_ != 0) {
+    std::cout << "[ ERROR ] Init fail return empty result" << std::endl;
+    result_.result_bboxes = result_boxes_;
+    result_.timestamp = std::chrono::steady_clock::now();
+    return result_;
+  }
+  if (modelFilepath_.find("yolov4") != modelFilepath_.npos) {
+    postprocessor_.Postprocess(Infer(input_tensors_), result_boxes_, inputDims_,
+                               img_height_, img_width_, labels_);
+  } else if (modelFilepath_.find("yolov6") != modelFilepath_.npos) {
+    postprocessor_.PostprocessYolov6(Infer(input_tensors_), result_boxes_,
+                                     inputDims_, img_height_, img_width_,
+                                     labels_, score_threshold_);
+  } else if (modelFilepath_.find("nanodet-plus") != modelFilepath_.npos) {
+    postprocessor_.PostprocessNanoDetPlus(
+        Infer(input_tensors_), result_boxes_, inputDims_, img_height_,
+        img_width_, labels_, score_threshold_, nms_threshold_);
+  } else if (modelFilepath_.find("rtmdet") != modelFilepath_.npos) {
+    postprocessor_.PostprocessRtmDet(Infer(input_tensors_), result_boxes_,
+                                     inputDims_, img_height_, img_width_,
+                                     labels_, score_threshold_, nms_threshold_);
+  } else {
+    std::cout << "[ ERROR ] Unsupported model return empty result" << std::endl;
+  }
   result_.result_bboxes = result_boxes_;
+  result_.timestamp = std::chrono::steady_clock::now();
   return result_;
 }
 

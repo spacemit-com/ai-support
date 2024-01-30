@@ -6,6 +6,7 @@
 
 #include "opencv2/opencv.hpp"
 #include "src/task/core/base_task_api.h"
+#include "task/vision/object_detection_types.h"
 
 template <class OutputType>
 class BaseVisionTaskApi : public BaseTaskApi<OutputType, const cv::Mat&> {
@@ -17,8 +18,7 @@ class BaseVisionTaskApi : public BaseTaskApi<OutputType, const cv::Mat&> {
   BaseVisionTaskApi& operator=(const BaseVisionTaskApi&) = delete;
 
  protected:
-  virtual void Preprocess(std::vector<std::vector<float>>& input_tensors,
-                          const cv::Mat& img_raw) = 0;
+  virtual void Preprocess(const cv::Mat& img_raw) = 0;
 };
 
 #endif

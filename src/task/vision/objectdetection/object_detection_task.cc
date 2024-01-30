@@ -96,3 +96,14 @@ objectDetectionTask::objectDetectionTask(const std::string &filePath)
 ObjectDetectionResult objectDetectionTask::Detect(const cv::Mat &raw_img) {
   return pimpl_->objectdetection_->Detect(raw_img);
 }
+
+ObjectDetectionResult objectDetectionTask::Detect(
+    const std::vector<std::vector<float>> &input_tensors, const int img_height,
+    const int img_width) {
+  return pimpl_->objectdetection_->Detect(input_tensors, img_height, img_width);
+}
+
+std::vector<std::vector<float>> objectDetectionTask::Process(
+    const cv::Mat &img_raw) {
+  return pimpl_->objectdetection_->Process(img_raw);
+}

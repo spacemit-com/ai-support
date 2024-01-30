@@ -25,11 +25,9 @@ class PoseEstimation : public BaseVisionTaskApi<PoseEstimationResult> {
                       const bool disable_spacemit_ep = true,
                       const int intra_threads_num = 4);
   int InitFromConfig(const std::string &configFilepath);
-  void Preprocess(std::vector<std::vector<float>> &input_tensors,
-                  const cv::Mat &img_raw) override;
 
  protected:
-  PoseEstimationResult EstimateRtmPose(const cv::Mat &raw_img, const Boxi &box);
+  void Preprocess(const cv::Mat &img_raw) override;
   PoseEstimationResult Postprocess() override;
 
  private:
@@ -42,6 +40,7 @@ class PoseEstimation : public BaseVisionTaskApi<PoseEstimationResult> {
   EstimationPostprocessor postprocessor_;
   std::vector<PosePoint> result_points_;
   PoseEstimationResult result_;
+  Boxi box_;
   int initFlag_;
   std::pair<cv::Mat, cv::Mat> crop_result_pair_;
 };

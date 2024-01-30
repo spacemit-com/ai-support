@@ -14,11 +14,6 @@ class BaseUntypedTaskApi {
   virtual ~BaseUntypedTaskApi() = default;
 
  protected:
-  // TODO(b/200258103): It's a short term solution. In the future we will forbid
-  // Tasks exposing the underlying TfLiteEngine. Please try not rely on this
-  // function.
-  //
-  // Returns a raw pointer to the underlying TfLiteEngine.
   Engine* GetEngine() { return engine_.get(); }
   std::unique_ptr<Engine> engine_;
 };
@@ -38,8 +33,7 @@ class BaseTaskApi : public BaseUntypedTaskApi {
 
  protected:
   // Subclasses need to populate input_tensors from api_inputs.
-  virtual void Preprocess(std::vector<std::vector<float>>& input_tensors,
-                          InputTypes... api_inputs) = 0;
+  virtual void Preprocess(InputTypes... api_inputs) = 0;
   // Subclasses need to construct OutputType object from output_tensors.
   // Original inputs are also provided as they may be needed.
   virtual OutputType Postprocess() = 0;

@@ -1,7 +1,6 @@
-﻿#include "object_detection.hpp"
+﻿#include <iostream>
 
-#include <iostream>
-
+#include "object_detection.hpp"
 #include "task/vision/object_detection_task.h"
 #ifdef DEBUG
 #include "utils/time.h"
@@ -11,9 +10,13 @@
 int DetectVideo(const std::string &modelFilepath,
                 const std::string &labelFilepath, const std::string &videoPath,
                 const std::string &srcPath) {
+  bool disable_spacemit_ep{false};
+  float score_threshold{-1.f}, nms_threshold{-1.f};
+  int intra_threads_num{2};
   std::unique_ptr<objectDetectionTask> objectdetectiontask =
-      std::unique_ptr<objectDetectionTask>(
-          new objectDetectionTask(modelFilepath, labelFilepath));
+      std::unique_ptr<objectDetectionTask>(new objectDetectionTask(
+          modelFilepath, labelFilepath, disable_spacemit_ep, intra_threads_num,
+          score_threshold, nms_threshold));
   cv::VideoCapture capture(videoPath);
   if (!capture.isOpened()) {
     std::cout << "Open video capture failed" << std::endl;

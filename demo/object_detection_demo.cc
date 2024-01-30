@@ -1,11 +1,10 @@
-#include "object_detection.hpp"
-
 #include <stdlib.h>
-#include <unistd.h> // for: getopt
+#include <unistd.h>  // for: getopt
 
 #include <iomanip>  // for: setprecision
 #include <iostream>
 
+#include "object_detection.hpp"
 #include "task/vision/object_detection_task.h"
 #include "utils/check_utils.h"
 #include "utils/time.h"
@@ -16,7 +15,7 @@ int main(int argc, char* argv[]) {
   std::string filePath, modelFilepath, imageFilepath, saveImgpath,
       labelFilepath, configFilepath;
   bool disable_spacemit_ep{false};
-  float score_threshold{0.4}, nms_threshold{0.5};
+  float score_threshold{-1.f}, nms_threshold{-1.f};
   int intra_threads_num{1};
   cv::Mat imgRaw;
 #ifdef DEBUG
@@ -101,8 +100,9 @@ int main(int argc, char* argv[]) {
       imgRaw = cv::imread(imageFilepath);
     }
     std::unique_ptr<objectDetectionTask> objectdetectiontask =
-        std::unique_ptr<objectDetectionTask>(
-            new objectDetectionTask(filePath, labelFilepath));
+        std::unique_ptr<objectDetectionTask>(new objectDetectionTask(
+            filePath, labelFilepath, disable_spacemit_ep, intra_threads_num,
+            score_threshold, nms_threshold));
     resultBoxes = objectdetectiontask->Detect(imgRaw).result_bboxes;
     {
 #ifdef DEBUG

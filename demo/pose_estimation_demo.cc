@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <unistd.h> // for: getopt
+#include <unistd.h>  // for: getopt
 
 #include <iomanip>  // for: setprecision
 #include <iostream>
@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
   std::string detFilePath, poseFilePath, modelFilepath, imageFilepath,
       saveImgpath, labelFilepath, configFilepath;
   bool disable_spacemit_ep{false};
-  float score_threshold{0.4}, nms_threshold{0.5};
+  float score_threshold{-1.f}, nms_threshold{-1.f};
   int intra_threads_num{1};
   cv::Mat imgRaw, img;
 #ifdef DEBUG
@@ -53,8 +53,9 @@ int main(int argc, char* argv[]) {
       resize_unscale(imgRaw, img, 320, 320);
     }
     std::unique_ptr<objectDetectionTask> objectdetectiontask =
-        std::unique_ptr<objectDetectionTask>(
-            new objectDetectionTask(detFilePath, labelFilepath));
+        std::unique_ptr<objectDetectionTask>(new objectDetectionTask(
+            detFilePath, labelFilepath, disable_spacemit_ep, intra_threads_num,
+            score_threshold, nms_threshold));
     resultBoxes = objectdetectiontask->Detect(img).result_bboxes;
 
     std::unique_ptr<poseEstimationTask> poseestimationtask =

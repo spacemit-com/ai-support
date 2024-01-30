@@ -220,7 +220,7 @@ void setThreadName(std::thread& thread, const char* name) {
 int main(int argc, char* argv[]) {
   std::string detFilePath, poseFilePath, labelFilepath, input, inputType;
   bool disable_spacemit_ep{false};
-  float score_threshold{0.4}, nms_threshold{0.5};
+  float score_threshold{-1}, nms_threshold{-1};
   int intra_threads_num{1}, resize_height{320}, resize_width{320};
   if (argc == 6) {
     detFilePath = argv[1];

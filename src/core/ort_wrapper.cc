@@ -8,28 +8,22 @@
 #endif
 
 int OrtWrapper::Init(std::string instanceName,
-                     std::basic_string<ORTCHAR_T> modelFilepath,
-                     const int intra_threads_num,
-                     const bool disable_spacemit_ep) {
+                     std::basic_string<ORTCHAR_T> modelFilepath) {
   std::unique_ptr<Ort::Env> env(new Ort::Env(
       OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING, instanceName.c_str()));
   // Creation: The Ort::Session is created here
   env_ = std::move(env);
-  sessionOptions_.SetIntraOpNumThreads(intra_threads_num);
+  sessionOptions_.SetIntraOpNumThreads(2);
   sessionOptions_.AddConfigEntry("session.intra_op.allow_spinning", "0");
-  sessionOptions_.SetInterOpNumThreads(intra_threads_num);
+  sessionOptions_.SetInterOpNumThreads(2);
   sessionOptions_.AddConfigEntry("session.inter_op.allow_spinning", "0");
-  if (disable_spacemit_ep == true) {
-    std::cout << "Disable spacemit ep now" << std::endl;
-  } else {
 #ifdef HAS_SPACEMIT_EP
-    SessionOptionsSpaceMITEnvInit(sessionOptions_);
-    // auto providers = Ort::GetAvailableProviders();
-    std::cout << "Enable spacemit ep now" << std::endl;
+  SessionOptionsSpaceMITEnvInit(sessionOptions_);
+  // auto providers = Ort::GetAvailableProviders();
+  std::cout << "Enable spacemit ep now" << std::endl;
 #else
-    std::cout << "[Warning] Unsupport spacemit ep now" << std::endl;
+  std::cout << "Disable spacemit ep now" << std::endl;
 #endif
-  }
   // Sets graph optimization level
   // Available levels are
   // ORT_DISABLE_ALL -> To disable all optimizations

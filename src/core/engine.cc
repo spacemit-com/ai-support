@@ -8,15 +8,14 @@ inline std::wstring to_wstring(const std::string& input) {
 }
 #endif /* _WIN32 */
 
-int Engine::Init(std::string instanceName, std::string modelFilepath,
-                 const bool disable_spacemit_ep, const int intra_threads_num) {
+int Engine::Init(std::string instanceName, std::string modelFilepath) {
   return ortwrapper_.Init(instanceName,
 #ifdef _WIN32
                           to_wstring(modelFilepath),
 #else
-                          modelFilepath,
+                          modelFilepath
 #endif /* _WIN32 */
-                          intra_threads_num, disable_spacemit_ep);
+  );
 }
 
 int Engine::Init(json config) { return ortwrapper_.Init(config); }

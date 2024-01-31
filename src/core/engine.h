@@ -12,8 +12,7 @@ class Engine {
  public:
   Engine() { OrtWrapper ortwrapper_; }
   ~Engine() {}
-  int Init(std::string instanceName, std::string modelFilepath,
-           const bool disable_spacemit_ep, const int intra_threads_num);
+  int Init(std::string instanceName, std::string modelFilepath);
   int Init(json config);
   size_t GetInputCount() { return ortwrapper_.GetInputCount(); }
   size_t GetOutputCount() { return ortwrapper_.GetOutputCount(); }

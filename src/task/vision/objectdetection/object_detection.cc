@@ -124,18 +124,13 @@ ObjectDetectionResult ObjectDetection::Postprocess() {
 }
 
 int ObjectDetection::InitFromCommand(const std::string &modelFilepath,
-                                     const std::string &labelFilepath,
-                                     const bool disable_spacemit_ep,
-                                     const int intra_threads_num,
-                                     const float &score_threshold,
-                                     const float &nms_threshold) {
+                                     const std::string &labelFilepath) {
   instanceName_ = "object-detection-inference";
   modelFilepath_ = modelFilepath;
   labelFilepath_ = labelFilepath;
-  score_threshold_ = score_threshold;
-  nms_threshold_ = nms_threshold;
-  initFlag_ = GetEngine()->Init(instanceName_, modelFilepath_,
-                                disable_spacemit_ep, intra_threads_num);
+  score_threshold_ = -1.f;
+  nms_threshold_ = -1.f;
+  initFlag_ = GetEngine()->Init(instanceName_, modelFilepath_);
   inputDims_ = GetEngine()->GetInputDims();
   labels_ = readLabels(labelFilepath_);
   return initFlag_;
@@ -151,6 +146,16 @@ int ObjectDetection::InitFromConfig(const std::string &configFilepath) {
   }
   modelFilepath_ = config["model_path"];
   labelFilepath_ = config["label_path"];
+  if (config.contains("score_threshold")) {
+    score_threshold_ = config["score_threshold"];
+  } else {
+    score_threshold_ = -1.f;
+  }
+  if (config.contains("nms_threshold")) {
+    nms_threshold_ = config["nms_threshold"];
+  } else {
+    nms_threshold_ = -1.f;
+  }
   labels_ = readLabels(labelFilepath_);
   initFlag_ = GetEngine()->Init(config);
   inputDims_ = GetEngine()->GetInputDims();

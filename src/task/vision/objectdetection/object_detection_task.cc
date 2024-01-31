@@ -10,11 +10,7 @@ class objectDetectionTask::impl {
 };
 
 objectDetectionTask::objectDetectionTask(const std::string &filePath,
-                                         const std::string &labelFilepath,
-                                         const bool &disable_spacemit_ep,
-                                         const int &intra_threads_num,
-                                         const float &score_threshold,
-                                         const float &nms_threshold)
+                                         const std::string &labelFilepath)
     : pimpl_(std::make_unique<impl>()) {
   pimpl_->objectdetection_ =
       std::unique_ptr<ObjectDetection>(new ObjectDetection());
@@ -34,9 +30,8 @@ objectDetectionTask::objectDetectionTask(const std::string &filePath,
                      "setting the correct path to the file"
                   << std::endl;
       } else {
-        int flag = pimpl_->objectdetection_->InitFromCommand(
-            filePath, labelFilepath, disable_spacemit_ep, intra_threads_num,
-            score_threshold, nms_threshold);
+        int flag =
+            pimpl_->objectdetection_->InitFromCommand(filePath, labelFilepath);
         if (flag != 0) {
           std::cout << "[Error] Init fail" << std::endl;
         }

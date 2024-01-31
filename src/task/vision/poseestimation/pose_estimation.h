@@ -21,9 +21,7 @@ class PoseEstimation : public BaseVisionTaskApi<PoseEstimationResult> {
   }
   ~PoseEstimation() {}
   PoseEstimationResult Estimate(const cv::Mat &raw_img, const Boxi &box);
-  int InitFromCommand(const std::string &modelFilepath,
-                      const bool disable_spacemit_ep = true,
-                      const int intra_threads_num = 4);
+  int InitFromCommand(const std::string &modelFilepath);
   int InitFromConfig(const std::string &configFilepath);
 
  protected:

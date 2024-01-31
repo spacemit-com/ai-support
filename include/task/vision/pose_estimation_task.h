@@ -10,10 +10,7 @@
 
 class poseEstimationTask {
  public:
-  poseEstimationTask(const std::string &filePath,
-                     const bool &disable_spacemit_ep = false,
-                     const int &intra_threads_num = 4);
-  poseEstimationTask(const std::string &filePath);
+  explicit poseEstimationTask(const std::string &filePath);
   ~poseEstimationTask() = default;
   PoseEstimationResult Estimate(const cv::Mat &raw_img, const Boxi &box);
 

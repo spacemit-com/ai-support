@@ -21,10 +21,7 @@ class ObjectDetection : public BaseVisionTaskApi<ObjectDetectionResult> {
   ~ObjectDetection() {}
   ObjectDetectionResult Detect(const cv::Mat &raw_img);
   int InitFromCommand(const std::string &modelFilepath,
-                      const std::string &labelFilepath,
-                      const bool disable_spacemit_ep,
-                      const int intra_threads_num, const float &score_threshold,
-                      const float &nms_threshold);
+                      const std::string &labelFilepath);
   int InitFromConfig(const std::string &configFilepath);
   std::vector<std::vector<float>> Process(const cv::Mat &raw_img);
   ObjectDetectionResult Detect(

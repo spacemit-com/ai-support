@@ -10,8 +10,7 @@ class imageClassificationTask::impl {
 };
 
 imageClassificationTask::imageClassificationTask(
-    const std::string& filePath, const std::string& labelFilepath,
-    const bool& disable_spacemit_ep, const int& intra_threads_num)
+    const std::string& filePath, const std::string& labelFilepath)
     : pimpl_(std::make_unique<impl>()) {
   pimpl_->imageclassification_ =
       std::unique_ptr<imageClassification>(new imageClassification());
@@ -28,8 +27,7 @@ imageClassificationTask::imageClassificationTask(
                  "the correct path to the file"
               << std::endl;
   } else {
-    int flag = pimpl_->imageclassification_->Init(
-        filePath, labelFilepath, disable_spacemit_ep, intra_threads_num);
+    int flag = pimpl_->imageclassification_->Init(filePath, labelFilepath);
     if (flag != 0) {
       std::cout << "[Error] Init fail" << std::endl;
     }

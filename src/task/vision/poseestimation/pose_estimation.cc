@@ -54,13 +54,10 @@ PoseEstimationResult PoseEstimation::Postprocess() {
   return result_;
 }
 
-int PoseEstimation::InitFromCommand(const std::string &modelFilepath,
-                                    const bool disable_spacemit_ep,
-                                    const int intra_threads_num) {
+int PoseEstimation::InitFromCommand(const std::string &modelFilepath) {
   instanceName_ = "pose-estimation-inference";
   modelFilepath_ = modelFilepath;
-  initFlag_ = GetEngine()->Init(instanceName_, modelFilepath_,
-                                disable_spacemit_ep, intra_threads_num);
+  initFlag_ = GetEngine()->Init(instanceName_, modelFilepath_);
   inputDims_ = GetEngine()->GetInputDims();
   return initFlag_;
 }

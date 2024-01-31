@@ -3,15 +3,12 @@
 #include "utils/time.h"
 
 int imageClassification::Init(const std::string modelFilepath,
-                              const std::string labelFilepath,
-                              const bool disable_spacemit_ep,
-                              const int intra_threads_num) {
+                              const std::string labelFilepath) {
   instanceName_ = "image-classification-inference";
   modelFilepath_ = modelFilepath;
   labelFilepath_ = labelFilepath;
   labels_ = readLabels(labelFilepath_);
-  initFlag_ = GetEngine()->Init(instanceName_, modelFilepath_,
-                                disable_spacemit_ep, intra_threads_num);
+  initFlag_ = GetEngine()->Init(instanceName_, modelFilepath_);
   return initFlag_;
 }
 

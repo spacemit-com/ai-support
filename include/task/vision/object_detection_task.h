@@ -11,12 +11,8 @@
 class objectDetectionTask {
  public:
   objectDetectionTask(const std::string &filePath,
-                      const std::string &labelFilepath,
-                      const bool &disable_spacemit_ep = false,
-                      const int &intra_threads_num = 4,
-                      const float &score_threshold = -1.f,
-                      const float &nms_threshold = -1.f);
-  objectDetectionTask(const std::string &filePath);
+                      const std::string &labelFilepath);
+  explicit objectDetectionTask(const std::string &filePath);
   ~objectDetectionTask() = default;
   ObjectDetectionResult Detect(const cv::Mat &raw_img);
   ObjectDetectionResult Detect(

@@ -8,9 +8,7 @@ class poseEstimationTask::impl {
   std::unique_ptr<PoseEstimation> poseestimation_;
 };
 
-poseEstimationTask::poseEstimationTask(const std::string &filePath,
-                                       const bool &disable_spacemit_ep,
-                                       const int &intra_threads_num)
+poseEstimationTask::poseEstimationTask(const std::string &filePath)
     : pimpl_(std::make_unique<impl>()) {
   pimpl_->poseestimation_ =
       std::unique_ptr<PoseEstimation>(new PoseEstimation());
@@ -26,8 +24,22 @@ poseEstimationTask::poseEstimationTask(const std::string &filePath,
                      "setting the correct path to the file"
                   << std::endl;
       } else {
-        int flag = pimpl_->poseestimation_->InitFromCommand(
-            filePath, disable_spacemit_ep, intra_threads_num);
+        int flag = pimpl_->poseestimation_->InitFromCommand(filePath);
+        if (flag != 0) {
+          std::cout << "[Error] Init fail" << std::endl;
+        }
+      }
+    } else if (strcmp(suffixStr.c_str(), "json") == 0) {
+      if (!checkConfigFileExtension(filePath)) {
+        std::cout << "[ ERROR ] The ConfigFilepath is not correct. Make sure "
+                     "you are setting the path to an json file (.json)"
+                  << std::endl;
+      } else if (!exists_check(filePath)) {
+        std::cout << "[ ERROR ] The File does not exist. Make sure you are "
+                     "setting the correct path to the file"
+                  << std::endl;
+      } else {
+        int flag = pimpl_->poseestimation_->InitFromConfig(filePath);
         if (flag != 0) {
           std::cout << "[Error] Init fail" << std::endl;
         }

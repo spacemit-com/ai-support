@@ -52,12 +52,23 @@ build-job-x86_64:   # This job runs in the build stage, which runs first.
     - echo "Before scripts ..."
   script:
     - echo "Compiling the code ..."
-    - mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DORT_HOME=${ORT_HOME} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=ON && make install -j`nproc` VERBOSE=1 && popd
+    - |
+      mkdir ${BUILD_DIR}
+      pushd ${BUILD_DIR}
+      cmake .. -DORT_HOME=${ORT_HOME} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=ON
+      make install -j`nproc` VERBOSE=1
+      popd
     # copy demo and data
     - if [[ "${CI_INSTALL_OPTION}" =~ "--with-demo" ]]; then cp -rdf demo ${BUILD_DIR}/${INSTALL_PREFIX} && cp -rdf data ${BUILD_DIR}/${INSTALL_PREFIX}/demo; fi
     # copy onnxruntime
     - if [[ "${CI_INSTALL_OPTION}" =~ "--with-ort" ]]; then mkdir -p ${BUILD_DIR}/${INSTALL_PREFIX}/lib/3rdparty/onnxruntime && cp -rdf ${ORT_HOME}/* ${BUILD_DIR}/${INSTALL_PREFIX}/lib/3rdparty/onnxruntime; fi
-    - pushd demo && mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DBIANBUAI_HOME=$(pwd)/../../${BUILD_DIR}/${INSTALL_PREFIX} -DORT_HOME=${ORT_HOME} && make -j`nproc` VERBOSE=1 && popd
+    - |
+      pushd demo
+      mkdir ${BUILD_DIR}
+      pushd ${BUILD_DIR}
+      cmake .. -DBIANBUAI_HOME=$(pwd)/../../${BUILD_DIR}/${INSTALL_PREFIX} -DORT_HOME=${ORT_HOME}
+      make -j`nproc` VERBOSE=1
+      popd
     - echo "Compile complete."
   artifacts:
     paths:
@@ -81,17 +92,31 @@ build-job-riscv64:  # This job runs in the build stage, which runs second.
     #- echo "CI_PROJECT_DIR ${CI_PROJECT_DIR}"
     - echo "Downloading latest spacemit-ort ..."
     - wget $(curl -X GET ${CI_NEXUS_URL} | grep -oP 'https:[^>]*.rv64.v[\d\.]*tar.gz' | tail -n 1) -O spacemit-ort.latest.tar.gz --no-check-certificate
-    - mkdir spacemit-ort && tar xzf spacemit-ort.latest.tar.gz -C spacemit-ort --strip-components 1 && tree -L 3 .
+    - |
+      mkdir spacemit-ort
+      tar xzf spacemit-ort.latest.tar.gz -C spacemit-ort --strip-components 1
+      tree -L 3 .
   script:
     - echo "Compiling the code ..."
     # Note: To use opencv static libraries, one'd better set OpenCV_DIR variable instead of OPENCV_INC and OPENCV_LIB variables.
-    - mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_STATIC_DIR}/lib/cmake/opencv4 -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=ON && make install -j`nproc` VERBOSE=1 && popd
+    - |
+      mkdir ${BUILD_DIR}
+      pushd ${BUILD_DIR}
+      cmake .. -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_STATIC_DIR}/lib/cmake/opencv4 -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=ON
+      make install -j`nproc` VERBOSE=1
+      popd
     # copy demo and data
     - if [[ "${CI_INSTALL_OPTION}" =~ "--with-demo" ]]; then cp -rdf demo ${BUILD_DIR}/${INSTALL_PREFIX} && cp -rdf data ${BUILD_DIR}/${INSTALL_PREFIX}/demo; fi
     # copy onnxruntime
     - if [[ "${CI_INSTALL_OPTION}" =~ "--with-ort" ]]; then mkdir -p ${BUILD_DIR}/${INSTALL_PREFIX}/lib/3rdparty/onnxruntime && cp -rdf ${ORT_HOME}/* ${BUILD_DIR}/${INSTALL_PREFIX}/lib/3rdparty/onnxruntime; fi
   #  - mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DORT_HOME=${ORT_HOME} -DOPENCV_INC=${OPENCV_SHARED_DIR}/include/opencv4 -DOPENCV_LIB=${OPENCV_SHARED_DIR}/lib -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=ON -DUSE_OPENCV_SHARED_LIBS=ON && make install -j`nproc` VERBOSE=1 && popd
-    - pushd demo && mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DBIANBUAI_HOME=$(pwd)/../../${BUILD_DIR}/${INSTALL_PREFIX} -DORT_HOME=${ORT_HOME} -DOPENCV_INC=${OPENCV_SHARED_DIR}/include/opencv4 -DOPENCV_LIB=${OPENCV_SHARED_DIR}/lib -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} && make -j`nproc` VERBOSE=1 && popd
+    - |
+      pushd demo
+      mkdir ${BUILD_DIR}
+      pushd ${BUILD_DIR}
+      cmake .. -DBIANBUAI_HOME=$(pwd)/../../${BUILD_DIR}/${INSTALL_PREFIX} -DORT_HOME=${ORT_HOME} -DOPENCV_INC=${OPENCV_SHARED_DIR}/include/opencv4 -DOPENCV_LIB=${OPENCV_SHARED_DIR}/lib -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT}
+      make -j`nproc` VERBOSE=1
+      popd
   #  - echo "Compile complete."
   artifacts:
     paths:
@@ -136,11 +161,23 @@ package-daily-build:
     #- echo $(date +"%Y%m%d_%H%M%S")
     - mkdir -p output
     # make deb ball
-    - bash ci/pack.sh build.x86_64/bianbu-ai-support.x86_64 ${CI_PKG_OPTION} && mkdir output/deb.x86_64 && mv bianbu-ai-support-*.deb output/deb.x86_64
-    - bash ci/pack.sh build.riscv64/bianbu-ai-support.riscv64 ${CI_PKG_OPTION} && mkdir output/deb.riscv64 && mv bianbu-ai-support-*.deb output/deb.riscv64
+    - |
+      bash ci/pack.sh build.x86_64/bianbu-ai-support.x86_64 ${CI_PKG_OPTION}
+      mkdir output/deb.x86_64
+      mv bianbu-ai-support-*.deb output/deb.x86_64
+    - |
+      bash ci/pack.sh build.riscv64/bianbu-ai-support.riscv64 ${CI_PKG_OPTION}
+      mkdir output/deb.riscv64
+      mv bianbu-ai-support-*.deb output/deb.riscv64
     # make tar ball
-    - pushd build.x86_64 && tar czf ../output/bianbu-ai-support.x86_64.$(date +"%Y%m%d_%H%M%S").tar.gz bianbu-ai-support.x86_64 && popd
-    - pushd build.riscv64 && tar czf ../output/bianbu-ai-support.riscv64.$(date +"%Y%m%d_%H%M%S").tar.gz bianbu-ai-support.riscv64 && popd
+    - |
+      pushd build.x86_64
+      tar czf ../output/bianbu-ai-support.x86_64.$(date +"%Y%m%d_%H%M%S").tar.gz bianbu-ai-support.x86_64
+      popd
+    - |
+      pushd build.riscv64
+      tar czf ../output/bianbu-ai-support.riscv64.$(date +"%Y%m%d_%H%M%S").tar.gz bianbu-ai-support.riscv64
+      popd
     #- rm -rf build.x86_64 build.riscv64 demo
   artifacts:
     paths:
@@ -154,10 +191,16 @@ upload-archive-nexus:
     - build-job-riscv64
   script:
     - tag=v${CI_COMMIT_REF_NAME#*/}
-    - pushd build.x86_64 && tar czf bianbu-ai-support.x86_64.${tag}.tar.gz bianbu-ai-support.x86_64 && popd
-    - pushd build.x86_64 && curl -k -u $NEXUS_USERNAME:$NEXUS_PASSWORD --upload-file bianbu-ai-support.x86_64.${tag}.tar.gz https://nexus.bianbu.xyz/repository/bianbu-ai/support-library/bianbu-ai-support.x86_64.${tag}.tar.gz && popd
-    - pushd build.riscv64 && tar czf bianbu-ai-support.riscv64.${tag}.tar.gz bianbu-ai-support.riscv64 && popd
-    - pushd build.riscv64 && curl -k -u $NEXUS_USERNAME:$NEXUS_PASSWORD --upload-file bianbu-ai-support.riscv64.${tag}.tar.gz https://nexus.bianbu.xyz/repository/bianbu-ai/support-library/bianbu-ai-support.riscv64.${tag}.tar.gz && popd
+    - |
+      pushd build.x86_64
+      tar czf bianbu-ai-support.x86_64.${tag}.tar.gz bianbu-ai-support.x86_64
+      curl -k -u $NEXUS_USERNAME:$NEXUS_PASSWORD --upload-file bianbu-ai-support.x86_64.${tag}.tar.gz https://nexus.bianbu.xyz/repository/bianbu-ai/support-library/bianbu-ai-support.x86_64.${tag}.tar.gz
+      popd
+    - |
+      pushd build.riscv64
+      tar czf bianbu-ai-support.riscv64.${tag}.tar.gz bianbu-ai-support.riscv64
+      curl -k -u $NEXUS_USERNAME:$NEXUS_PASSWORD --upload-file bianbu-ai-support.riscv64.${tag}.tar.gz https://nexus.bianbu.xyz/repository/bianbu-ai/support-library/bianbu-ai-support.riscv64.${tag}.tar.gz
+      popd
   only:
     - tags
 

@@ -41,6 +41,8 @@ variables:
   ORT_HOME_X86: "/home/workspace/onnxruntime-linux-x64-1.15.1"
   CI_NEXUS_URL: "https://nexus.bianbu.xyz/service/rest/repository/browse/bianbu-ai/onnxruntime/"
   CI_INSTALL_OPTION: "--with-demo --with-ort"
+  KUBERNETES_MEMORY_LIMIT: "6Gi"
+  KUBERNETES_MEMORY_REQUEST: "6Gi"
 
 build-job-x86_64:   # This job runs in the build stage, which runs first.
   stage: build

@@ -44,6 +44,7 @@ function ai_prerm_uninstall_desktop() {
     for desktop in "${aiDesktop[@]}"; do
       rm -rf "${FILENAME}/${gDesktopName}/${desktop}"
     done
+    rm -rf ${FILENAME}/.config/bianbu-ai-support
   done
 }
 

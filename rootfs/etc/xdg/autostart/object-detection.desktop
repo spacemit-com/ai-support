@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=object-detection
+Exec=/usr/bin/bianbu-ai-autotools desktop /usr/share/applications/object-detection.desktop
+Terminal=false
+NoDisplay=true
+StartupNotify=false

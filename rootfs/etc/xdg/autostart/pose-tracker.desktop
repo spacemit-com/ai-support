@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=pose-tracker
+Exec=/usr/bin/bianbu-ai-autotools desktop /usr/share/applications/pose-tracker.desktop
+Terminal=false
+NoDisplay=true
+StartupNotify=false

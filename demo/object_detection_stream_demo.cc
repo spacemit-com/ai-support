@@ -145,18 +145,20 @@ void Preview(DataLoader& dataloader, Detector& detector) {
         TimeWatcher t("|-- Output result");
 #endif
         for (int i = 0; i < static_cast<int>(objs.result_bboxes.size()); i++) {
-          std::cout << "bbox[" << std::setw(2) << i << "]"
-                    << " "
-                    << "x1y1x2y2: "
-                    << "(" << std::setw(4) << objs.result_bboxes[i].x1 << ","
-                    << std::setw(4) << objs.result_bboxes[i].y1 << ","
-                    << std::setw(4) << objs.result_bboxes[i].x2 << ","
-                    << std::setw(4) << objs.result_bboxes[i].y2 << ")"
-                    << ", "
-                    << "score: " << std::fixed << std::setprecision(3)
-                    << std::setw(4) << objs.result_bboxes[i].score << ", "
-                    << "label_text: " << objs.result_bboxes[i].label_text
-                    << std::endl;
+          if (objs.result_bboxes[i].flag) {
+            std::cout << "bbox[" << std::setw(2) << i << "]"
+                      << " "
+                      << "x1y1x2y2: "
+                      << "(" << std::setw(4) << objs.result_bboxes[i].x1 << ","
+                      << std::setw(4) << objs.result_bboxes[i].y1 << ","
+                      << std::setw(4) << objs.result_bboxes[i].x2 << ","
+                      << std::setw(4) << objs.result_bboxes[i].y2 << ")"
+                      << ", "
+                      << "score: " << std::fixed << std::setprecision(3)
+                      << std::setw(4) << objs.result_bboxes[i].score << ", "
+                      << "label_text: " << objs.result_bboxes[i].label_text
+                      << std::endl;
+          }
         }
       }
     }

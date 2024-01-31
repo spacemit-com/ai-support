@@ -43,17 +43,19 @@ int DetectVideo(const std::string &filepath, const std::string &videoPath,
       TimeWatcher t("|-- Output result");
 #endif
       for (int i = 0; i < static_cast<int>(resultBoxes.size()); i++) {
-        std::cout << "bbox[" << std::setw(2) << i << "]"
-                  << " "
-                  << "x1y1x2y2: "
-                  << "(" << std::setw(4) << resultBoxes[i].x1 << ","
-                  << std::setw(4) << resultBoxes[i].y1 << "," << std::setw(4)
-                  << resultBoxes[i].x2 << "," << std::setw(4)
-                  << resultBoxes[i].y2 << ")"
-                  << ", "
-                  << "score: " << std::fixed << std::setprecision(3)
-                  << std::setw(4) << resultBoxes[i].score << ", "
-                  << "label_text: " << resultBoxes[i].label_text << std::endl;
+        if (resultBoxes[i].flag) {
+          std::cout << "bbox[" << std::setw(2) << i << "]"
+                    << " "
+                    << "x1y1x2y2: "
+                    << "(" << std::setw(4) << resultBoxes[i].x1 << ","
+                    << std::setw(4) << resultBoxes[i].y1 << "," << std::setw(4)
+                    << resultBoxes[i].x2 << "," << std::setw(4)
+                    << resultBoxes[i].y2 << ")"
+                    << ", "
+                    << "score: " << std::fixed << std::setprecision(3)
+                    << std::setw(4) << resultBoxes[i].score << ", "
+                    << "label_text: " << resultBoxes[i].label_text << std::endl;
+        }
       }
     }
     draw_boxes_inplace(frame, resultBoxes);

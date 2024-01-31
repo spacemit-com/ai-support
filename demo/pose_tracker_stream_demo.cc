@@ -142,10 +142,17 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
   poses.timestamp = now;
   int count = 0;
   int dur = 0;
+  int enable_show = 1;
+  const char* showfps = getenv("SHOWFPS");
+  const char* show = getenv("SHOW");
+  if (show && strcmp(show, "-1") == 0) {
+    enable_show = -1;
+  }
   while (dataloader.ifenable()) {
     auto start = std::chrono::steady_clock::now();
     frame = dataloader.fetch_frame();  // 取(搬走)一帧数据
     if ((frame).empty()) {
+      dataloader.set_disable();
       break;
     }
     if (tracker.estimated())  // 判断原因: detector.detected 不用锁,
@@ -181,7 +188,6 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
     }
     int preview_fps = dataloader.get_preview_fps();
     int detection_fps = dataloader.get_detection_fps();
-    const char* showfps = getenv("SHOWFPS");
     if (showfps != nullptr) {
       cv::putText(frame, "preview fps: " + std::to_string(preview_fps),
                   cv::Point(0, 15), cv::FONT_HERSHEY_SIMPLEX, 0.5f,
@@ -190,8 +196,10 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
                   cv::Point(500, 15), cv::FONT_HERSHEY_SIMPLEX, 0.5f,
                   cv::Scalar(0, 255, 0), 1, cv::LINE_AA);
     }
-    cv::imshow("Track", (frame));
-    cv::waitKey(10);
+    if (enable_show != -1) {
+      cv::imshow("Track", (frame));
+      cv::waitKey(10);
+    }
     auto end = std::chrono::steady_clock::now();
     auto preview_duration =
         std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -202,13 +210,17 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
       dur = 0;
       count = 0;
     }
-    if (cv::getWindowProperty("Track", cv::WND_PROP_VISIBLE) < 1) {
-      dataloader.set_disable();
-      break;
+    if (enable_show != -1) {
+      if (cv::getWindowProperty("Track", cv::WND_PROP_VISIBLE) < 1) {
+        dataloader.set_disable();
+        break;
+      }
     }
   }
   std::cout << "preview thread quit" << std::endl;
-  cv::destroyAllWindows();
+  if (enable_show != -1) {
+    cv::destroyAllWindows();
+  }
 }
 
 #ifndef _WIN32

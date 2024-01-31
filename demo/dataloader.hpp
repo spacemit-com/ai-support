@@ -1,11 +1,11 @@
 ﻿#ifndef SUPPORT_DEMO_DATALOADER_HPP_
 #define SUPPORT_DEMO_DATALOADER_HPP_
 
-#include <cctype> // for: std::isdigit
+#include <cctype>  // for: std::isdigit
 #include <memory>
 #include <mutex>
-#include <string>
 #include <queue>
+#include <string>
 /* opencv header files */
 #include "opencv2/opencv.hpp"
 /* bianbu-ai-support header files */
@@ -165,7 +165,9 @@ class SharedDataLoader : public DataLoader {
   cv::Mat fetch_frame() {
     cv::Mat frame, temp;
     capture_.read(frame);
-    resize_unscale(frame, temp, get_resize_height(), get_resize_width());
+    if (!frame.empty()) {
+      resize_unscale(frame, temp, get_resize_height(), get_resize_width());
+    }
     frame_mutex_.lock();
     frame_ = temp.clone();
     frame_mutex_.unlock();

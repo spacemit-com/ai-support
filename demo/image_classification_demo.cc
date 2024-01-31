@@ -1,6 +1,3 @@
-#include <stdlib.h>
-#include <unistd.h> // for: getopt
-
 #include <iostream>
 
 #include "task/vision/image_classification_task.h"
@@ -20,21 +17,6 @@ int main(int argc, char* argv[]) {
     filePath = argv[1];
     labelFilepath = argv[2];
     imageFilepath = argv[3];
-    int o;
-    const char* optstring = "d:t:";
-    while ((o = getopt(argc, argv, optstring)) != -1) {
-      switch (o) {
-        case 'd':
-          disable_spacemit_ep = atoi(optarg);
-          break;
-        case 't':
-          intra_threads_num = atoi(optarg);
-          break;
-        case '?':
-          std::cout << "[ERROR] Unsupported usage" << std::endl;
-          break;
-      }
-    }
     if (!checkImageFileExtension(imageFilepath)) {
       std::cout << "[ ERROR ] The ImageFilepath is not correct. Make sure you "
                    "are setting the path to an imgae file (.jpg/.jpeg/.png)"
@@ -49,15 +31,14 @@ int main(int argc, char* argv[]) {
     }
   } else {
     std::cout << "run with " << argv[0]
-              << " <modelFilepath> <labelFilepath> <imageFilepath> option(-d "
-                 "<disable_spacemit_ep>) option(-t <intra_threads_num>)"
+              << " <modelFilepath> <labelFilepath> <imageFilepath>"
               << std::endl;
     return -1;
   }
   cv::Mat imgRaw;
   std::unique_ptr<imageClassificationTask> imageclassification =
-      std::unique_ptr<imageClassificationTask>(new imageClassificationTask(
-          filePath, labelFilepath, disable_spacemit_ep, intra_threads_num));
+      std::unique_ptr<imageClassificationTask>(
+          new imageClassificationTask(filePath, labelFilepath));
 #ifdef DEBUG
   std::cout << "." << std::endl;
 #endif

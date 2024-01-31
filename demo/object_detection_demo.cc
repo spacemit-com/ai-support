@@ -1,6 +1,3 @@
-#include <stdlib.h>
-#include <unistd.h>  // for: getopt
-
 #include <iomanip>  // for: setprecision
 #include <iostream>
 
@@ -14,9 +11,6 @@ int main(int argc, char* argv[]) {
   std::vector<Boxi> resultBoxes;
   std::string filePath, modelFilepath, imageFilepath, saveImgpath,
       labelFilepath, configFilepath;
-  bool disable_spacemit_ep{false};
-  float score_threshold{-1.f}, nms_threshold{-1.f};
-  int intra_threads_num{1};
   cv::Mat imgRaw;
 #ifdef DEBUG
   std::cout << "." << std::endl;
@@ -100,9 +94,8 @@ int main(int argc, char* argv[]) {
       imgRaw = cv::imread(imageFilepath);
     }
     std::unique_ptr<objectDetectionTask> objectdetectiontask =
-        std::unique_ptr<objectDetectionTask>(new objectDetectionTask(
-            filePath, labelFilepath, disable_spacemit_ep, intra_threads_num,
-            score_threshold, nms_threshold));
+        std::unique_ptr<objectDetectionTask>(
+            new objectDetectionTask(filePath, labelFilepath));
     resultBoxes = objectdetectiontask->Detect(imgRaw).result_bboxes;
     {
 #ifdef DEBUG
@@ -156,31 +149,9 @@ int main(int argc, char* argv[]) {
 #endif
       imgRaw = cv::imread(imageFilepath);
     }
-    int o;
-    const char* optstring = "d:t:s:n:";
-    while ((o = getopt(argc, argv, optstring)) != -1) {
-      switch (o) {
-        case 'd':
-          disable_spacemit_ep = atoi(optarg);
-          break;
-        case 't':
-          intra_threads_num = atoi(optarg);
-          break;
-        case 's':
-          score_threshold = atof(optarg);
-          break;
-        case 'n':
-          nms_threshold = atof(optarg);
-          break;
-        case '?':
-          std::cout << "[ERROR] Unsupported usage" << std::endl;
-          break;
-      }
-    }
     std::unique_ptr<objectDetectionTask> objectdetectiontask =
-        std::unique_ptr<objectDetectionTask>(new objectDetectionTask(
-            filePath, labelFilepath, disable_spacemit_ep, intra_threads_num,
-            score_threshold, nms_threshold));
+        std::unique_ptr<objectDetectionTask>(
+            new objectDetectionTask(filePath, labelFilepath));
     resultBoxes = objectdetectiontask->Detect(imgRaw).result_bboxes;
     {
 #ifdef DEBUG
@@ -213,9 +184,7 @@ int main(int argc, char* argv[]) {
   } else {
     std::cout
         << "run with " << argv[0]
-        << " <modelFilepath> <labelFilepath> <imageFilepath> <saveImgpath> "
-           "option(-d <disable_spacemit_ep>) option(-t <intra_threads_num>) "
-           "option(-s <score_threshold>) option(-n <nms_threshold>) or "
+        << " <modelFilepath> <labelFilepath> <imageFilepath> <saveImgpath> or "
         << argv[0] << " <configFilepath> <imageFilepath> <saveImgpath>"
         << std::endl;
     return -1;

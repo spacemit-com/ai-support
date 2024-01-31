@@ -7,16 +7,13 @@
 #endif
 
 #include "utils/utils.h"
-int DetectVideo(const std::string &modelFilepath,
-                const std::string &labelFilepath, const std::string &videoPath,
+int DetectVideo(const std::string &filepath, const std::string &videoPath,
                 const std::string &srcPath) {
   bool disable_spacemit_ep{false};
   float score_threshold{-1.f}, nms_threshold{-1.f};
   int intra_threads_num{2};
   std::unique_ptr<objectDetectionTask> objectdetectiontask =
-      std::unique_ptr<objectDetectionTask>(new objectDetectionTask(
-          modelFilepath, labelFilepath, disable_spacemit_ep, intra_threads_num,
-          score_threshold, nms_threshold));
+      std::unique_ptr<objectDetectionTask>(new objectDetectionTask(filepath));
   cv::VideoCapture capture(videoPath);
   if (!capture.isOpened()) {
     std::cout << "Open video capture failed" << std::endl;
@@ -71,23 +68,21 @@ int DetectVideo(const std::string &modelFilepath,
 }
 
 int main(int argc, char *argv[]) {
-  std::string modelFilepath, labelFilepath, videoFilepath, dstFilepath;
+  std::string filepath, videoFilepath, dstFilepath;
 #ifdef DEBUG
   std::cout << "." << std::endl;
 #endif
-  if (argc == 5) {
-    modelFilepath = argv[1];
-    labelFilepath = argv[2];
-    videoFilepath = argv[3];
-    dstFilepath = argv[4];
-    int flag =
-        DetectVideo(modelFilepath, labelFilepath, videoFilepath, dstFilepath);
+  if (argc == 4) {
+    filepath = argv[1];
+    videoFilepath = argv[2];
+    dstFilepath = argv[3];
+    int flag = DetectVideo(filepath, videoFilepath, dstFilepath);
     if (flag != 0) {
       std::cout << "[Error] Detect fail" << std::endl;
     }
   } else {
     std::cout << "run with " << argv[0]
-              << " <modelFilepath>  <labelFilepath> <videoFilepath> "
+              << " <configFilepath> <videoFilepath> "
                  "<dstFilepath> (end with .avi)"
               << std::endl;
     return -1;

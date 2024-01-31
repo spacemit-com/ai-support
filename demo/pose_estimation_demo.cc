@@ -1,6 +1,3 @@
-#include <stdlib.h>
-#include <unistd.h>  // for: getopt
-
 #include <iomanip>  // for: setprecision
 #include <iostream>
 
@@ -17,21 +14,16 @@ int main(int argc, char* argv[]) {
       {11, 13}, {13, 15}, {12, 14}, {14, 16}};
   std::vector<PosePoint> resultPoints;
   std::vector<Boxi> resultBoxes;
-  std::string detFilePath, poseFilePath, modelFilepath, imageFilepath,
-      saveImgpath, labelFilepath, configFilepath;
-  bool disable_spacemit_ep{false};
-  float score_threshold{-1.f}, nms_threshold{-1.f};
-  int intra_threads_num{1};
+  std::string detFilePath, poseFilePath, imageFilepath, saveImgpath;
   cv::Mat imgRaw, img;
 #ifdef DEBUG
   std::cout << "." << std::endl;
 #endif
-  if (argc == 6) {
+  if (argc == 5) {
     detFilePath = argv[1];
     poseFilePath = argv[2];
-    labelFilepath = argv[3];
-    imageFilepath = argv[4];
-    saveImgpath = argv[5];
+    imageFilepath = argv[3];
+    saveImgpath = argv[4];
     if (!checkImageFileExtension(imageFilepath) ||
         !checkImageFileExtension(saveImgpath)) {
       std::cout << "[ ERROR ] The ImageFilepath is not correct. Make sure you "
@@ -53,14 +45,13 @@ int main(int argc, char* argv[]) {
       resize_unscale(imgRaw, img, 320, 320);
     }
     std::unique_ptr<objectDetectionTask> objectdetectiontask =
-        std::unique_ptr<objectDetectionTask>(new objectDetectionTask(
-            detFilePath, labelFilepath, disable_spacemit_ep, intra_threads_num,
-            score_threshold, nms_threshold));
+        std::unique_ptr<objectDetectionTask>(
+            new objectDetectionTask(detFilePath));
     resultBoxes = objectdetectiontask->Detect(img).result_bboxes;
 
     std::unique_ptr<poseEstimationTask> poseestimationtask =
-        std::unique_ptr<poseEstimationTask>(new poseEstimationTask(
-            poseFilePath, disable_spacemit_ep, intra_threads_num));
+        std::unique_ptr<poseEstimationTask>(
+            new poseEstimationTask(poseFilePath));
     Boxi box;
     for (int i = 0; i < static_cast<int>(resultBoxes.size()); i++) {
       box = resultBoxes[i];
@@ -99,94 +90,11 @@ int main(int argc, char* argv[]) {
       }
     }
     cv::imwrite(saveImgpath, imgRaw);
-  } else if (argc > 6) {
-    detFilePath = argv[1];
-    poseFilePath = argv[2];
-    labelFilepath = argv[3];
-    imageFilepath = argv[4];
-    saveImgpath = argv[5];
-    if (!checkImageFileExtension(imageFilepath) ||
-        !checkImageFileExtension(saveImgpath)) {
-      std::cout << "[ ERROR ] The ImageFilepath is not correct. Make sure you "
-                   "are setting the path to an imgae file (.jpg/.jpeg/.png)"
-                << std::endl;
-      return -1;
-    }
-    if (!exists_check(imageFilepath)) {
-      std::cout << "[ ERROR ] The Image File does not exist. Make sure you are "
-                   "setting the correct path to the file"
-                << std::endl;
-      return -1;
-    }
-    {
-#ifdef DEBUG
-      TimeWatcher t("|-- Load input data");
-#endif
-      imgRaw = cv::imread(imageFilepath);
-      resize_unscale(imgRaw, img, 320, 320);
-    }
-    int o;
-    const char* optstring = "d:t:s:n:";
-    while ((o = getopt(argc, argv, optstring)) != -1) {
-      switch (o) {
-        case 'd':
-          disable_spacemit_ep = atoi(optarg);
-          break;
-        case 't':
-          intra_threads_num = atoi(optarg);
-          break;
-        case 's':
-          score_threshold = atof(optarg);
-          break;
-        case 'n':
-          nms_threshold = atof(optarg);
-          break;
-        case '?':
-          std::cout << "[ERROR] Unsupported usage" << std::endl;
-          break;
-      }
-    }
-    std::unique_ptr<objectDetectionTask> objectdetectiontask =
-        std::unique_ptr<objectDetectionTask>(new objectDetectionTask(
-            detFilePath, labelFilepath, disable_spacemit_ep, intra_threads_num,
-            score_threshold, nms_threshold));
-    resultBoxes = objectdetectiontask->Detect(imgRaw).result_bboxes;
-
-    std::unique_ptr<poseEstimationTask> poseestimationtask =
-        std::unique_ptr<poseEstimationTask>(new poseEstimationTask(
-            poseFilePath, disable_spacemit_ep, intra_threads_num));
-    Boxi box;
-    for (int i = 0; i < static_cast<int>(resultBoxes.size()); i++) {
-      box = resultBoxes[i];
-      if (box.label != 0) {
-        continue;
-      }
-      resultPoints = poseestimationtask->Estimate(img, box).result_points;
-      for (int i = 0; i < static_cast<int>(resultPoints.size()); ++i) {
-        cv::circle(img, cv::Point(resultPoints[i].x, resultPoints[i].y), 2,
-                   cv::Scalar{0, 0, 255}, 2, cv::LINE_AA);
-      }
-
-      for (int i = 0; i < static_cast<int>(coco_17_joint_links.size()); ++i) {
-        std::pair<int, int> joint_links = coco_17_joint_links[i];
-        cv::line(img,
-                 cv::Point(resultPoints[joint_links.first].x,
-                           resultPoints[joint_links.first].y),
-                 cv::Point(resultPoints[joint_links.second].x,
-                           resultPoints[joint_links.second].y),
-                 cv::Scalar{0, 255, 0}, 2, cv::LINE_AA);
-      }
-    }
-    cv::imwrite(saveImgpath, img);
   } else {
-    std::cout
-        << "run with " << argv[0]
-        << " <detModelFilepath> <poseModelFilepath> <labelFilepath> "
-           "<imageFilepath> "
-           "<saveImgpath> "
-           "option(-d <disable_spacemit_ep>) option(-t <intra_threads_num>) "
-           "option(-s <score_threshold>) option(-n <nms_threshold>)"
-        << std::endl;
+    std::cout << "run with " << argv[0]
+              << " <detConfigFilepath> <poseConfigFilepath> <imageFilepath> "
+                 "<saveImgpath> "
+              << std::endl;
     return -1;
   }
   return 0;

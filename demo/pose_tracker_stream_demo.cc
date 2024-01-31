@@ -24,28 +24,17 @@
 
 class Tracker {
  public:
-  Tracker(const std::string& detFilePath, const std::string& poseFilePath,
-          const std::string& labelFilepath, const bool disableSpacemitEp,
-          const int intraThreadsNum, const float scoreThreshold,
-          const float nmsThreshold) {
+  Tracker(const std::string& detFilePath, const std::string& poseFilePath) {
     detFilePath_ = detFilePath;
     poseFilePath_ = poseFilePath;
-    labelFilepath_ = labelFilepath;
-    disableSpacemitEp_ = disableSpacemitEp;
-    intraThreadsNum_ = intraThreadsNum;
-    scoreThreshold_ = scoreThreshold;
-    nmsThreshold_ = nmsThreshold;
   }
   ~Tracker() {}
   // 初始化/反初始化
   int init() {
-    objectdetectiontask_ =
-        std::unique_ptr<objectDetectionTask>(new objectDetectionTask(
-            detFilePath_, labelFilepath_, disableSpacemitEp_, intraThreadsNum_,
-            scoreThreshold_, nmsThreshold_));
-    poseestimationtask_ =
-        std::unique_ptr<poseEstimationTask>(new poseEstimationTask(
-            poseFilePath_, disableSpacemitEp_, intraThreadsNum_));
+    objectdetectiontask_ = std::unique_ptr<objectDetectionTask>(
+        new objectDetectionTask(detFilePath_));
+    poseestimationtask_ = std::unique_ptr<poseEstimationTask>(
+        new poseEstimationTask(poseFilePath_));
     return 0;
   }
 
@@ -99,10 +88,6 @@ class Tracker {
   std::string poseFilePath_;
   std::string detFilePath_;
   std::string labelFilepath_;
-  bool disableSpacemitEp_;
-  int intraThreadsNum_;
-  float scoreThreshold_;
-  float nmsThreshold_;
 };
 
 // 检测线程
@@ -230,38 +215,22 @@ void setThreadName(std::thread& thread, const char* name) {
 #endif
 
 int main(int argc, char* argv[]) {
-  std::string detFilePath, poseFilePath, labelFilepath, input, inputType;
-  bool disable_spacemit_ep{false};
-  float score_threshold{-1}, nms_threshold{-1};
-  int intra_threads_num{1}, resize_height{320}, resize_width{320};
-  if (argc == 6) {
+  std::string detFilePath, poseFilePath, input, inputType;
+  int resize_height{320}, resize_width{320};
+  if (argc == 5) {
     detFilePath = argv[1];
     poseFilePath = argv[2];
-    labelFilepath = argv[3];
-    input = argv[4];
-    inputType = argv[5];
-  } else if (argc > 6) {
+    input = argv[3];
+    inputType = argv[4];
+  } else if (argc > 5) {
     detFilePath = argv[1];
     poseFilePath = argv[2];
-    labelFilepath = argv[3];
-    input = argv[4];
-    inputType = argv[5];
+    input = argv[3];
+    inputType = argv[4];
     int o;
-    const char* optstring = "d:t:s:n:w:h:";
+    const char* optstring = "w:h:";
     while ((o = getopt(argc, argv, optstring)) != -1) {
       switch (o) {
-        case 'd':
-          disable_spacemit_ep = atoi(optarg);
-          break;
-        case 't':
-          intra_threads_num = atoi(optarg);
-          break;
-        case 's':
-          score_threshold = atof(optarg);
-          break;
-        case 'n':
-          nms_threshold = atof(optarg);
-          break;
         case 'w':
           resize_width = atoi(optarg);
           break;
@@ -275,18 +244,12 @@ int main(int argc, char* argv[]) {
     }
   } else {
     std::cout << "run with " << argv[0]
-              << " <detModelFilepath> <poseModelFilepath> <labelFilepath> "
-                 "<input> <inputType> (video "
-                 "or cameraId)  option(-d <disable_spacemit_ep>) option(-t "
-                 "<intra_threads_num>) "
-                 "option(-s <score_threshold>) option(-n <nms_threshold>) "
-                 "option(-h <resize_height>) option(-w <resize_width>)"
+              << " <detFilepath> <poseFilepath> <input> <inputType> (video or "
+                 "cameraId option(-h <resize_height>) option(-w <resize_width>)"
               << std::endl;
     return -1;
   }
-  Tracker tracker{detFilePath,         poseFilePath,      labelFilepath,
-                  disable_spacemit_ep, intra_threads_num, score_threshold,
-                  nms_threshold};
+  Tracker tracker{detFilePath, poseFilePath};
   SharedDataLoader dataloader{resize_height, resize_width};
   if (dataloader.init(input) != 0) {
     std::cout << "[ERROR] dataloader init error" << std::endl;

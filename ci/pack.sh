@@ -63,9 +63,10 @@ EOF
   else
     cp -rd ${INSTALL_LOCAL}/lib/3rdparty/onnxruntime/* ${PKG_DIR}/usr/
   fi
-  cp -rd ${INSTALL_LOCAL}/* ${PKG_DIR}/usr/
+  cp -rdf ${INSTALL_LOCAL}/* ${PKG_DIR}/usr/
+  cp -rdf ${INSTALL_LOCAL}/../etc ${PKG_DIR}/
   # post process
-  rm -rf ${PKG_DIR}/usr/lib/3rdparty ${PKG_DIR}/usr/demo
+  rm -rdf ${PKG_DIR}/usr/lib/3rdparty ${PKG_DIR}/usr/demo
 
   # create debian package
   dpkg -b ${PKG_DIR} ${PKG_NAME}-${PKG_VER}.deb

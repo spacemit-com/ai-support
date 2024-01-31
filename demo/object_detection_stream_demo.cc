@@ -23,23 +23,12 @@
 
 class Detector {
  public:
-  Detector(const std::string& filePath, const std::string& labelFilepath,
-           const bool disableSpacemitEp, const int intraThreadsNum,
-           const float scoreThreshold, const float nmsThreshold) {
-    filePath_ = filePath;
-    labelFilepath_ = labelFilepath;
-    disableSpacemitEp_ = disableSpacemitEp;
-    intraThreadsNum_ = intraThreadsNum;
-    scoreThreshold_ = scoreThreshold;
-    nmsThreshold_ = nmsThreshold;
-  }
+  explicit Detector(const std::string& filePath) { filePath_ = filePath; }
   ~Detector() {}
   // 初始化/反初始化
   int init() {
-    objectdetectiontask_ =
-        std::unique_ptr<objectDetectionTask>(new objectDetectionTask(
-            filePath_, labelFilepath_, disableSpacemitEp_, intraThreadsNum_,
-            scoreThreshold_, nmsThreshold_));
+    objectdetectiontask_ = std::unique_ptr<objectDetectionTask>(
+        new objectDetectionTask(filePath_));
     return 0;
   }
 
@@ -76,11 +65,6 @@ class Detector {
   std::queue<struct ObjectDetectionResult> objs_array_;
   std::unique_ptr<objectDetectionTask> objectdetectiontask_;
   std::string filePath_;
-  std::string labelFilepath_;
-  bool disableSpacemitEp_;
-  int intraThreadsNum_;
-  float scoreThreshold_;
-  float nmsThreshold_;
 };
 
 // 检测线程
@@ -228,36 +212,20 @@ void setThreadName(std::thread& thread, const char* name) {
 #endif
 
 int main(int argc, char* argv[]) {
-  std::string filePath, labelFilepath, input, inputType;
-  bool disable_spacemit_ep{false};
-  float score_threshold{-1.f}, nms_threshold{-1.f};
-  int intra_threads_num{2}, resize_height{320}, resize_width{320};
-  if (argc == 5) {
+  std::string filePath, input, inputType;
+  int resize_height{320}, resize_width{320};
+  if (argc == 4) {
     filePath = argv[1];
-    labelFilepath = argv[2];
-    input = argv[3];
-    inputType = argv[4];
-  } else if (argc > 5) {
+    input = argv[2];
+    inputType = argv[3];
+  } else if (argc > 4) {
     filePath = argv[1];
-    labelFilepath = argv[2];
-    input = argv[3];
-    inputType = argv[4];
+    input = argv[2];
+    inputType = argv[3];
     int o;
-    const char* optstring = "d:t:s:n:w:h:";
+    const char* optstring = "w:h:";
     while ((o = getopt(argc, argv, optstring)) != -1) {
       switch (o) {
-        case 'd':
-          disable_spacemit_ep = atoi(optarg);
-          break;
-        case 't':
-          intra_threads_num = atoi(optarg);
-          break;
-        case 's':
-          score_threshold = atof(optarg);
-          break;
-        case 'n':
-          nms_threshold = atof(optarg);
-          break;
         case 'w':
           resize_width = atoi(optarg);
           break;
@@ -270,17 +238,14 @@ int main(int argc, char* argv[]) {
       }
     }
   } else {
-    std::cout << "run with " << argv[0]
-              << " <modelFilepath> <labelFilepath> <input> <inputType> (video "
-                 "or cameraId)  option(-d <disable_spacemit_ep>) option(-t "
-                 "<intra_threads_num>) "
-                 "option(-s <score_threshold>) option(-n <nms_threshold>) "
-                 "option(-h <resize_height>) option(-w <resize_width>)"
-              << std::endl;
+    std::cout
+        << "run with " << argv[0]
+        << " <modelFilepath> <input> <inputType> (video "
+           "or cameraId) option(-h <resize_height>) option(-w <resize_width>)"
+        << std::endl;
     return -1;
   }
-  Detector detector{filePath,          labelFilepath,   disable_spacemit_ep,
-                    intra_threads_num, score_threshold, nms_threshold};
+  Detector detector{filePath};
   SharedDataLoader dataloader{resize_height, resize_width};
   if (dataloader.init(input) != 0) {
     std::cout << "[ERROR] dataloader init error" << std::endl;

@@ -48,6 +48,8 @@ class ObjectDetection : public BaseVisionTaskApi<ObjectDetectionResult> {
   int initFlag_;
   float score_threshold_;
   float nms_threshold_;
+  std::vector<int> class_name_whitelist_;
+  std::vector<int> class_name_blacklist_;
 };
 
 #endif  // SUPPORT_SRC_TASK_VISION_OBJECTDETECTION_OBJECT_DETECTION_H_

@@ -118,6 +118,29 @@ ObjectDetectionResult ObjectDetection::Postprocess() {
   } else {
     std::cout << "[ ERROR ] Unsupported model return empty result" << std::endl;
   }
+  if (!class_name_blacklist_.empty()) {
+    for (int i = 0; i < static_cast<int>(class_name_blacklist_.size()); i++) {
+      for (int j = 0; j < static_cast<int>(result_boxes_.size()); j++) {
+        if (class_name_blacklist_[i] ==
+            static_cast<int>(result_boxes_[j].label)) {
+          result_boxes_[j].flag = false;
+        }
+      }
+    }
+  }
+  if (!class_name_whitelist_.empty()) {
+    for (int j = 0; j < static_cast<int>(result_boxes_.size()); j++) {
+      result_boxes_[j].flag = false;
+    }
+    for (int i = 0; i < static_cast<int>(class_name_whitelist_.size()); i++) {
+      for (int j = 0; j < static_cast<int>(result_boxes_.size()); j++) {
+        if (class_name_whitelist_[i] ==
+            static_cast<int>(result_boxes_[j].label)) {
+          result_boxes_[j].flag = true;
+        }
+      }
+    }
+  }
   result_.result_bboxes = result_boxes_;
   result_.timestamp = std::chrono::steady_clock::now();
   return result_;
@@ -155,6 +178,14 @@ int ObjectDetection::InitFromConfig(const std::string &configFilepath) {
     nms_threshold_ = config["nms_threshold"];
   } else {
     nms_threshold_ = -1.f;
+  }
+  if (config.contains("class_name_whitelist")) {
+    class_name_whitelist_ =
+        config["class_name_whitelist"].get<std::vector<int>>();
+  }
+  if (config.contains("class_name_blacklist")) {
+    class_name_blacklist_ =
+        config["class_name_blacklist"].get<std::vector<int>>();
   }
   labels_ = readLabels(labelFilepath_);
   initFlag_ = GetEngine()->Init(config);

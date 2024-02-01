@@ -1,0 +1,9 @@
+{
+    "name": "Yolov6",
+    "instance_name": "object-detection-inference",
+    "model_path": "/usr/share/models/yolov6p5_n.q.onnx",
+    "label_path": "/usr/share/models/coco.txt",
+    "intra_threads_num": 2,
+    "graph_optimization_level": "",
+    "score_threshold": 0.3
+}

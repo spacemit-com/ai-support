@@ -64,7 +64,8 @@ bianbu-dev pack -a  # same as `bianbu-dev pack && bianbu-dev build` (pack 1st, t
 bianbu-dev chroot   # apt install onnxruntime, libopencv-dev
 
 # build package with dpkg(Note: install dependencies 1st plz, e.g. onnxruntime, opencv)
-dpkg-buildpackage -tc -b -uc
+apt-get build-dep -y $(pwd) # run in bianbu-ai-support directory
+dpkg-buildpackage -us -b -uc --no-pre-clean --no-post-clean # -tc
 # ..
 # |-- bianbu-ai-support-dbgsym_1.0.1_amd64.ddeb
 # |-- bianbu-ai-support_1.0.1_amd64.buildinfo

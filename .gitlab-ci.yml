@@ -31,6 +31,13 @@ image: harbor.bianbu.xyz/spacemit-ai/bianbu-ai-support:v1.1.1
     - main
     - cicd
     - merge_requests
+    - schedules
+
+.rule-upload: &rule-upload
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^bianbu-23.10\/.*$/'
+      when: on_success
+
 
 variables:
   SDK: "/opt"
@@ -149,6 +156,7 @@ build-job-riscv64-deb:
   only:
     - deb
 
+
 x86_64-test-job:    # This job runs in the test stage.
   stage: test       # It only starts when the job in the build stage completes successfully.
   dependencies:
@@ -208,6 +216,7 @@ package-daily-build:
       - output
   <<: *only-defaults
 
+
 upload-archive-nexus:
   stage: upload
   dependencies:
@@ -225,8 +234,7 @@ upload-archive-nexus:
       tar czf bianbu-ai-support.riscv64.${tag}.tar.gz bianbu-ai-support.riscv64
       curl -k -u $NEXUS_USERNAME:$NEXUS_PASSWORD --upload-file bianbu-ai-support.riscv64.${tag}.tar.gz https://nexus.bianbu.xyz/repository/bianbu-ai/support-library/bianbu-ai-support.riscv64.${tag}.tar.gz
       popd
-  only:
-    - tags
+  <<: *rule-upload
 
 upload-archive-bianbu:
   stage: upload
@@ -260,8 +268,8 @@ upload-archive-bianbu:
     - git push origin --all
     # status
     - echo "Bianbu devscripts successfully packaged."
-  only:
-    - tags
+  <<: *rule-upload
+
 
 lint-test-job:   # This job also runs in the test stage.
   stage: test    # It can run at the same time as unit-test-job (in parallel).

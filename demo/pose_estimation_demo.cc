@@ -47,11 +47,16 @@ int main(int argc, char* argv[]) {
     std::unique_ptr<objectDetectionTask> objectdetectiontask =
         std::unique_ptr<objectDetectionTask>(
             new objectDetectionTask(detFilePath));
+    if (objectdetectiontask->getInitFlag() != 0) {
+      return -1;
+    }
     resultBoxes = objectdetectiontask->Detect(img).result_bboxes;
-
     std::unique_ptr<poseEstimationTask> poseestimationtask =
         std::unique_ptr<poseEstimationTask>(
             new poseEstimationTask(poseFilePath));
+    if (poseestimationtask->getInitFlag() != 0) {
+      return -1;
+    }
     Boxi box;
     for (int i = 0; i < static_cast<int>(resultBoxes.size()); i++) {
       box = resultBoxes[i];

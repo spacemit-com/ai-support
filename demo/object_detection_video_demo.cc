@@ -9,11 +9,11 @@
 #include "utils/utils.h"
 int DetectVideo(const std::string &filepath, const std::string &videoPath,
                 const std::string &srcPath) {
-  bool disable_spacemit_ep{false};
-  float score_threshold{-1.f}, nms_threshold{-1.f};
-  int intra_threads_num{2};
   std::unique_ptr<objectDetectionTask> objectdetectiontask =
       std::unique_ptr<objectDetectionTask>(new objectDetectionTask(filepath));
+  if (objectdetectiontask->getInitFlag() != 0) {
+    return -1;
+  }
   cv::VideoCapture capture(videoPath);
   if (!capture.isOpened()) {
     std::cout << "Open video capture failed" << std::endl;

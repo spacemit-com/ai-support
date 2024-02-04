@@ -35,7 +35,12 @@ class Tracker {
         new objectDetectionTask(detFilePath_));
     poseestimationtask_ = std::unique_ptr<poseEstimationTask>(
         new poseEstimationTask(poseFilePath_));
-    return 0;
+    return get_init_flag();
+  }
+
+  int get_init_flag() {
+    return (objectdetectiontask_->getInitFlag() ||
+            poseestimationtask_->getInitFlag());
   }
 
   int uninit() { return 0; }
@@ -101,6 +106,7 @@ void Track(DataLoader& dataloader, Tracker& tracker) {
     auto start = std::chrono::steady_clock::now();
     frame = dataloader.peek_frame();  // 取(拷贝)一帧数据
     if ((frame).empty()) {
+      dataloader.set_disable();
       continue;
     }
     int flag = tracker.infer(frame);  // 推理并保存检测结果

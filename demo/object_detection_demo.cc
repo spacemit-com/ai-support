@@ -98,6 +98,9 @@ int main(int argc, char* argv[]) {
     std::unique_ptr<objectDetectionTask> objectdetectiontask =
         std::unique_ptr<objectDetectionTask>(
             new objectDetectionTask(filePath, labelFilepath));
+    if (objectdetectiontask->getInitFlag() != 0) {
+      return -1;
+    }
     resultBoxes = objectdetectiontask->Detect(imgRaw).result_bboxes;
     {
 #ifdef DEBUG

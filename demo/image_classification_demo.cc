@@ -7,8 +7,6 @@
 
 int main(int argc, char* argv[]) {
   std::string filePath, labelFilepath, imageFilepath;
-  bool disable_spacemit_ep{false};
-  int intra_threads_num{1};
   if (argc == 4) {
     filePath = argv[1];
     labelFilepath = argv[2];
@@ -48,7 +46,9 @@ int main(int argc, char* argv[]) {
 #endif
     imgRaw = cv::imread(imageFilepath);
   }
-  ImageClassificationResult result = imageclassification->Classify(imgRaw);
-  std::cout << "classify result: " << result.label_text << std::endl;
+  if (!imageclassification->getInitFlag()) {
+    ImageClassificationResult result = imageclassification->Classify(imgRaw);
+    std::cout << "classify result: " << result.label_text << std::endl;
+  }
   return 0;
 }

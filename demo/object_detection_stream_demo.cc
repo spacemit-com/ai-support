@@ -29,7 +29,7 @@ class Detector {
   int init() {
     objectdetectiontask_ = std::unique_ptr<objectDetectionTask>(
         new objectDetectionTask(filePath_));
-    return 0;
+    return get_init_flag();
   }
 
   int uninit() { return 0; }
@@ -48,7 +48,7 @@ class Detector {
 
   // 查询检测结果
   int detected() { return objs_array_.size(); }
-
+  int get_init_flag() { return objectdetectiontask_->getInitFlag(); }
   // 移走检测结果
   ObjectDetectionResult get_object() {
     ObjectDetectionResult objs_moved;
@@ -71,13 +71,14 @@ class Detector {
 void Detection(DataLoader& dataloader, Detector& detector) {
   if (detector.init() != 0) {
     std::cout << "[ERROR] detector init error" << std::endl;
-    return;
+    dataloader.set_disable();
   }
   cv::Mat frame;
   while (dataloader.ifenable()) {
     auto start = std::chrono::steady_clock::now();
     frame = dataloader.peek_frame();  // 取(拷贝)一帧数据
     if ((frame).empty()) {
+      dataloader.set_disable();
       continue;
     }
     int flag = detector.infer(frame);  // 推理并保存检测结果
@@ -242,7 +243,7 @@ int main(int argc, char* argv[]) {
   } else {
     std::cout
         << "run with " << argv[0]
-        << " <modelFilepath> <input> <inputType> (video "
+        << " <configFilepath> <input> <inputType> (video "
            "or cameraId) option(-h <resize_height>) option(-w <resize_width>)"
         << std::endl;
     return -1;

@@ -12,6 +12,7 @@ class objectDetectionTask::impl {
 objectDetectionTask::objectDetectionTask(const std::string &filePath,
                                          const std::string &labelFilepath)
     : pimpl_(std::make_unique<impl>()) {
+  init_flag_ = -1;
   pimpl_->objectdetection_ =
       std::unique_ptr<ObjectDetection>(new ObjectDetection());
   if (!checkLabelFileExtension(labelFilepath)) {
@@ -30,9 +31,9 @@ objectDetectionTask::objectDetectionTask(const std::string &filePath,
                      "setting the correct path to the file"
                   << std::endl;
       } else {
-        int flag =
+        init_flag_ =
             pimpl_->objectdetection_->InitFromCommand(filePath, labelFilepath);
-        if (flag != 0) {
+        if (init_flag_ != 0) {
           std::cout << "[Error] Init fail" << std::endl;
         }
       }
@@ -46,8 +47,8 @@ objectDetectionTask::objectDetectionTask(const std::string &filePath,
                      "setting the correct path to the file"
                   << std::endl;
       } else {
-        int flag = pimpl_->objectdetection_->InitFromConfig(filePath);
-        if (flag != 0) {
+        init_flag_ = pimpl_->objectdetection_->InitFromConfig(filePath);
+        if (init_flag_ != 0) {
           std::cout << "[Error] Init fail" << std::endl;
         }
       }
@@ -61,6 +62,7 @@ objectDetectionTask::objectDetectionTask(const std::string &filePath,
 
 objectDetectionTask::objectDetectionTask(const std::string &filePath)
     : pimpl_(std::make_unique<impl>()) {
+  init_flag_ = -1;
   pimpl_->objectdetection_ =
       std::unique_ptr<ObjectDetection>(new ObjectDetection());
   if (filePath.length() > 4) {
@@ -75,8 +77,8 @@ objectDetectionTask::objectDetectionTask(const std::string &filePath)
                      "setting the correct path to the file"
                   << std::endl;
       } else {
-        int flag = pimpl_->objectdetection_->InitFromConfig(filePath);
-        if (flag != 0) {
+        init_flag_ = pimpl_->objectdetection_->InitFromConfig(filePath);
+        if (init_flag_ != 0) {
           std::cout << "[Error] Init fail" << std::endl;
         }
       }
@@ -87,6 +89,8 @@ objectDetectionTask::objectDetectionTask(const std::string &filePath)
     std::cout << "[ ERROR ] Unsupport filepath" << std::endl;
   }
 }
+
+int objectDetectionTask::getInitFlag() { return init_flag_; }
 
 ObjectDetectionResult objectDetectionTask::Detect(const cv::Mat &raw_img) {
   return pimpl_->objectdetection_->Detect(raw_img);

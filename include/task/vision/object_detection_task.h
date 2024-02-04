@@ -19,10 +19,12 @@ class objectDetectionTask {
       const std::vector<std::vector<float>> &input_tensors,
       const int img_height, const int img_width);
   std::vector<std::vector<float>> Process(const cv::Mat &img_raw);
+  int getInitFlag();
 
  private:
   class impl;
   std::shared_ptr<impl> pimpl_;
+  int init_flag_;
 };
 
 #endif  // SUPPORT_INCLUDE_TASK_VISION_OBJECT_DETECTION_TASK_H_

@@ -10,6 +10,7 @@ class poseEstimationTask::impl {
 
 poseEstimationTask::poseEstimationTask(const std::string &filePath)
     : pimpl_(std::make_unique<impl>()) {
+  init_flag_ = -1;
   pimpl_->poseestimation_ =
       std::unique_ptr<PoseEstimation>(new PoseEstimation());
   if (filePath.length() > 4) {
@@ -24,8 +25,8 @@ poseEstimationTask::poseEstimationTask(const std::string &filePath)
                      "setting the correct path to the file"
                   << std::endl;
       } else {
-        int flag = pimpl_->poseestimation_->InitFromCommand(filePath);
-        if (flag != 0) {
+        init_flag_ = pimpl_->poseestimation_->InitFromCommand(filePath);
+        if (init_flag_ != 0) {
           std::cout << "[Error] Init fail" << std::endl;
         }
       }
@@ -39,8 +40,8 @@ poseEstimationTask::poseEstimationTask(const std::string &filePath)
                      "setting the correct path to the file"
                   << std::endl;
       } else {
-        int flag = pimpl_->poseestimation_->InitFromConfig(filePath);
-        if (flag != 0) {
+        init_flag_ = pimpl_->poseestimation_->InitFromConfig(filePath);
+        if (init_flag_ != 0) {
           std::cout << "[Error] Init fail" << std::endl;
         }
       }
@@ -51,6 +52,8 @@ poseEstimationTask::poseEstimationTask(const std::string &filePath)
     std::cout << "[ ERROR ] Unsupport filepath" << std::endl;
   }
 }
+
+int poseEstimationTask::getInitFlag() { return init_flag_; }
 
 PoseEstimationResult poseEstimationTask::Estimate(const cv::Mat &raw_img,
                                                   const Boxi &box) {

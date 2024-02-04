@@ -27,12 +27,14 @@ imageClassificationTask::imageClassificationTask(
                  "the correct path to the file"
               << std::endl;
   } else {
-    int flag = pimpl_->imageclassification_->Init(filePath, labelFilepath);
-    if (flag != 0) {
+    init_flag_ = pimpl_->imageclassification_->Init(filePath, labelFilepath);
+    if (init_flag_ != 0) {
       std::cout << "[Error] Init fail" << std::endl;
     }
   }
 }
+
+int imageClassificationTask::getInitFlag() { return init_flag_; }
 
 ImageClassificationResult imageClassificationTask::Classify(
     const cv::Mat& img_raw) {

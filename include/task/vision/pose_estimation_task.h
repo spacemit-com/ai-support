@@ -12,11 +12,13 @@ class poseEstimationTask {
  public:
   explicit poseEstimationTask(const std::string &filePath);
   ~poseEstimationTask() = default;
+  int getInitFlag();
   PoseEstimationResult Estimate(const cv::Mat &raw_img, const Boxi &box);
 
  private:
   class impl;
   std::shared_ptr<impl> pimpl_;
+  int init_flag_;
 };
 
 #endif  // SUPPORT_INCLUDE_TASK_VISION_POSE_ESTIMATION_TASK_H_

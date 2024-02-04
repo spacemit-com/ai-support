@@ -51,7 +51,8 @@ Version: ${PKG_VER}
 Section: Utils
 Priority: optional
 Architecture: ${ARCH}
-Depends: libopencv-dev
+Build-Depends: cmake, debhelper-compat (= 12), onnxruntime, libopencv-dev
+Depends: onnxruntime, libopencv-dev
 Maintainer: -
 Description: ${PKG_DESC}.
 EOF

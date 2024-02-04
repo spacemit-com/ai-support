@@ -182,10 +182,11 @@ riscv64-test-job:   # This job runs in the test stage.
     - echo "Running riscv64 tests done!"
   <<: *only-defaults
 
-package-daily-build:
+package-daily-dpkg:
   stage: package
   variables:
     CI_PKG_OPTION: "--skip-py" # "--skip-ort --skip-py"
+    CI_PKG_VERSION: "1.0.7"
   dependencies:
     - build-job-x86_64
     - build-job-riscv64
@@ -195,12 +196,23 @@ package-daily-build:
     # make deb ball
     - |
       bash ci/pack.sh build.x86_64/bianbu-ai-support.x86_64 ${CI_PKG_OPTION}
-      mkdir output/deb.x86_64
-      mv bianbu-ai-support-*.deb output/deb.x86_64
+      mv bianbu-ai-support-*.deb output/bianbu-ai-support_${CI_PKG_VERSION}_amd.deb
     - |
       bash ci/pack.sh build.riscv64/bianbu-ai-support.riscv64 ${CI_PKG_OPTION}
-      mkdir output/deb.riscv64
-      mv bianbu-ai-support-*.deb output/deb.riscv64
+      mv bianbu-ai-support-*.deb output/bianbu-ai-support_${CI_PKG_VERSION}_riscv64.deb
+    #- rm -rf build.x86_64 build.riscv64 demo
+  artifacts:
+    paths:
+      - output/bianbu-ai-support_*.deb
+  <<: *only-defaults
+
+package-daily-prebuilt:
+  stage: package
+  dependencies:
+    - build-job-x86_64
+    - build-job-riscv64
+  script:
+    - mkdir -p output
     # make tar ball
     - |
       pushd build.x86_64
@@ -213,7 +225,7 @@ package-daily-build:
     #- rm -rf build.x86_64 build.riscv64 demo
   artifacts:
     paths:
-      - output
+      - output/bianbu-ai-support.*.tar.gz
   <<: *only-defaults
 
 

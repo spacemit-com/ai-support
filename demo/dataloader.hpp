@@ -55,8 +55,8 @@ class ExclusiveDataLoader : public DataLoader {
       return -1;
     }
   }
-  int init(const int cameraId) {
-    capture_.open(cameraId);
+  int init(const int camera_id) {
+    capture_.open(camera_id);
     if (capture_.isOpened()) {
       return 0;
     } else {
@@ -131,25 +131,27 @@ class SharedDataLoader : public DataLoader {
     }
   }
 
-  int init(int cameraId) {
+  int init(int camera_id) {
 #ifndef _WIN32
-    capture_.open(cameraId);
+    capture_.open(camera_id);
     if (!capture_.isOpened()) {
       std::cout
-          << "Open camera capture failed, try to figure out right cameraId"
+          << "Open camera capture failed, try to figure out right camera id"
           << std::endl;
       std::string path = "/dev/video";
       for (int i = 0; i <= 100; ++i) {
         std::string device_path = path + std::to_string(i);
         if (is_valid_camera(device_path)) {
-          cameraId = i;
-          break;
+          capture_.open(i);
+          if (capture_.isOpened()) {
+            break;
+          }
         }
       }
     }
+#else
+    capture_.open(camera_id);
 #endif
-
-    capture_.open(cameraId);
     if (capture_.isOpened()) {
       int width = 640;
       int height = 480;

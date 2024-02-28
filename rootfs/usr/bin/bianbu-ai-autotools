@@ -27,6 +27,7 @@
 
 #set -e
 #set -x
+entry_point=bianbu-ai-support # $(basename ${BASH_SOURCE[0]})
 
 cmd=$1
 shift
@@ -37,13 +38,13 @@ test -f ${XDG_CONFIG_HOME:-~/.config}/user-dirs.dirs && . ${XDG_CONFIG_HOME:-~/.
 function auto_desktop() {
   desktop=$1
   shortcut=$(basename $desktop)
-  if [[ ! -f ${XDG_CONFIG_HOME:-~/.config}/bianbu-ai-support/applications/${shortcut%.desktop}-initial-setup-done ]]; then
+  if [[ ! -f ${XDG_CONFIG_HOME:-~/.config}/${entry_point}/applications/${shortcut%.desktop}-initial-setup-done ]]; then
     xdg-desktop-icon install --novendor ${desktop}
     gio set $(xdg-user-dir DESKTOP)/${shortcut} metadata::trusted true
   fi
   if [[ -f $(xdg-user-dir DESKTOP)/${shortcut} ]]; then
-    mkdir -p ${XDG_CONFIG_HOME:-~/.config}/bianbu-ai-support/applications
-    touch ${XDG_CONFIG_HOME:-~/.config}/bianbu-ai-support/applications/${shortcut%.desktop}-initial-setup-done
+    mkdir -p ${XDG_CONFIG_HOME:-~/.config}/${entry_point}/applications
+    touch ${XDG_CONFIG_HOME:-~/.config}/${entry_point}/applications/${shortcut%.desktop}-initial-setup-done
   fi
 }
 

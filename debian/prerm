@@ -11,6 +11,7 @@ aiDesktop=(
   "hand-tracker.desktop"
   "pose-tracker.desktop"
 )
+aiAppName=bianbu-ai-support
 function ai_prerm_uninstall_desktop() {
   gDesktopName="桌面"
   if [ -d "/root/桌面" ]; then
@@ -44,7 +45,7 @@ function ai_prerm_uninstall_desktop() {
     for desktop in "${aiDesktop[@]}"; do
       rm -rf "${FILENAME}/${gDesktopName}/${desktop}"
     done
-    rm -rf ${FILENAME}/.config/bianbu-ai-support
+    rm -rf ${FILENAME}/.config/${aiAppName}
   done
 }
 

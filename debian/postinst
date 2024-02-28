@@ -13,7 +13,7 @@ function copy_install_to_desktop() {
   local aiDesktopName=$2
   local curUserName=$3
   if [ -e "/usr/share/applications/${aiDesktopName}" ]; then
-    cp -f /usr/share/applications/${aiDesktopName} "${curFileName}/${gDesktopName}/${wpsDesktopName}"
+    cp -f /usr/share/applications/${aiDesktopName} "${curFileName}/${gDesktopName}/"
     if test $? -eq 0; then
       chmod +x "${curFileName}/${gDesktopName}/${aiDesktopName}"
       chown ${curUserName} "${curFileName}/${gDesktopName}/${aiDesktopName}"

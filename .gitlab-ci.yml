@@ -239,12 +239,14 @@ upload-archive-nexus:
     - |
       pushd build.x86_64
       tar czf bianbu-ai-support.x86_64.${tag}.tar.gz bianbu-ai-support.x86_64
-      curl -k -u $NEXUS_USERNAME:$NEXUS_PASSWORD --upload-file bianbu-ai-support.x86_64.${tag}.tar.gz https://nexus.bianbu.xyz/repository/bianbu-ai/support-library/bianbu-ai-support.x86_64.${tag}.tar.gz
+      http_code=$(curl -k -u $NEXUS_USERNAME:$NEXUS_PASSWORD --upload-file bianbu-ai-support.x86_64.${tag}.tar.gz https://nexus.bianbu.xyz/repository/bianbu-ai/support-library/bianbu-ai-support.x86_64.${tag}.tar.gz -w %{http_code})
+      [[ ${http_code} == "201" ]]
       popd
     - |
       pushd build.riscv64
       tar czf bianbu-ai-support.riscv64.${tag}.tar.gz bianbu-ai-support.riscv64
-      curl -k -u $NEXUS_USERNAME:$NEXUS_PASSWORD --upload-file bianbu-ai-support.riscv64.${tag}.tar.gz https://nexus.bianbu.xyz/repository/bianbu-ai/support-library/bianbu-ai-support.riscv64.${tag}.tar.gz
+      http_code=$(curl -k -u $NEXUS_USERNAME:$NEXUS_PASSWORD --upload-file bianbu-ai-support.riscv64.${tag}.tar.gz https://nexus.bianbu.xyz/repository/bianbu-ai/support-library/bianbu-ai-support.riscv64.${tag}.tar.gz -w %{http_code})
+      [[ ${http_code} == "201" ]]
       popd
   <<: *rule-upload
 

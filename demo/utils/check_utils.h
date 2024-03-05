@@ -7,17 +7,18 @@
 
 static bool checkImageFileExtension(const std::string& filename) {
   size_t pos = filename.rfind('.');
-  if (filename.empty()) {
-    std::cout << "[ ERROR ] The Image file path is empty" << std::endl;
-    return false;
+  std::string ext;
+  if (pos != std::string::npos) {
+    ext = filename.substr(pos + 1);
   }
-  if (pos == std::string::npos) return false;
-  std::string ext = filename.substr(pos + 1);
   if (ext == "jpeg" || ext == "jpg" || ext == "png") {
     return true;
-  } else {
-    return false;
   }
+  std::cout << "[ ERROR ] The image file path " << filename
+            << " is not correct. Make sure you "
+               "are setting the path to an imgae file (.jpg/.jpeg/.png)"
+            << std::endl;
+  return false;
 }
 
 #endif  // SUPPORT_DEMO_UTILS_CHECK_UTILS_H_

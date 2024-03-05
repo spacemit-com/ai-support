@@ -24,17 +24,29 @@
 
 class Tracker {
  public:
-  Tracker(const std::string& detFilePath, const std::string& poseFilePath) {
-    detFilePath_ = detFilePath;
-    poseFilePath_ = poseFilePath;
+  Tracker(const std::string& det_file_path, const std::string& pose_file_path) {
+    det_file_path_ = det_file_path;
+    pose_file_path_ = pose_file_path;
+  }
+  Tracker(const ObjectDetectionOption& detection_option,
+          const PoseEstimationOption& estimation_option) {
+    detection_option_ = detection_option;
+    estimation_option_ = estimation_option;
   }
   ~Tracker() {}
   // 初始化/反初始化
   int init() {
-    objectdetectiontask_ = std::unique_ptr<objectDetectionTask>(
-        new objectDetectionTask(detFilePath_));
-    poseestimationtask_ = std::unique_ptr<poseEstimationTask>(
-        new poseEstimationTask(poseFilePath_));
+    if (!det_file_path_.empty()) {
+      objectdetectiontask_ = std::unique_ptr<ObjectDetectionTask>(
+          new ObjectDetectionTask(det_file_path_));
+      poseestimationtask_ = std::unique_ptr<PoseEstimationTask>(
+          new PoseEstimationTask(pose_file_path_));
+    } else {
+      objectdetectiontask_ = std::unique_ptr<ObjectDetectionTask>(
+          new ObjectDetectionTask(detection_option_));
+      poseestimationtask_ = std::unique_ptr<PoseEstimationTask>(
+          new PoseEstimationTask(estimation_option_));
+    }
     return get_init_flag();
   }
 
@@ -88,17 +100,18 @@ class Tracker {
  private:
   std::mutex poses_mutex_;
   std::queue<struct PoseEstimationResult> poses_array_;
-  std::unique_ptr<objectDetectionTask> objectdetectiontask_;
-  std::unique_ptr<poseEstimationTask> poseestimationtask_;
-  std::string poseFilePath_;
-  std::string detFilePath_;
-  std::string labelFilepath_;
+  std::unique_ptr<ObjectDetectionTask> objectdetectiontask_;
+  std::unique_ptr<PoseEstimationTask> poseestimationtask_;
+  std::string pose_file_path_;
+  std::string det_file_path_;
+  ObjectDetectionOption detection_option_;
+  PoseEstimationOption estimation_option_;
 };
 
 // 检测线程
 void Track(DataLoader& dataloader, Tracker& tracker) {
   if (tracker.init() != 0) {
-    std::cout << "[ERROR] tracker init error" << std::endl;
+    std::cout << "[ ERROR ] Tracker init error" << std::endl;
     return;
   }
   cv::Mat frame;
@@ -107,7 +120,7 @@ void Track(DataLoader& dataloader, Tracker& tracker) {
     frame = dataloader.peek_frame();  // 取(拷贝)一帧数据
     if ((frame).empty()) {
       dataloader.set_disable();
-      continue;
+      break;
     }
     int flag = tracker.infer(frame);  // 推理并保存检测结果
     auto end = std::chrono::steady_clock::now();
@@ -115,14 +128,14 @@ void Track(DataLoader& dataloader, Tracker& tracker) {
         std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     dataloader.set_detection_fps(1000 / (detection_duration.count()));
     if (flag == 0) {
-      std::cout << "[Warning] unable to catch person" << std::endl;  // 无人
+      std::cout << "[ WARNING ] Unable to catch person" << std::endl;  // 无人
     }
     if (flag == -1) {
-      std::cout << "[Error] infer frame failed" << std::endl;
+      std::cout << "[ ERROR ] Infer frame failed" << std::endl;
       break;  // 摄像头结束拍摄或者故障
     }
   }
-  std::cout << "track thread quit" << std::endl;
+  std::cout << "Track thread quit" << std::endl;
 }
 
 // 预览线程
@@ -134,8 +147,8 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
   int count = 0;
   int dur = 0;
   int enable_show = 1;
-  const char* showfps = getenv("SHOWFPS");
-  const char* show = getenv("SHOW");
+  const char* showfps = getenv("SUPPORT_SHOWFPS");
+  const char* show = getenv("SUPPORT_SHOW");
   if (show && strcmp(show, "-1") == 0) {
     enable_show = -1;
   }
@@ -161,7 +174,7 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
             static_cast<float>(input_width) / static_cast<float>(img_width));
         float dw = (input_width - resize_ratio * img_width) / 2;
         float dh = (input_height - resize_ratio * img_height) / 2;
-        for (int i = 0; i < static_cast<int>(poses.result_points.size()); i++) {
+        for (size_t i = 0; i < poses.result_points.size(); i++) {
           poses.result_points[i].x =
               (poses.result_points[i].x - dw) / resize_ratio;
           poses.result_points[i].y =
@@ -208,7 +221,7 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
       }
     }
   }
-  std::cout << "preview thread quit" << std::endl;
+  std::cout << "Preview thread quit" << std::endl;
   if (enable_show != -1) {
     cv::destroyAllWindows();
   }
@@ -221,50 +234,63 @@ void setThreadName(std::thread& thread, const char* name) {
 #endif
 
 int main(int argc, char* argv[]) {
-  std::string detFilePath, poseFilePath, input, inputType;
+  std::string det_file_path, pose_file_path, input, input_type;
   int resize_height{320}, resize_width{320};
-  if (argc == 5) {
-    detFilePath = argv[1];
-    poseFilePath = argv[2];
-    input = argv[3];
-    inputType = argv[4];
-  } else if (argc > 5) {
-    detFilePath = argv[1];
-    poseFilePath = argv[2];
-    input = argv[3];
-    inputType = argv[4];
-    int o;
-    const char* optstring = "w:h:";
-    while ((o = getopt(argc, argv, optstring)) != -1) {
-      switch (o) {
-        case 'w':
-          resize_width = atoi(optarg);
-          break;
-        case 'h':
-          resize_height = atoi(optarg);
-          break;
-        case '?':
-          std::cout << "[ERROR] Unsupported usage" << std::endl;
-          break;
-      }
+  ObjectDetectionOption detection_option;
+  PoseEstimationOption estimation_option;
+  std::unique_ptr<Tracker> tracker;
+  int o;
+  const char* optstring = "w:h:";
+  while ((o = getopt(argc, argv, optstring)) != -1) {
+    switch (o) {
+      case 'w':
+        resize_width = atoi(optarg);
+        break;
+      case 'h':
+        resize_height = atoi(optarg);
+        break;
+      case '?':
+        std::cout << "[ ERROR ] Unsupported usage" << std::endl;
+        break;
     }
+  }
+  if (argc - optind == 4) {
+    det_file_path = argv[optind];
+    pose_file_path = argv[optind + 1];
+    input = argv[optind + 2];
+    input_type = argv[optind + 3];
+    tracker =
+        std::unique_ptr<Tracker>(new Tracker(det_file_path, pose_file_path));
+  } else if (argc - optind == 5) {
+    detection_option.model_path = argv[optind];
+    detection_option.label_path = argv[optind + 1];
+    estimation_option.model_path = argv[optind + 2];
+    input = argv[optind + 3];
+    input_type = argv[optind + 4];
+    tracker = std::unique_ptr<Tracker>(
+        new Tracker(detection_option, estimation_option));
   } else {
-    std::cout << "run with " << argv[0]
-              << " <detFilepath> <poseFilepath> <input> <inputType> (video or "
-                 "cameraId option(-h <resize_height>) option(-w <resize_width>)"
-              << std::endl;
+    std::cout
+        << "Please run with " << argv[0]
+        << " <det_model_file_path> <det_label_file_path> "
+           "<pose_model_file_path> <input> <input_type> (video or cameraId "
+           "option(-h <resize_height>) option(-w <resize_width>) or "
+        << argv[0]
+        << " <det_config_file_path> <pose_config_file_path> <input> "
+           "<input_type> (video or cameraId option(-h <resize_height>) "
+           "option(-w <resize_width>)"
+        << std::endl;
     return -1;
   }
-  Tracker tracker{detFilePath, poseFilePath};
   SharedDataLoader dataloader{resize_height, resize_width};
   if (dataloader.init(input) != 0) {
-    std::cout << "[ERROR] dataloader init error" << std::endl;
+    std::cout << "[ ERROR ] dataloader init error" << std::endl;
     return -1;
   }
 
-  std::thread t1(Preview, std::ref(dataloader), std::ref(tracker));
+  std::thread t1(Preview, std::ref(dataloader), std::ref(*tracker));
   // std::this_thread::sleep_for(std::chrono::seconds(5));
-  std::thread t2(Track, std::ref(dataloader), std::ref(tracker));
+  std::thread t2(Track, std::ref(dataloader), std::ref(*tracker));
 #ifndef _WIN32
   setThreadName(t1, "PreviewThread");
   setThreadName(t2, "TrackerThread");

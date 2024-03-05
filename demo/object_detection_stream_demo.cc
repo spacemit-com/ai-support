@@ -23,12 +23,20 @@
 
 class Detector {
  public:
-  explicit Detector(const std::string& filePath) { filePath_ = filePath; }
+  explicit Detector(const std::string& config_file_path) {
+    config_file_path_ = config_file_path;
+  }
+  explicit Detector(ObjectDetectionOption& option) { option_ = option; }
   ~Detector() {}
   // 初始化/反初始化
   int init() {
-    objectdetectiontask_ = std::unique_ptr<objectDetectionTask>(
-        new objectDetectionTask(filePath_));
+    if (!config_file_path_.empty()) {
+      objectdetectiontask_ = std::unique_ptr<ObjectDetectionTask>(
+          new ObjectDetectionTask(config_file_path_));
+    } else {
+      objectdetectiontask_ = std::unique_ptr<ObjectDetectionTask>(
+          new ObjectDetectionTask(option_));
+    }
     return get_init_flag();
   }
 
@@ -63,14 +71,15 @@ class Detector {
  private:
   std::mutex objs_mutex_;
   std::queue<struct ObjectDetectionResult> objs_array_;
-  std::unique_ptr<objectDetectionTask> objectdetectiontask_;
-  std::string filePath_;
+  std::unique_ptr<ObjectDetectionTask> objectdetectiontask_;
+  std::string config_file_path_;
+  ObjectDetectionOption option_;
 };
 
 // 检测线程
 void Detection(DataLoader& dataloader, Detector& detector) {
   if (detector.init() != 0) {
-    std::cout << "[ERROR] detector init error" << std::endl;
+    std::cout << "[ ERROR ] Detector init error" << std::endl;
     dataloader.set_disable();
   }
   cv::Mat frame;
@@ -79,7 +88,7 @@ void Detection(DataLoader& dataloader, Detector& detector) {
     frame = dataloader.peek_frame();  // 取(拷贝)一帧数据
     if ((frame).empty()) {
       dataloader.set_disable();
-      continue;
+      break;
     }
     int flag = detector.infer(frame);  // 推理并保存检测结果
     auto end = std::chrono::steady_clock::now();
@@ -87,11 +96,11 @@ void Detection(DataLoader& dataloader, Detector& detector) {
         std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     dataloader.set_detection_fps(1000 / (detection_duration.count()));
     if (flag == -1) {
-      std::cout << "[Error] infer frame failed" << std::endl;
+      std::cout << "[ ERROR ] Infer frame failed" << std::endl;
       break;  // 摄像头结束拍摄或者故障
     }
   }
-  std::cout << "detection thread quit" << std::endl;
+  std::cout << "Detection thread quit" << std::endl;
 }
 
 // 预览线程
@@ -103,8 +112,8 @@ void Preview(DataLoader& dataloader, Detector& detector) {
   int count = 0;
   int dur = 0;
   int enable_show = 1;
-  const char* showfps = getenv("SHOWFPS");
-  const char* show = getenv("SHOW");
+  const char* showfps = getenv("SUPPORT_SHOWFPS");
+  const char* show = getenv("SUPPORT_SHOW");
   if (show && strcmp(show, "-1") == 0) {
     enable_show = -1;
   }
@@ -130,7 +139,7 @@ void Preview(DataLoader& dataloader, Detector& detector) {
             static_cast<float>(input_width) / static_cast<float>(img_width));
         float dw = (input_width - resize_ratio * img_width) / 2;
         float dh = (input_height - resize_ratio * img_height) / 2;
-        for (int i = 0; i < static_cast<int>(objs.result_bboxes.size()); i++) {
+        for (size_t i = 0; i < objs.result_bboxes.size(); i++) {
           objs.result_bboxes[i].x1 =
               (objs.result_bboxes[i].x1 - dw) / resize_ratio;
           objs.result_bboxes[i].x2 =
@@ -145,21 +154,19 @@ void Preview(DataLoader& dataloader, Detector& detector) {
 #ifdef DEBUG
         TimeWatcher t("|-- Output result");
 #endif
-        for (int i = 0; i < static_cast<int>(objs.result_bboxes.size()); i++) {
-          if (objs.result_bboxes[i].flag) {
-            std::cout << "bbox[" << std::setw(2) << i << "]"
-                      << " "
-                      << "x1y1x2y2: "
-                      << "(" << std::setw(4) << objs.result_bboxes[i].x1 << ","
-                      << std::setw(4) << objs.result_bboxes[i].y1 << ","
-                      << std::setw(4) << objs.result_bboxes[i].x2 << ","
-                      << std::setw(4) << objs.result_bboxes[i].y2 << ")"
-                      << ", "
-                      << "score: " << std::fixed << std::setprecision(3)
-                      << std::setw(4) << objs.result_bboxes[i].score << ", "
-                      << "label_text: " << objs.result_bboxes[i].label_text
-                      << std::endl;
-          }
+        for (size_t i = 0; i < objs.result_bboxes.size(); i++) {
+          std::cout << "bbox[" << std::setw(2) << i << "]"
+                    << " "
+                    << "x1y1x2y2: "
+                    << "(" << std::setw(4) << objs.result_bboxes[i].x1 << ","
+                    << std::setw(4) << objs.result_bboxes[i].y1 << ","
+                    << std::setw(4) << objs.result_bboxes[i].x2 << ","
+                    << std::setw(4) << objs.result_bboxes[i].y2 << ")"
+                    << ", "
+                    << "score: " << std::fixed << std::setprecision(3)
+                    << std::setw(4) << objs.result_bboxes[i].score << ", "
+                    << "label_text: " << objs.result_bboxes[i].label_text
+                    << std::endl;
         }
       }
     }
@@ -202,7 +209,7 @@ void Preview(DataLoader& dataloader, Detector& detector) {
       }
     }
   }
-  std::cout << "preview thread quit" << std::endl;
+  std::cout << "Preview thread quit" << std::endl;
   if (enable_show != -1) {
     cv::destroyAllWindows();
   }
@@ -215,49 +222,57 @@ void setThreadName(std::thread& thread, const char* name) {
 #endif
 
 int main(int argc, char* argv[]) {
-  std::string filePath, input, inputType;
+  std::string config_file_path, input, input_type;
+  ObjectDetectionOption option;
   int resize_height{320}, resize_width{320};
-  if (argc == 4) {
-    filePath = argv[1];
-    input = argv[2];
-    inputType = argv[3];
-  } else if (argc > 4) {
-    filePath = argv[1];
-    input = argv[2];
-    inputType = argv[3];
-    int o;
-    const char* optstring = "w:h:";
-    while ((o = getopt(argc, argv, optstring)) != -1) {
-      switch (o) {
-        case 'w':
-          resize_width = atoi(optarg);
-          break;
-        case 'h':
-          resize_height = atoi(optarg);
-          break;
-        case '?':
-          std::cout << "[ERROR] Unsupported usage" << std::endl;
-          break;
-      }
+  std::unique_ptr<Detector> detector;
+  int o;
+  const char* optstring = "w:h:";
+  while ((o = getopt(argc, argv, optstring)) != -1) {
+    switch (o) {
+      case 'w':
+        resize_width = atoi(optarg);
+        break;
+      case 'h':
+        resize_height = atoi(optarg);
+        break;
+      case '?':
+        std::cout << "[ ERROR ] Unsupported usage" << std::endl;
+        break;
     }
+  }
+  if (argc - optind == 3) {
+    config_file_path = argv[optind];
+    input = argv[optind + 1];
+    input_type = argv[optind + 2];
+    detector = std::unique_ptr<Detector>(new Detector(config_file_path));
+  } else if (argc - optind == 4) {
+    option.model_path = argv[optind];
+    option.label_path = argv[optind + 1];
+    input = argv[optind + 2];
+    input_type = argv[optind + 3];
+    detector = std::unique_ptr<Detector>(new Detector(option));
   } else {
-    std::cout
-        << "run with " << argv[0]
-        << " <configFilepath> <input> <inputType> (video "
-           "or cameraId) option(-h <resize_height>) option(-w <resize_width>)"
-        << std::endl;
+    std::cout << "Please run with " << argv[0]
+              << " <model_file_path> <label_file_path> <input> <input_type> "
+                 "(video or camera_id) option(-h <resize_height>) option(-w "
+                 "<resize_width>) or "
+              << argv[0]
+              << " <config_file_path> <input> <input_type> (video "
+                 "or camera_id) option(-h <resize_height>) option(-w "
+                 "<resize_width>)"
+              << std::endl;
     return -1;
   }
-  Detector detector{filePath};
   SharedDataLoader dataloader{resize_height, resize_width};
   if (dataloader.init(input) != 0) {
-    std::cout << "[ERROR] dataloader init error" << std::endl;
+    std::cout << "[ ERROR ] Dataloader init error" << std::endl;
     return -1;
   }
 
-  std::thread t1(Preview, std::ref(dataloader), std::ref(detector));
+  std::thread t1(Preview, std::ref(dataloader), std::ref(*detector));
   // std::this_thread::sleep_for(std::chrono::seconds(5));
-  std::thread t2(Detection, std::ref(dataloader), std::ref(detector));
+  std::thread t2(Detection, std::ref(dataloader), std::ref(*detector));
 #ifndef _WIN32
   setThreadName(t1, "PreviewThread");
   setThreadName(t2, "DetectionThread");

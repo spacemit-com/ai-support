@@ -6,37 +6,32 @@
 #include "utils/utils.h"
 
 int main(int argc, char* argv[]) {
-  std::string filePath, labelFilepath, imageFilepath;
-  if (argc == 4) {
-    filePath = argv[1];
-    labelFilepath = argv[2];
-    imageFilepath = argv[3];
-  } else if (argc > 4) {
-    filePath = argv[1];
-    labelFilepath = argv[2];
-    imageFilepath = argv[3];
-    if (!checkImageFileExtension(imageFilepath)) {
-      std::cout << "[ ERROR ] The ImageFilepath is not correct. Make sure you "
-                   "are setting the path to an imgae file (.jpg/.jpeg/.png)"
-                << std::endl;
-      return -1;
-    }
-    if (!exists_check(imageFilepath)) {
-      std::cout << "[ ERROR ] The Image File does not exist. Make sure you are "
-                   "setting the correct path to the file"
-                << std::endl;
-      return -1;
-    }
+  ImageClassificationOption option;
+  std::string config_file_path, image_file_path;
+  std::unique_ptr<ImageClassificationTask> imageclassificationtask;
+  if (argc == 3) {
+    config_file_path = argv[1];
+    image_file_path = argv[2];
+    imageclassificationtask = std::unique_ptr<ImageClassificationTask>(
+        new ImageClassificationTask(config_file_path));
+  } else if (argc == 4) {
+    option.model_path = argv[1];
+    option.label_path = argv[2];
+    image_file_path = argv[3];
+    imageclassificationtask = std::unique_ptr<ImageClassificationTask>(
+        new ImageClassificationTask(option));
   } else {
-    std::cout << "run with " << argv[0]
-              << " <modelFilepath> <labelFilepath> <imageFilepath>"
+    std::cout << "Please run with " << argv[0]
+              << " <model_file_path> <label_file_path> <image_file_path> or "
+              << argv[0] << " <config_file_path> <image_file_path>"
               << std::endl;
     return -1;
   }
-  cv::Mat imgRaw;
-  std::unique_ptr<imageClassificationTask> imageclassification =
-      std::unique_ptr<imageClassificationTask>(
-          new imageClassificationTask(filePath, labelFilepath));
+  cv::Mat img_raw;
+  if (!checkImageFileExtension(image_file_path) ||
+      !existsCheck(image_file_path)) {
+    return -1;
+  }
 #ifdef DEBUG
   std::cout << "." << std::endl;
 #endif
@@ -44,11 +39,9 @@ int main(int argc, char* argv[]) {
 #ifdef DEBUG
     TimeWatcher t("|-- Load input data");
 #endif
-    imgRaw = cv::imread(imageFilepath);
+    img_raw = cv::imread(image_file_path);
   }
-  if (!imageclassification->getInitFlag()) {
-    ImageClassificationResult result = imageclassification->Classify(imgRaw);
-    std::cout << "classify result: " << result.label_text << std::endl;
-  }
+  ImageClassificationResult result = imageclassificationtask->Classify(img_raw);
+  std::cout << "Classify result: " << result.label_text << std::endl;
   return 0;
 }

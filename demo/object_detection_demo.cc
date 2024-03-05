@@ -8,137 +8,77 @@
 #include "utils/utils.h"
 
 int main(int argc, char* argv[]) {
-  std::vector<Boxi> resultBoxes;
-  std::string filePath, modelFilepath, imageFilepath, saveImgpath,
-      labelFilepath, configFilepath;
-  cv::Mat imgRaw;
+  std::vector<Boxi> bboxes;
+  std::string image_file_path, save_img_path, config_file_path;
+  ObjectDetectionOption option;
+  std::unique_ptr<ObjectDetectionTask> objectdetectiontask;
+  cv::Mat img_raw;
 #ifdef DEBUG
   std::cout << "." << std::endl;
 #endif
   if (argc == 4) {
-    filePath = argv[1];
-    imageFilepath = argv[2];
-    saveImgpath = argv[3];
-    if (!checkImageFileExtension(imageFilepath) ||
-        !checkImageFileExtension(saveImgpath)) {
-      std::cout << "[ ERROR ] The ImageFilepath is not correct. Make sure you "
-                   "are setting the path to an imgae file (.jpg/.jpeg/.png)"
-                << std::endl;
-      return -1;
-    }
-    if (!exists_check(imageFilepath)) {
-      std::cout << "[ ERROR ] The Image File does not exist. Make sure you are "
-                   "setting the correct path to the file"
-                << std::endl;
-      return -1;
-    }
-    {
-#ifdef DEBUG
-      TimeWatcher t("|-- Load input data");
-#endif
-      imgRaw = cv::imread(imageFilepath);
-    }
-    std::unique_ptr<objectDetectionTask> objectdetectiontask =
-        std::unique_ptr<objectDetectionTask>(new objectDetectionTask(filePath));
-    resultBoxes = objectdetectiontask->Detect(imgRaw).result_bboxes;
-    {
-#ifdef DEBUG
-      TimeWatcher t("|-- Output result");
-#endif
-      for (int i = 0; i < static_cast<int>(resultBoxes.size()); i++) {
-        if (resultBoxes[i].flag) {
-          std::cout << "bbox[" << std::setw(2) << i << "]"
-                    << " "
-                    << "x1y1x2y2: "
-                    << "(" << std::setw(4) << resultBoxes[i].x1 << ","
-                    << std::setw(4) << resultBoxes[i].y1 << "," << std::setw(4)
-                    << resultBoxes[i].x2 << "," << std::setw(4)
-                    << resultBoxes[i].y2 << ")"
-                    << ", "
-                    << "score: " << std::fixed << std::setprecision(3)
-                    << std::setw(4) << resultBoxes[i].score << ", "
-                    << "label_text: " << resultBoxes[i].label_text << std::endl;
-        }
-      }
-    }
-    {
-#ifdef DEBUG
-      TimeWatcher t("|-- Box drawing");
-#endif
-      draw_boxes_inplace(imgRaw, resultBoxes);
-    }
-
-    cv::imwrite(saveImgpath, imgRaw);
-    // cv::imshow("detected.jpg",imgRaw);
-    // cv::waitKey(0);
+    config_file_path = argv[1];
+    image_file_path = argv[2];
+    save_img_path = argv[3];
+    objectdetectiontask = std::unique_ptr<ObjectDetectionTask>(
+        new ObjectDetectionTask(config_file_path));
   } else if (argc == 5) {
-    filePath = argv[1];
-    labelFilepath = argv[2];
-    imageFilepath = argv[3];
-    saveImgpath = argv[4];
-    if (!checkImageFileExtension(imageFilepath) ||
-        !checkImageFileExtension(saveImgpath)) {
-      std::cout << "[ ERROR ] The ImageFilepath is not correct. Make sure you "
-                   "are setting the path to an imgae file (.jpg/.jpeg/.png)"
-                << std::endl;
-      return -1;
-    }
-    if (!exists_check(imageFilepath)) {
-      std::cout << "[ ERROR ] The Image File does not exist. Make sure you are "
-                   "setting the correct path to the file"
-                << std::endl;
-      return -1;
-    }
-    {
-#ifdef DEBUG
-      TimeWatcher t("|-- Load input data");
-#endif
-      imgRaw = cv::imread(imageFilepath);
-    }
-    std::unique_ptr<objectDetectionTask> objectdetectiontask =
-        std::unique_ptr<objectDetectionTask>(
-            new objectDetectionTask(filePath, labelFilepath));
-    if (objectdetectiontask->getInitFlag() != 0) {
-      return -1;
-    }
-    resultBoxes = objectdetectiontask->Detect(imgRaw).result_bboxes;
-    {
-#ifdef DEBUG
-      TimeWatcher t("|-- Output result");
-#endif
-      for (int i = 0; i < static_cast<int>(resultBoxes.size()); i++) {
-        if (resultBoxes[i].flag) {
-          std::cout << "bbox[" << std::setw(2) << i << "]"
-                    << " "
-                    << "x1y1x2y2: "
-                    << "(" << std::setw(4) << resultBoxes[i].x1 << ","
-                    << std::setw(4) << resultBoxes[i].y1 << "," << std::setw(4)
-                    << resultBoxes[i].x2 << "," << std::setw(4)
-                    << resultBoxes[i].y2 << ")"
-                    << ", "
-                    << "score: " << std::fixed << std::setprecision(3)
-                    << std::setw(4) << resultBoxes[i].score << ", "
-                    << "label_text: " << resultBoxes[i].label_text << std::endl;
-        }
-      }
-    }
-    {
-#ifdef DEBUG
-      TimeWatcher t("|-- Box drawing");
-#endif
-      draw_boxes_inplace(imgRaw, resultBoxes);
-    }
-
-    cv::imwrite(saveImgpath, imgRaw);
-    // cv::imshow("detected.jpg",imgRaw);
-    // cv::waitKey(0);
+    option.model_path = argv[1];
+    option.label_path = argv[2];
+    image_file_path = argv[3];
+    save_img_path = argv[4];
+    objectdetectiontask =
+        std::unique_ptr<ObjectDetectionTask>(new ObjectDetectionTask(option));
   } else {
-    std::cout
-        << "run with " << argv[0]
-        << " <modelFilepath> <labelFilepath> <imageFilepath> <saveImgpath> or "
-        << argv[0] << " <configFilepath> <imageFilepath> <saveImgpath>"
-        << std::endl;
+    std::cout << "Please run with " << argv[0]
+              << " <model_file_path> <label_file_path> <image_file_path> "
+                 "<save_img_path> or "
+              << argv[0]
+              << " <config_file_path> <image_file_path> <save_img_path>"
+              << std::endl;
     return -1;
   }
+  if (objectdetectiontask->getInitFlag() != 0) {
+    return -1;
+  }
+  if (!checkImageFileExtension(image_file_path) ||
+      !checkImageFileExtension(save_img_path) ||
+      !existsCheck(image_file_path)) {
+    return -1;
+  }
+  {
+#ifdef DEBUG
+    TimeWatcher t("|-- Load input data");
+#endif
+    img_raw = cv::imread(image_file_path);
+  }
+  bboxes = objectdetectiontask->Detect(img_raw).result_bboxes;
+  {
+#ifdef DEBUG
+    TimeWatcher t("|-- Output result");
+#endif
+    for (size_t i = 0; i < bboxes.size(); i++) {
+      std::cout << "bbox[" << std::setw(2) << i << "]"
+                << " "
+                << "x1y1x2y2: "
+                << "(" << std::setw(4) << bboxes[i].x1 << "," << std::setw(4)
+                << bboxes[i].y1 << "," << std::setw(4) << bboxes[i].x2 << ","
+                << std::setw(4) << bboxes[i].y2 << ")"
+                << ", "
+                << "score: " << std::fixed << std::setprecision(3)
+                << std::setw(4) << bboxes[i].score << ", "
+                << "label_text: " << bboxes[i].label_text << std::endl;
+    }
+  }
+  {
+#ifdef DEBUG
+    TimeWatcher t("|-- Box drawing");
+#endif
+    draw_boxes_inplace(img_raw, bboxes);
+  }
+
+  cv::imwrite(save_img_path, img_raw);
+  // cv::imshow("detected.jpg",img_raw);
+  // cv::waitKey(0);
   return 0;
 }

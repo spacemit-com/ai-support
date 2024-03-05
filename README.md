@@ -40,12 +40,33 @@ cmake .. -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_DIR} \
 ### run demo
 
 ```bash
-./classification_demo <modelFilepath> <labelFilepath> <imageFilepath>
-./detection_stream_demo <configFilepath> <input> <inputType>
-./detection_demo <modelFilepath> <labelFilepath> <imageFilepath> <saveImgpath>
+./classification_demo <model_file_path> <label_file_path> <image_file_path>
+or
+./classification_demo <config_file_path> <image_file_path>
+./detection_demo <model_file_path> <label_file_path> <image_file_path> <save_img_path> 
 or 
-./detection_demo <configFilepath> <imageFilepath> <saveImgpath>
-./detection_video_demo <configFilepath> <videoFilepath> <saveFilepath>
-./estimation_demo <detConfigFilepath> <poseConfigFilepath> <imageFilepath> <saveImgpath>
-./tracker_stream_demo <detConfigFilepath> <poseConfigFilepath> <input> <inputType>
+./detection_demo <config_file_path> <image_file_path> <save_img_path>
+./detection_stream_demo <model_file_path> <label_file_path> <input> <input_type> (video or camera_id) option(-h <resize_height>) option(-w <resize_width>)
+or
+./detection_stream_demo <config_file_path> <input> <input_type> (video or camera_id) option(-h <resize_height>) option(-w <resize_width>)
+./detection_video_demo <model_file_path> <label_file_path> <video_file_path> <dst_file_path> (end with .avi)
+or
+./detection_video_demo <config_file_path> <video_file_path> <dst_file_path> (end with .avi)
+./estimation_demo <det_model_file_path> <det_label_file_path> <pose_model_file_path> <image_file_path> <save_img_path> 
+or
+./estimation_demo <det_config_file_path> <pose_config_file_path> <image_file_path> <save_img_path> 
+./tracker_stream_demo <det_model_file_path> <det_label_file_path> <pose_model_file_path> <input> <input_type> (video or cameraId) option(-h <resize_height>) option(-w <resize_width>)
+or
+./tracker_stream_demo <det_config_file_path> <pose_config_file_path> <input> <input_type> (video or cameraId) option(-h <resize_height>) option(-w <resize_width>)
 ```
+
+### Using environment variables to implement functions
+| Environment variable name         |                                          Remarks                                                    |
+|-----------------------------------|:---------------------------------------------------------------------------------------------------:|
+| SUPPORT_SHOW (stream demo)        |                                      -1 means not to display                                        |
+| SUPPORT_SHOWFPS (stream demo)     |                                   If there is content, fps will be displayed                        |
+| SUPPORT_PROFILING_PROJECTS        |                                 Generated profile file address                                      |
+| SUPPORT_LOG_LEVEL                 |                                          The range is 0-4                                           |
+| SUPPORT_GRAPH_OPTIMIZATION_LEVEL  | Graph optimization level (ort_disable_all, ort_enable_basic, ort_enable_extended, ort_enable_all)   |
+| SUPPORT_OPT_MODEL_PATH            |                                    Optimized model path                                             |
+| SUPPORT_DISABLE_SPACEMIT_EP       |                                  1 means to disable spacemit-ep                                     |

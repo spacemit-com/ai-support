@@ -1,110 +1,60 @@
 #include "src/core/ort_wrapper.h"
 
+#include <stdlib.h>  // for: getenv atoi
+
 #include <utility>  // for move
 
+#ifdef _WIN32
+#include "src/utils/utils.h"
+#endif /* _WIN32 */
 #include "utils/time.h"
 #ifdef HAS_SPACEMIT_EP
 #include "spacemit_ort_env.h"
 #endif
 
-int OrtWrapper::Init(std::string instanceName,
-                     std::basic_string<ORTCHAR_T> modelFilepath) {
+int OrtWrapper::Init(const std::string &instance_name,
+                     const std::basic_string<ORTCHAR_T> &model_file_path,
+                     const int intra_threads_num, const int inter_threads_num) {
   std::unique_ptr<Ort::Env> env(new Ort::Env(
-      OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING, instanceName.c_str()));
+      OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING, instance_name.c_str()));
   // Creation: The Ort::Session is created here
   env_ = std::move(env);
-  sessionOptions_.SetIntraOpNumThreads(2);
+  sessionOptions_.SetIntraOpNumThreads(intra_threads_num);
   sessionOptions_.AddConfigEntry("session.intra_op.allow_spinning", "0");
-  sessionOptions_.SetInterOpNumThreads(2);
+  sessionOptions_.SetInterOpNumThreads(inter_threads_num);
   sessionOptions_.AddConfigEntry("session.inter_op.allow_spinning", "0");
 #ifdef HAS_SPACEMIT_EP
-  SessionOptionsSpaceMITEnvInit(sessionOptions_);
-  // auto providers = Ort::GetAvailableProviders();
-  std::cout << "Enable spacemit ep now" << std::endl;
-#else
-  std::cout << "Disable spacemit ep now" << std::endl;
-#endif
-  // Sets graph optimization level
-  // Available levels are
-  // ORT_DISABLE_ALL -> To disable all optimizations
-  // ORT_ENABLE_BASIC -> To enable basic optimizations (Such as redundant node
-  // removals) ORT_ENABLE_EXTENDED -> To enable extended optimizations
-  // (Includes level 1 + more complex optimizations like node fusions)
-  // ORT_ENABLE_ALL -> To Enable All possible optimizations
-  // sessionOptions_.SetGraphOptimizationLevel(
-  // GraphOptimizationLevel::ORT_DISABLE_ALL);
-  std::unique_ptr<Ort::Session> session(
-      new Ort::Session(*env_, modelFilepath.c_str(), sessionOptions_));
-  session_ = std::move(session);
-  return 0;
-}
-
-int OrtWrapper::Init(json config) {
-  std::string instanceName;
-  if (config.contains("instance_name")) {
-    instanceName = config["instance_name"];
-  }
-  std::basic_string<ORTCHAR_T> modelFilepath = config["model_path"];
-  std::unique_ptr<Ort::Env> env(new Ort::Env(
-      OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING, instanceName.c_str()));
-  // Creation: The Ort::Session is created here
-  env_ = std::move(env);
-  if (!config.contains("disable_spcacemit_ep") ||
-      config["disable_spcacemit_ep"] == false) {
-#ifdef HAS_SPACEMIT_EP
+  const char *disable_spacemit_ep = getenv("SUPPORT_DISABLE_SPACEMIT_EP");
+  if (disable_spacemit_ep != nullptr && strcmp(disable_spacemit_ep, "1") == 0) {
+    std::cout << "Disable spacemit ep now" << std::endl;
+  } else {
     SessionOptionsSpaceMITEnvInit(sessionOptions_);
     // auto providers = Ort::GetAvailableProviders();
     std::cout << "Enable spacemit ep now" << std::endl;
+  }
 #else
-    std::cout << "[Warning] Unsupport spacemit ep now" << std::endl;
+  std::cout << "Unsupport spacemit ep now" << std::endl;
 #endif
-  } else {
-    std::cout << "Disable spacemit ep now" << std::endl;
+
+  const char *opt_model_path = getenv("SUPPORT_OPT_MODEL_PATH");
+  if (opt_model_path != nullptr) {
+#ifdef _WIN32
+    std::wstring wstr = to_wstring(opt_model_path);
+    sessionOptions_.SetOptimizedModelFilePath(wstr.c_str());
+#else
+    sessionOptions_.SetOptimizedModelFilePath(opt_model_path);
+#endif /* _WIN32 */
   }
-  if (config.contains("intra_threads_num")) {
-    int intraThreadsnum = config["intra_threads_num"];
-    sessionOptions_.SetIntraOpNumThreads(intraThreadsnum);
-    sessionOptions_.AddConfigEntry("session.intra_op.allow_spinning", "0");
-  } else {
-    sessionOptions_.SetIntraOpNumThreads(4);
-    sessionOptions_.AddConfigEntry("session.intra_op.allow_spinning", "0");
-  }
-  sessionOptions_.SetInterOpNumThreads(1);
-  sessionOptions_.AddConfigEntry("session.inter_op.allow_spinning", "0");
-  if (config.contains("profiling_projects")) {
-    std::basic_string<ORTCHAR_T> profiling_projects =
-        config["profiling_projects"];
-    if (profiling_projects.size()) {
-      sessionOptions_.EnableProfiling(profiling_projects.c_str());
-    }
-  }
-  if (config.contains("opt_model_path")) {
-    std::basic_string<ORTCHAR_T> opt_model_path = config["opt_model_path"];
-    if (opt_model_path.size()) {
-      sessionOptions_.SetOptimizedModelFilePath(opt_model_path.c_str());
-    }
-  }
-  if (config.contains("log_level")) {
-    int log_level = config["log_level"];
-    if (log_level >= 0 && log_level <= 4) {
-      sessionOptions_.SetLogSeverityLevel(log_level);
-    }
-  }
-  // Sets graph optimization level
-  // Available levels are
-  // ORT_DISABLE_ALL -> To disable all optimizations
-  // ORT_ENABLE_BASIC -> To enable basic optimizations (Such as redundant node
-  // removals) ORT_ENABLE_EXTENDED -> To enable extended optimizations
-  // (Includes level 1 + more complex optimizations like node fusions)
-  // ORT_ENABLE_ALL -> To Enable All possible optimizations
-  if (config.contains("graph_optimization_level")) {
-    if (config["graph_optimization_level"] == "ort_disable_all") {
+  const char *graph_optimization_level =
+      getenv("SUPPORT_GRAPH_OPTIMIZATION_LEVEL");
+  if (graph_optimization_level != nullptr) {
+    if (strcmp(graph_optimization_level, "ort_disable_all") == 0) {
       sessionOptions_.SetGraphOptimizationLevel(
           GraphOptimizationLevel::ORT_DISABLE_ALL);
-    } else if (config["graph_optimization_level"] == "ort_enable_basic") {
+    } else if (strcmp(graph_optimization_level, "ort_enable_basic") == 0) {
       sessionOptions_.SetGraphOptimizationLevel(
           GraphOptimizationLevel::ORT_ENABLE_BASIC);
-    } else if (config["graph_optimization_level"] == "ort_enable_extended") {
+    } else if (strcmp(graph_optimization_level, "ort_enable_extended") == 0) {
       sessionOptions_.SetGraphOptimizationLevel(
           GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
     } else {
@@ -112,8 +62,26 @@ int OrtWrapper::Init(json config) {
           GraphOptimizationLevel::ORT_ENABLE_ALL);
     }
   }
+  const char *profiling_projects = getenv("SUPPORT_PROFILING_PROJECTS");
+  if (profiling_projects != nullptr) {
+#ifdef _WIN32
+    std::wstring wstr = to_wstring(profiling_projects);
+    sessionOptions_.EnableProfiling(wstr.c_str());
+#else
+    sessionOptions_.EnableProfiling(profiling_projects);
+#endif /* _WIN32 */
+  }
+
+  const char *log_level_str = getenv("SUPPORT_LOG_LEVEL");
+  if (log_level_str != nullptr) {
+    int log_level = atoi(log_level_str);
+    if (log_level >= 0 && log_level <= 4) {
+      sessionOptions_.SetLogSeverityLevel(log_level);
+    }
+  }
+
   std::unique_ptr<Ort::Session> session(
-      new Ort::Session(*env_, modelFilepath.c_str(), sessionOptions_));
+      new Ort::Session(*env_, model_file_path.c_str(), sessionOptions_));
   session_ = std::move(session);
   return 0;
 }
@@ -202,7 +170,7 @@ std::vector<Ort::Value> OrtWrapper::Invoke(
   Ort::MemoryInfo memoryInfo = Ort::MemoryInfo::CreateCpu(
       OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
 
-  for (int i = 0; i < static_cast<int>(num_inputs); i++) {
+  for (size_t i = 0; i < num_inputs; i++) {
     input_tensors.push_back(Ort::Value::CreateTensor<float>(
         memoryInfo, input_tensor_values[i].data(), input_tensor_size[i],
         input_node_dims[i].data(), input_node_dims[i].size()));

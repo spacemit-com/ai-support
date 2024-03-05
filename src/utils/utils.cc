@@ -2,7 +2,8 @@
 
 #include <cmath>
 #include <cstdint>  // for: uint32_t
-#include <fstream>
+#include <fstream>  // for ifstream
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -11,73 +12,36 @@
 #include "src/utils/utils.h"
 using json = nlohmann::json;
 
-bool checkLabelFileExtension(const std::string& filename) {
-  size_t pos = filename.rfind('.');
-  if (filename.empty()) {
-    std::cout << "[ ERROR ] The Label file path is empty" << std::endl;
-    return false;
-  }
-  if (pos == std::string::npos) return false;
-  std::string ext = filename.substr(pos + 1);
-  if (ext == "txt") {
-    return true;
-  } else {
-    return false;
-  }
+bool startsWith(const std::string& str, const std::string& prefix) {
+  return (str.rfind(prefix, 0) == 0);
 }
 
-std::vector<std::string> readLabels(const std::string& labelFilepath) {
+bool endsWith(const std::string& str, const std::string& suffix) {
+  if (suffix.length() > str.length()) {
+    return false;
+  }
+  return (str.rfind(suffix) == (str.length() - suffix.length()));
+}
+
+std::vector<std::string> readLabels(const std::string& label_file_path) {
   std::vector<std::string> labels;
   std::string line;
-  std::ifstream fp(labelFilepath);
+  std::ifstream fp(label_file_path);
   while (std::getline(fp, line)) {
     labels.push_back(line);
   }
   return labels;
 }
 
-bool checkModelFileExtension(const std::string& filename) {
-  size_t pos = filename.rfind('.');
-  if (filename.empty()) {
-    std::cout << "[ ERROR ] The Model file path is empty" << std::endl;
-    return false;
-  }
-  if (pos == std::string::npos) return false;
-  std::string ext = filename.substr(pos + 1);
-  if (ext == "onnx") {
+bool checkFileExtension(const std::string& filename, const std::string& ext) {
+  if (endsWith(filename, ext)) {
     return true;
-  } else {
-    return false;
   }
-}
-
-int checkConfigFileExtension(const std::string& filename) {
-  size_t pos = filename.rfind('.');
-  if (filename.empty()) {
-    std::cout << "[ ERROR ] The Config file path is empty" << std::endl;
-    return false;
-  }
-  if (pos == std::string::npos) return false;
-  std::string ext = filename.substr(pos + 1);
-  if (ext == "json") {
-    return true;
-  } else {
-    return false;
-  }
-}
-
-int configCheck(const json& config) {
-  if (!config.contains("model_path") || !config.contains("label_path")) {
-    return 1;
-  } else if (!checkModelFileExtension(config["model_path"]) ||
-             !checkLabelFileExtension(config["label_path"])) {
-    return 1;
-  } else if (!exists_check(config["model_path"]) ||
-             !exists_check(config["label_path"])) {
-    return 1;
-  } else {
-    return 0;
-  }
+  std::cout << "[ ERROR ] The file path " << filename
+            << " is not correct. Make sure you "
+               "are setting the path to a file ("
+            << ext << ")" << std::endl;
+  return false;
 }
 
 float sigmoid(float x) { return (1 / (1 + exp(-x))); }
@@ -91,9 +55,17 @@ float fast_exp(float x) {
   return v.f;
 }
 
-bool exists_check(const std::string& name) {
+bool existsCheck(const std::string& name) {
   struct stat buffer;
-  return (stat(name.c_str(), &buffer) == 0);
+  if (stat(name.c_str(), &buffer) == 0) {
+    return true;
+  } else {
+    std::cout << "[ ERROR ] The file " << name
+              << " does not exist. Make sure you are "
+                 "setting the correct path to the file"
+              << std::endl;
+    return false;
+  }
 }
 
 void resize_unscale(const cv::Mat& mat, cv::Mat& mat_rs, int target_height,
@@ -126,4 +98,79 @@ void resize_unscale(const cv::Mat& mat, cv::Mat& mat_rs, int target_height,
   cv::resize(mat, new_unpad_mat, cv::Size(new_unpad_w, new_unpad_h));
 
   new_unpad_mat.copyTo(mat_rs(cv::Rect(dw, dh, new_unpad_w, new_unpad_h)));
+}
+
+int configToOption(const std::string& config_file_path,
+                   ImageClassificationOption& option) {
+  if (!checkFileExtension(config_file_path, ".json") &&
+      !existsCheck(config_file_path)) {
+    return 1;
+  }
+  std::ifstream f(config_file_path);
+  json config = json::parse(f);
+  std::string model_path = config["model_path"];
+  option.model_path = model_path;
+  std::string label_path = config["label_path"];
+  option.label_path = label_path;
+  if (config.contains("intra_threads_num")) {
+    option.intra_threads_num = config["intra_threads_num"];
+  }
+  if (config.contains("inter_threads_num")) {
+    option.inter_threads_num = config["inter_threads_num"];
+  }
+  return 0;
+}
+
+int configToOption(const std::string& config_file_path,
+                   ObjectDetectionOption& option) {
+  if (!checkFileExtension(config_file_path, "json") &&
+      !existsCheck(config_file_path)) {
+    return 1;
+  }
+  std::ifstream f(config_file_path);
+  json config = json::parse(f);
+  std::string model_path = config["model_path"];
+  option.model_path = model_path;
+  std::string label_path = config["label_path"];
+  option.label_path = label_path;
+  if (config.contains("intra_threads_num")) {
+    option.intra_threads_num = config["intra_threads_num"];
+  }
+  if (config.contains("inter_threads_num")) {
+    option.inter_threads_num = config["inter_threads_num"];
+  }
+  if (config.contains("score_threshold")) {
+    option.score_threshold = config["score_threshold"];
+  }
+  if (config.contains("nms_threshold")) {
+    option.nms_threshold = config["nms_threshold"];
+  }
+  if (config.contains("class_name_whitelist")) {
+    option.class_name_whitelist =
+        config["class_name_whitelist"].get<std::vector<int>>();
+  }
+  if (config.contains("class_name_blacklist")) {
+    option.class_name_blacklist =
+        config["class_name_blacklist"].get<std::vector<int>>();
+  }
+  return 0;
+}
+
+int configToOption(const std::string& config_file_path,
+                   PoseEstimationOption& option) {
+  if (!checkFileExtension(config_file_path, ".json") &&
+      !existsCheck(config_file_path)) {
+    return 1;
+  }
+  std::ifstream f(config_file_path);
+  json config = json::parse(f);
+  std::string model_path = config["model_path"];
+  option.model_path = model_path;
+  if (config.contains("intra_threads_num")) {
+    option.intra_threads_num = config["intra_threads_num"];
+  }
+  if (config.contains("inter_threads_num")) {
+    option.inter_threads_num = config["inter_threads_num"];
+  }
+  return 0;
 }

@@ -62,7 +62,7 @@ void EstimationPostprocessor::Postprocess(
   // anti affine transformation to obtain the coordinates on the original
   // picture
   cv::Mat affine_transform_reverse = crop_result_pair.second;
-  for (int i = 0; i < static_cast<int>(result_points.size()); ++i) {
+  for (size_t i = 0; i < result_points.size(); ++i) {
     cv::Mat origin_point_Mat = cv::Mat::ones(3, 1, CV_64FC1);
     origin_point_Mat.at<double>(0, 0) = result_points[i].x;
     origin_point_Mat.at<double>(1, 0) = result_points[i].y;

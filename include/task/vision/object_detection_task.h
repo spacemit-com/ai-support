@@ -8,13 +8,12 @@
 #include "opencv2/opencv.hpp"
 #include "task/vision/object_detection_types.h"
 
-class objectDetectionTask {
+class ObjectDetectionTask {
  public:
-  objectDetectionTask(const std::string &filePath,
-                      const std::string &labelFilepath);
-  explicit objectDetectionTask(const std::string &filePath);
-  ~objectDetectionTask() = default;
-  ObjectDetectionResult Detect(const cv::Mat &raw_img);
+  explicit ObjectDetectionTask(const std::string &config_file_path);
+  explicit ObjectDetectionTask(const ObjectDetectionOption &option);
+  ~ObjectDetectionTask() = default;
+  ObjectDetectionResult Detect(const cv::Mat &img_raw);
   ObjectDetectionResult Detect(
       const std::vector<std::vector<float>> &input_tensors,
       const int img_height, const int img_width);

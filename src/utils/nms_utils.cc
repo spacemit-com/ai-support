@@ -79,7 +79,6 @@ void blending_nms(std::vector<Boxf> &input, std::vector<Boxf> &output,
       rects.y2 += buf[l].y2 * rate;
       rects.score += buf[l].score * rate;
     }
-    rects.flag = true;
     output.push_back(rects);
 
     // keep top k

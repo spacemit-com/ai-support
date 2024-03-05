@@ -1,29 +1,38 @@
 #include "src/task/vision/imageclassification/image_classification.h"
 
-#include "utils/time.h"
+#include <iostream>
 
-int imageClassification::Init(const std::string modelFilepath,
-                              const std::string labelFilepath) {
-  instanceName_ = "image-classification-inference";
-  modelFilepath_ = modelFilepath;
-  labelFilepath_ = labelFilepath;
-  labels_ = readLabels(labelFilepath_);
-  initFlag_ = GetEngine()->Init(instanceName_, modelFilepath_);
-  return initFlag_;
+#include "utils/time.h"
+#include "utils/utils.h"
+
+int ImageClassification::InitFromOption(
+    const ImageClassificationOption &option) {
+  option_ = option;
+  init_flag_ = 1;
+  if (!checkFileExtension(option_.label_path, ".json") ||
+      !existsCheck(option_.label_path)) {
+    return init_flag_;
+  }
+  instance_name_ = "image-classification-inference";
+  labels_ = readLabels(option_.label_path);
+  init_flag_ =
+      GetEngine()->Init(instance_name_, option_.model_path,
+                        option.intra_threads_num, option.inter_threads_num);
+  return init_flag_;
 }
 
-void imageClassification::Preprocess(const cv::Mat &img_raw) {
+void ImageClassification::Preprocess(const cv::Mat &img_raw) {
   auto input_dims = GetInputShape();
   preprocessor_.Preprocess(img_raw, input_dims, input_tensors_);
 }
 
-ImageClassificationResult imageClassification::Postprocess() {
+ImageClassificationResult ImageClassification::Postprocess() {
   return postprocessor_.Postprocess(Infer(input_tensors_), labels_);
 }
 
-ImageClassificationResult imageClassification::Classify(
+ImageClassificationResult ImageClassification::Classify(
     const cv::Mat &img_raw) {
-  if (initFlag_ != 0) {
+  if (init_flag_ != 0) {
     std::cout << "[ ERROR ] Init fail return empty result" << std::endl;
     ImageClassificationResult empty_result{"", -1, .0f};
     return empty_result;

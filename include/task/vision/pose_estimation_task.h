@@ -8,12 +8,13 @@
 #include "task/vision/object_detection_types.h"
 #include "task/vision/pose_estimation_types.h"
 
-class poseEstimationTask {
+class PoseEstimationTask {
  public:
-  explicit poseEstimationTask(const std::string &filePath);
-  ~poseEstimationTask() = default;
+  explicit PoseEstimationTask(const std::string &config_file_path);
+  explicit PoseEstimationTask(const PoseEstimationOption &option);
+  ~PoseEstimationTask() = default;
   int getInitFlag();
-  PoseEstimationResult Estimate(const cv::Mat &raw_img, const Boxi &box);
+  PoseEstimationResult Estimate(const cv::Mat &img_raw, const Boxi &box);
 
  private:
   class impl;

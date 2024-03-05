@@ -1,14 +1,13 @@
 #include "src/task/vision/poseestimation/pose_estimation.h"
 
 #include <chrono>
-#include <fstream>
 
 #include "src/utils/json.hpp"
 #include "utils/time.h"
 
 using json = nlohmann::json;
 
-PoseEstimationResult PoseEstimation::Estimate(const cv::Mat &raw_img,
+PoseEstimationResult PoseEstimation::Estimate(const cv::Mat &img_raw,
                                               const Boxi &box) {
   result_points_.clear();
   input_tensors_.clear();
@@ -18,17 +17,16 @@ PoseEstimationResult PoseEstimation::Estimate(const cv::Mat &raw_img,
     std::cout << "|-- Preprocess" << std::endl;
     TimeWatcher t("|--");
 #endif
-    Preprocess(raw_img);
+    Preprocess(img_raw);
   }
   return Postprocess();
 }
 
 void PoseEstimation::Preprocess(const cv::Mat &img_raw) {
-  if (initFlag_ != 0) {
-    std::cout << "[ ERROR ] Init fail" << std::endl;
+  if (init_flag_ != 0) {
     return;
   }
-  if (modelFilepath_.find("rtmpose") != modelFilepath_.npos) {
+  if (option_.model_path.find("rtmpose") != option_.model_path.npos) {
     processor_.Preprocess(img_raw, box_, input_tensors_, crop_result_pair_,
                           CHW);
   } else {
@@ -37,13 +35,13 @@ void PoseEstimation::Preprocess(const cv::Mat &img_raw) {
 }
 
 PoseEstimationResult PoseEstimation::Postprocess() {
-  if (initFlag_ != 0) {
+  if (init_flag_ != 0) {
     std::cout << "[ ERROR ] Init fail" << std::endl;
     result_.result_points = result_points_;
     result_.timestamp = std::chrono::steady_clock::now();
     return result_;
   }
-  if (modelFilepath_.find("rtmpose") != modelFilepath_.npos) {
+  if (option_.model_path.find("rtmpose") != option_.model_path.npos) {
     postprocessor_.Postprocess(Infer(input_tensors_), crop_result_pair_,
                                result_points_);
   } else {
@@ -54,24 +52,12 @@ PoseEstimationResult PoseEstimation::Postprocess() {
   return result_;
 }
 
-int PoseEstimation::InitFromCommand(const std::string &modelFilepath) {
-  instanceName_ = "pose-estimation-inference";
-  modelFilepath_ = modelFilepath;
-  initFlag_ = GetEngine()->Init(instanceName_, modelFilepath_);
-  inputDims_ = GetEngine()->GetInputDims();
-  return initFlag_;
-}
-
-int PoseEstimation::InitFromConfig(const std::string &configFilepath) {
-  std::ifstream f(configFilepath);
-  json config = json::parse(f);
-  if (configCheck(config)) {
-    initFlag_ = 1;
-    std::cout << "[ ERROR ] Config check fail" << std::endl;
-    return initFlag_;
-  }
-  modelFilepath_ = config["model_path"];
-  initFlag_ = GetEngine()->Init(config);
-  inputDims_ = GetEngine()->GetInputDims();
-  return initFlag_;
+int PoseEstimation::InitFromOption(const PoseEstimationOption &option) {
+  init_flag_ = 1;
+  instance_name_ = "pose-estimation-inference";
+  option_ = option;
+  init_flag_ =
+      GetEngine()->Init(instance_name_, option_.model_path,
+                        option.intra_threads_num, option.inter_threads_num);
+  return init_flag_;
 }

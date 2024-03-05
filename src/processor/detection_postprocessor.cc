@@ -75,7 +75,6 @@ void DetectionPostprocessor::Postprocess(
           box.score = conf;
           box.label = label;
           box.label_text = labels[label].c_str();
-          box.flag = true;
           bbox_collection.push_back(box);
           count += 1;  // limit boxes for nms.
           if (count > max_nms) break;
@@ -98,7 +97,6 @@ void DetectionPostprocessor::Postprocess(
     result_box.label = detected_boxes[i].label;
     result_box.score = detected_boxes[i].score;
     result_box.label_text = detected_boxes[i].label_text;
-    result_box.flag = detected_boxes[i].flag;
     result_boxes.push_back(result_box);
   }
 }
@@ -148,7 +146,6 @@ void DetectionPostprocessor::PostprocessYolov6(
     }
     result_box.label = output_labels.At<int>({0, i});
     result_box.label_text = labels[result_box.label].c_str();
-    result_box.flag = true;
     result_boxes.push_back(result_box);
   }
 }
@@ -222,7 +219,6 @@ void DetectionPostprocessor::PostprocessNanoDetPlus(
         box.label = label;
         box.label_text = labels[label].c_str();
         box.score = cls_conf;
-        box.flag = true;
         box.x1 = ((ct_x - dis_pred[0]) * strides[i] - dw) / resize_ratio;
         box.x1 = std::max(box.x1, .0f);
         box.y1 = ((ct_y - dis_pred[1]) * strides[i] - dh) / resize_ratio;
@@ -250,7 +246,6 @@ void DetectionPostprocessor::PostprocessNanoDetPlus(
     result_box.label = detected_boxes[i].label;
     result_box.score = detected_boxes[i].score;
     result_box.label_text = detected_boxes[i].label_text;
-    result_box.flag = detected_boxes[i].flag;
     result_boxes.push_back(result_box);
   }
 }
@@ -294,7 +289,6 @@ void DetectionPostprocessor::PostprocessRtmDet(
     int classes = label_result[i];
     if (classes != 0) continue;
     Boxf box;
-    box.flag = true;
     box.score = det_result[i * reshap_dims + 4];
     if (box.score < score_threshold) continue;  // filter
     box.x1 = (det_result[i * reshap_dims] - dw) / resize_ratio;
@@ -324,7 +318,6 @@ void DetectionPostprocessor::PostprocessRtmDet(
     result_box.label = detected_boxes[i].label;
     result_box.score = detected_boxes[i].score;
     result_box.label_text = detected_boxes[i].label_text;
-    result_box.flag = detected_boxes[i].flag;
     result_boxes.push_back(result_box);
   }
 }

@@ -5,23 +5,25 @@
 
 #include "src/utils/json.hpp"
 #include "utils/time.h"
+#include "utils/utils.h"
 using json = nlohmann::json;
 
 std::vector<std::vector<float>> ObjectDetection::Process(
-    const cv::Mat &raw_img) {
+    const cv::Mat &img_raw) {
   input_tensors_.clear();
-  if (initFlag_ != 0) {
+  if (init_flag_ != 0) {
     std::cout << "[ ERROR ] Init fail return empty tensors" << std::endl;
     return input_tensors_;
   }
-  if (modelFilepath_.find("yolov4") != modelFilepath_.npos) {
-    preprocessor_.Preprocess(raw_img, inputDims_, input_tensors_, HWC);
-  } else if (modelFilepath_.find("yolov6") != modelFilepath_.npos) {
-    preprocessor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
-  } else if (modelFilepath_.find("nanodet-plus") != modelFilepath_.npos) {
-    preprocessor_.PreprocessNanoDetPlus(raw_img, inputDims_, input_tensors_);
-  } else if (modelFilepath_.find("rtmdet") != modelFilepath_.npos) {
-    preprocessor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
+  if (option_.model_path.find("yolov4") != option_.model_path.npos) {
+    preprocessor_.Preprocess(img_raw, input_dims_, input_tensors_, HWC);
+  } else if (option_.model_path.find("yolov6") != option_.model_path.npos) {
+    preprocessor_.Preprocess(img_raw, input_dims_, input_tensors_, CHW);
+  } else if (option_.model_path.find("nanodet-plus") !=
+             option_.model_path.npos) {
+    preprocessor_.PreprocessNanoDetPlus(img_raw, input_dims_, input_tensors_);
+  } else if (option_.model_path.find("rtmdet") != option_.model_path.npos) {
+    preprocessor_.Preprocess(img_raw, input_dims_, input_tensors_, CHW);
   } else {
     std::cout << "[ ERROR ] Unsupported model return empty tensors"
               << std::endl;
@@ -30,10 +32,10 @@ std::vector<std::vector<float>> ObjectDetection::Process(
   return input_tensors_;
 }
 
-ObjectDetectionResult ObjectDetection::Detect(const cv::Mat &raw_img) {
+ObjectDetectionResult ObjectDetection::Detect(const cv::Mat &img_raw) {
   result_boxes_.clear();
   input_tensors_.clear();
-  Preprocess(raw_img);
+  Preprocess(img_raw);
   return Postprocess();
 }
 
@@ -42,28 +44,29 @@ ObjectDetectionResult ObjectDetection::Detect(
     const int img_width) {
   result_boxes_.clear();
   input_tensors_ = input_tensors;
-  if (initFlag_ != 0) {
+  if (init_flag_ != 0) {
     std::cout << "[ ERROR ] Init fail return empty result" << std::endl;
     result_.result_bboxes = result_boxes_;
     result_.timestamp = std::chrono::steady_clock::now();
     return result_;
   }
-  if (modelFilepath_.find("yolov4") != modelFilepath_.npos) {
-    postprocessor_.Postprocess(Infer(input_tensors_), result_boxes_, inputDims_,
-                               img_height, img_width, labels_, score_threshold_,
-                               nms_threshold_);
-  } else if (modelFilepath_.find("yolov6") != modelFilepath_.npos) {
+  if (option_.model_path.find("yolov4") != option_.model_path.npos) {
+    postprocessor_.Postprocess(Infer(input_tensors_), result_boxes_,
+                               input_dims_, img_height, img_width, labels_,
+                               option_.score_threshold, option_.nms_threshold);
+  } else if (option_.model_path.find("yolov6") != option_.model_path.npos) {
     postprocessor_.PostprocessYolov6(Infer(input_tensors_), result_boxes_,
-                                     inputDims_, img_height, img_width, labels_,
-                                     score_threshold_);
-  } else if (modelFilepath_.find("nanodet-plus") != modelFilepath_.npos) {
+                                     input_dims_, img_height, img_width,
+                                     labels_, option_.score_threshold);
+  } else if (option_.model_path.find("nanodet-plus") !=
+             option_.model_path.npos) {
     postprocessor_.PostprocessNanoDetPlus(
-        Infer(input_tensors_), result_boxes_, inputDims_, img_height, img_width,
-        labels_, score_threshold_, nms_threshold_);
-  } else if (modelFilepath_.find("rtmdet") != modelFilepath_.npos) {
-    postprocessor_.PostprocessRtmDet(Infer(input_tensors_), result_boxes_,
-                                     inputDims_, img_height, img_width, labels_,
-                                     score_threshold_, nms_threshold_);
+        Infer(input_tensors_), result_boxes_, input_dims_, img_height,
+        img_width, labels_, option_.score_threshold, option_.nms_threshold);
+  } else if (option_.model_path.find("rtmdet") != option_.model_path.npos) {
+    postprocessor_.PostprocessRtmDet(
+        Infer(input_tensors_), result_boxes_, input_dims_, img_height,
+        img_width, labels_, option_.score_threshold, option_.nms_threshold);
   } else {
     std::cout << "[ ERROR ] Unsupported model return empty result" << std::endl;
   }
@@ -72,123 +75,109 @@ ObjectDetectionResult ObjectDetection::Detect(
   return result_;
 }
 
-void ObjectDetection::Preprocess(const cv::Mat &raw_img) {
-  if (initFlag_ != 0) {
-    std::cout << "[ ERROR ] Init fail" << std::endl;
+void ObjectDetection::Preprocess(const cv::Mat &img_raw) {
+  if (init_flag_ != 0) {
     return;
   }
-  img_height_ = raw_img.rows;
-  img_width_ = raw_img.cols;
-  if (modelFilepath_.find("yolov4") != modelFilepath_.npos) {
-    preprocessor_.Preprocess(raw_img, inputDims_, input_tensors_, HWC);
-  } else if (modelFilepath_.find("yolov6") != modelFilepath_.npos) {
-    preprocessor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
-  } else if (modelFilepath_.find("nanodet-plus") != modelFilepath_.npos) {
-    preprocessor_.PreprocessNanoDetPlus(raw_img, inputDims_, input_tensors_);
-  } else if (modelFilepath_.find("rtmdet") != modelFilepath_.npos) {
-    preprocessor_.Preprocess(raw_img, inputDims_, input_tensors_, CHW);
+  img_height_ = img_raw.rows;
+  img_width_ = img_raw.cols;
+  if (option_.model_path.find("yolov4") != option_.model_path.npos) {
+    preprocessor_.Preprocess(img_raw, input_dims_, input_tensors_, HWC);
+  } else if (option_.model_path.find("yolov6") != option_.model_path.npos) {
+    preprocessor_.Preprocess(img_raw, input_dims_, input_tensors_, CHW);
+  } else if (option_.model_path.find("nanodet-plus") !=
+             option_.model_path.npos) {
+    preprocessor_.PreprocessNanoDetPlus(img_raw, input_dims_, input_tensors_);
+  } else if (option_.model_path.find("rtmdet") != option_.model_path.npos) {
+    preprocessor_.Preprocess(img_raw, input_dims_, input_tensors_, CHW);
   } else {
     std::cout << "[ ERROR ] Unsupported model" << std::endl;
   }
 }
 
 ObjectDetectionResult ObjectDetection::Postprocess() {
-  if (initFlag_ != 0) {
+  if (init_flag_ != 0) {
     std::cout << "[ ERROR ] Init fail return empty result" << std::endl;
     result_.result_bboxes = result_boxes_;
     result_.timestamp = std::chrono::steady_clock::now();
     return result_;
   }
-  if (modelFilepath_.find("yolov4") != modelFilepath_.npos) {
-    postprocessor_.Postprocess(Infer(input_tensors_), result_boxes_, inputDims_,
-                               img_height_, img_width_, labels_,
-                               score_threshold_, nms_threshold_);
-  } else if (modelFilepath_.find("yolov6") != modelFilepath_.npos) {
+  if (option_.model_path.find("yolov4") != option_.model_path.npos) {
+    postprocessor_.Postprocess(Infer(input_tensors_), result_boxes_,
+                               input_dims_, img_height_, img_width_, labels_,
+                               option_.score_threshold, option_.nms_threshold);
+  } else if (option_.model_path.find("yolov6") != option_.model_path.npos) {
     postprocessor_.PostprocessYolov6(Infer(input_tensors_), result_boxes_,
-                                     inputDims_, img_height_, img_width_,
-                                     labels_, score_threshold_);
-  } else if (modelFilepath_.find("nanodet-plus") != modelFilepath_.npos) {
+                                     input_dims_, img_height_, img_width_,
+                                     labels_, option_.score_threshold);
+  } else if (option_.model_path.find("nanodet-plus") !=
+             option_.model_path.npos) {
     postprocessor_.PostprocessNanoDetPlus(
-        Infer(input_tensors_), result_boxes_, inputDims_, img_height_,
-        img_width_, labels_, score_threshold_, nms_threshold_);
-  } else if (modelFilepath_.find("rtmdet") != modelFilepath_.npos) {
-    postprocessor_.PostprocessRtmDet(Infer(input_tensors_), result_boxes_,
-                                     inputDims_, img_height_, img_width_,
-                                     labels_, score_threshold_, nms_threshold_);
+        Infer(input_tensors_), result_boxes_, input_dims_, img_height_,
+        img_width_, labels_, option_.score_threshold, option_.nms_threshold);
+  } else if (option_.model_path.find("rtmdet") != option_.model_path.npos) {
+    postprocessor_.PostprocessRtmDet(
+        Infer(input_tensors_), result_boxes_, input_dims_, img_height_,
+        img_width_, labels_, option_.score_threshold, option_.nms_threshold);
   } else {
     std::cout << "[ ERROR ] Unsupported model return empty result" << std::endl;
   }
-  if (!class_name_blacklist_.empty()) {
-    for (int i = 0; i < static_cast<int>(class_name_blacklist_.size()); i++) {
-      for (int j = 0; j < static_cast<int>(result_boxes_.size()); j++) {
-        if (class_name_blacklist_[i] ==
-            static_cast<int>(result_boxes_[j].label)) {
-          result_boxes_[j].flag = false;
-        }
-      }
-    }
-  }
-  if (!class_name_whitelist_.empty()) {
-    for (int j = 0; j < static_cast<int>(result_boxes_.size()); j++) {
-      result_boxes_[j].flag = false;
-    }
-    for (int i = 0; i < static_cast<int>(class_name_whitelist_.size()); i++) {
-      for (int j = 0; j < static_cast<int>(result_boxes_.size()); j++) {
-        if (class_name_whitelist_[i] ==
-            static_cast<int>(result_boxes_[j].label)) {
-          result_boxes_[j].flag = true;
-        }
-      }
-    }
-  }
+  ApllyList();
   result_.result_bboxes = result_boxes_;
   result_.timestamp = std::chrono::steady_clock::now();
   return result_;
 }
 
-int ObjectDetection::InitFromCommand(const std::string &modelFilepath,
-                                     const std::string &labelFilepath) {
-  instanceName_ = "object-detection-inference";
-  modelFilepath_ = modelFilepath;
-  labelFilepath_ = labelFilepath;
-  score_threshold_ = -1.f;
-  nms_threshold_ = -1.f;
-  initFlag_ = GetEngine()->Init(instanceName_, modelFilepath_);
-  inputDims_ = GetEngine()->GetInputDims();
-  labels_ = readLabels(labelFilepath_);
-  return initFlag_;
+void ObjectDetection::ApllyList() {
+  if (option_.class_name_blacklist.empty() &&
+      option_.class_name_whitelist.empty()) {
+    return;
+  }
+  for (auto it = result_boxes_.begin(); it != result_boxes_.end();) {
+    if (!class_name_list_[static_cast<int>(it->label)]) {
+      it = result_boxes_.erase(it);
+    } else {
+      ++it;
+    }
+  }
 }
 
-int ObjectDetection::InitFromConfig(const std::string &configFilepath) {
-  std::ifstream f(configFilepath);
-  json config = json::parse(f);
-  if (configCheck(config)) {
-    initFlag_ = 1;
-    std::cout << "[ ERROR ] Config check fail" << std::endl;
-    return initFlag_;
+int ObjectDetection::InitFromOption(const ObjectDetectionOption &option) {
+  init_flag_ = 1;
+  option_ = option;
+  if (!checkFileExtension(option_.label_path, ".txt") ||
+      !existsCheck(option_.label_path)) {
+    return init_flag_;
   }
-  modelFilepath_ = config["model_path"];
-  labelFilepath_ = config["label_path"];
-  if (config.contains("score_threshold")) {
-    score_threshold_ = config["score_threshold"];
+  instance_name_ = "object-detection-inference";
+  labels_ = readLabels(option_.label_path);
+  int label_size = labels_.size();
+  if (!option_.class_name_whitelist.empty()) {
+    std::vector<int> list(label_size, 0);
+    class_name_list_ = list;
+    for (size_t i = 0; i < option_.class_name_whitelist.size(); i++) {
+      if (option_.class_name_whitelist[i] < label_size &&
+          option_.class_name_whitelist[i] >= 0) {
+        class_name_list_[option_.class_name_whitelist[i]] = 1;
+      }
+    }
   } else {
-    score_threshold_ = -1.f;
+    std::vector<int> list(label_size, 1);
+    class_name_list_ = list;
   }
-  if (config.contains("nms_threshold")) {
-    nms_threshold_ = config["nms_threshold"];
-  } else {
-    nms_threshold_ = -1.f;
+  if (!option_.class_name_blacklist.empty()) {
+    for (size_t i = 0; i < option_.class_name_blacklist.size(); i++) {
+      if (option_.class_name_blacklist[i] < label_size &&
+          option_.class_name_blacklist[i] >= 0) {
+        class_name_list_[option_.class_name_blacklist[i]] = 0;
+      }
+    }
   }
-  if (config.contains("class_name_whitelist")) {
-    class_name_whitelist_ =
-        config["class_name_whitelist"].get<std::vector<int>>();
+  init_flag_ =
+      GetEngine()->Init(instance_name_, option_.model_path,
+                        option.intra_threads_num, option.inter_threads_num);
+  if (!init_flag_) {
+    input_dims_ = GetEngine()->GetInputDims();
   }
-  if (config.contains("class_name_blacklist")) {
-    class_name_blacklist_ =
-        config["class_name_blacklist"].get<std::vector<int>>();
-  }
-  labels_ = readLabels(labelFilepath_);
-  initFlag_ = GetEngine()->Init(config);
-  inputDims_ = GetEngine()->GetInputDims();
-  return initFlag_;
+  return init_flag_;
 }

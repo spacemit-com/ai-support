@@ -1,5 +1,5 @@
-#ifndef SUPPORT_SRC_TASK_VISION_IMAGECLASSIFICATION_IMAGE_CLASSIFICATION_H_
-#define SUPPORT_SRC_TASK_VISION_IMAGECLASSIFICATION_IMAGE_CLASSIFICATION_H_
+#ifndef SUPPORT_SRC_TASK_VISION_ImageClassification_IMAGE_CLASSIFICATION_H_
+#define SUPPORT_SRC_TASK_VISION_ImageClassification_IMAGE_CLASSIFICATION_H_
 
 #include <cmath>
 #include <exception>
@@ -19,14 +19,14 @@
 #include "src/utils/utils.h"
 #include "task/vision/image_classification_types.h"
 
-class imageClassification
+class ImageClassification
     : public BaseVisionTaskApi<ImageClassificationResult> {
  public:
-  imageClassification() : BaseVisionTaskApi<ImageClassificationResult>() {
-    initFlag_ = -1;
+  ImageClassification() : BaseVisionTaskApi<ImageClassificationResult>() {
+    init_flag_ = -1;
   }
-  ~imageClassification() {}
-  int Init(const std::string modelFilepath, const std::string labelFilepath);
+  ~ImageClassification() {}
+  int InitFromOption(const ImageClassificationOption& option);
   ImageClassificationResult Classify(const cv::Mat& img_raw);
 
  protected:
@@ -36,14 +36,13 @@ class imageClassification
  private:
   ClassificationPreprocessor preprocessor_;
   ClassificationPostprocessor postprocessor_;
-  std::string instanceName_;
-  std::string modelFilepath_;
+  ImageClassificationOption option_;
+  std::string instance_name_;
   cv::Mat img_raw_;
-  std::string labelFilepath_;
   std::vector<std::string> labels_;
   std::vector<Ort::Value> output_tensors_;
   std::vector<std::vector<float>> input_tensors_;
-  int initFlag_ = false;
+  int init_flag_;
 };
 
-#endif  // SUPPORT_SRC_TASK_VISION_IMAGECLASSIFICATION_IMAGE_CLASSIFICATION_H_
+#endif  // SUPPORT_SRC_TASK_VISION_ImageClassification_IMAGE_CLASSIFICATION_H_

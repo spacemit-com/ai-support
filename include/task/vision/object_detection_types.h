@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <limits>  // for numeric_limits<>
+#include <string>
 #include <type_traits>
 #include <vector>
 
@@ -27,15 +28,14 @@ struct BoundingBoxType {
   value_type x2;
   value_type y2;
   score_type score;
-  const char *label_text;
+  const char* label_text;
   unsigned int label;  // for general object detection.
-  bool flag;           // future use.
   // convert type.
   template <typename O1, typename O2 = score_type>
   BoundingBoxType<O1, O2> convert_type() const;
 
   template <typename O1, typename O2 = score_type>
-  value_type iou_of(const BoundingBoxType<O1, O2> &other) const;
+  value_type iou_of(const BoundingBoxType<O1, O2>& other) const;
 
   value_type width() const;
 
@@ -58,8 +58,7 @@ struct BoundingBoxType {
         y2(static_cast<value_type>(0)),
         score(static_cast<score_type>(0)),
         label_text(nullptr),
-        label(0),
-        flag(false) {
+        label(0) {
     __assert_type<value_type, score_type>();
   }
 };  // End BoundingBox.
@@ -84,14 +83,13 @@ inline BoundingBoxType<O1, O2> BoundingBoxType<T1, T2>::convert_type() const {
   other.score = static_cast<other_score_type>(score);
   other.label_text = label_text;
   other.label = label;
-  other.flag = flag;
   return other;
 }
 
 template <typename T1, typename T2>
 template <typename O1, typename O2>
 inline typename BoundingBoxType<T1, T2>::value_type
-BoundingBoxType<T1, T2>::iou_of(const BoundingBoxType<O1, O2> &other) const {
+BoundingBoxType<T1, T2>::iou_of(const BoundingBoxType<O1, O2>& other) const {
   BoundingBoxType<value_type, score_type> tbox =
       other.template convert_type<value_type, score_type>();
   value_type inner_x1 = x1 > tbox.x1 ? x1 : tbox.x1;
@@ -159,7 +157,18 @@ BoundingBoxType<T1, T2>::area() const {
 
 struct ObjectDetectionResult {
   std::vector<Boxi> result_bboxes;
-  std::chrono::time_point< std::chrono::steady_clock > timestamp;
+  std::chrono::time_point<std::chrono::steady_clock> timestamp;
+};
+
+struct ObjectDetectionOption {
+  std::string model_path;
+  std::string label_path;
+  int intra_threads_num = 2;
+  int inter_threads_num = 2;
+  float score_threshold = -1.f;
+  float nms_threshold = -1.f;
+  std::vector<int> class_name_whitelist;
+  std::vector<int> class_name_blacklist;
 };
 
 #endif  // SUPPORT_INCLUDE_TASK_VISION_OBJECT_DETECTION_TYPES_H_

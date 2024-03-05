@@ -4,21 +4,27 @@
 #include <string>
 
 #include "include/utils/utils.h"
-#include "src/utils/json.hpp"
-using json = nlohmann::json;
-
-bool checkLabelFileExtension(const std::string& filename);
 
 std::vector<std::string> readLabels(const std::string& labelFilepath);
-
-bool checkModelFileExtension(const std::string& filename);
-
-int checkConfigFileExtension(const std::string& filename);
-
-int configCheck(const json& config);
 
 float sigmoid(float x);
 
 float fast_exp(float x);
+
+bool startsWith(const std::string& str, const std::string& prefix);
+
+bool endsWith(const std::string& str, const std::string& suffix);
+#ifdef _WIN32
+#include <codecvt>
+inline std::wstring to_wstring(const std::string& input) {
+  std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+  return converter.from_bytes(input);
+}
+inline std::wstring to_wstring(const char* input) {
+  std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+  std::string str(input);
+  return converter.from_bytes(str);
+}
+#endif /* _WIN32 */
 
 #endif  // SUPPORT_SRC_UTILS_UTILS_H_

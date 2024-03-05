@@ -7,11 +7,11 @@
 #include "opencv2/opencv.hpp"
 #include "task/vision/image_classification_types.h"
 
-class imageClassificationTask {
+class ImageClassificationTask {
  public:
-  imageClassificationTask(const std::string& filePath,
-                          const std::string& labelFilepath);
-  ~imageClassificationTask() = default;
+  explicit ImageClassificationTask(const std::string& config_file_path);
+  explicit ImageClassificationTask(const ImageClassificationOption& option);
+  ~ImageClassificationTask() = default;
   ImageClassificationResult Classify(const cv::Mat& img_raw);
   int getInitFlag();
 

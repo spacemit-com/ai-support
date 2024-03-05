@@ -25,7 +25,7 @@ ImageClassificationResult ClassificationPostprocessor::Postprocess(
   which are usually the buffer from std::vector instances. */
   Ort::Value &pred = output_tensors.at(0);
   const float *output_pred_ptr = pred.GetTensorData<float>();
-  for (int i = 0; i < static_cast<int>(labels.size()); i++) {
+  for (size_t i = 0; i < labels.size(); i++) {
     activation = output_pred_ptr[i];
     expSum += std::exp(activation);
     if (activation > maxActivation) {

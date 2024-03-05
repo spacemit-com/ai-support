@@ -60,10 +60,6 @@ std::pair<cv::Mat, cv::Mat> EstimationPreprocessor::CropImageByDetectBox(
     return result_pair;
   }
 
-  if (!box.flag) {
-    return result_pair;
-  }
-
   // deep copy
   cv::Mat input_mat_copy;
   input_image.copyTo(input_mat_copy);

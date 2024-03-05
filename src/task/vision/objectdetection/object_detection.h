@@ -16,28 +16,26 @@
 class ObjectDetection : public BaseVisionTaskApi<ObjectDetectionResult> {
  public:
   ObjectDetection() : BaseVisionTaskApi<ObjectDetectionResult>() {
-    initFlag_ = -1;
+    init_flag_ = -1;
   }
   ~ObjectDetection() {}
-  ObjectDetectionResult Detect(const cv::Mat &raw_img);
-  int InitFromCommand(const std::string &modelFilepath,
-                      const std::string &labelFilepath);
-  int InitFromConfig(const std::string &configFilepath);
-  std::vector<std::vector<float>> Process(const cv::Mat &raw_img);
+  ObjectDetectionResult Detect(const cv::Mat &img_raw);
+  int InitFromOption(const ObjectDetectionOption &option);
+  std::vector<std::vector<float>> Process(const cv::Mat &img_raw);
   ObjectDetectionResult Detect(
       const std::vector<std::vector<float>> &input_tensors,
       const int img_height, const int img_width);
 
  protected:
-  void Preprocess(const cv::Mat &raw_img) override;
+  void ApllyList();
+  void Preprocess(const cv::Mat &img_raw) override;
   ObjectDetectionResult Postprocess() override;
 
  private:
-  std::string instanceName_;
-  std::string modelFilepath_;
-  std::string labelFilepath_;
+  std::string instance_name_;
   std::vector<std::string> labels_;
-  std::vector<std::vector<int64_t>> inputDims_;
+  ObjectDetectionOption option_;
+  std::vector<std::vector<int64_t>> input_dims_;
   std::vector<std::vector<float>> input_tensors_;
   DetectionPreprocessor preprocessor_;
   DetectionPostprocessor postprocessor_;
@@ -45,11 +43,8 @@ class ObjectDetection : public BaseVisionTaskApi<ObjectDetectionResult> {
   ObjectDetectionResult result_;
   int img_height_;
   int img_width_;
-  int initFlag_;
-  float score_threshold_;
-  float nms_threshold_;
-  std::vector<int> class_name_whitelist_;
-  std::vector<int> class_name_blacklist_;
+  int init_flag_;
+  std::vector<int> class_name_list_;
 };
 
 #endif  // SUPPORT_SRC_TASK_VISION_OBJECTDETECTION_OBJECT_DETECTION_H_

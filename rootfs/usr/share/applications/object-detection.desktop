@@ -3,6 +3,6 @@ Type=Application
 #Encoding=UTF-8
 Version=1.0.3
 Name=object-detection
-Exec=/usr/bin/detection_stream_demo /usr/share/ai-support/models/yolov6.json 0 cameraId
+Exec=/usr/bin/detection_stream_demo /usr/share/ai-support/models/yolov6.json 0 camera_id
 Terminal=true
 Icon=/usr/share/icons/bianbu-ai-demo/object-detection.png

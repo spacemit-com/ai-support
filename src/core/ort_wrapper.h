@@ -10,16 +10,14 @@
 
 #include "onnxruntime_cxx_api.h"
 #include "opencv2/opencv.hpp"
-#include "src/utils/json.hpp"
-using json = nlohmann::json;
 
 class OrtWrapper {
  public:
   OrtWrapper() {}
   ~OrtWrapper() {}
-  int Init(std::string instanceName,
-           std::basic_string<ORTCHAR_T> modelFilepath);
-  int Init(json config);
+  int Init(const std::string& instance_name,
+           const std::basic_string<ORTCHAR_T>& model_file_path,
+           const int intra_threads_num, const int inter_threads_num);
   size_t GetInputCount() { return session_->GetInputCount(); }
   size_t GetOutputCount() { return session_->GetOutputCount(); }
   std::vector<std::vector<int64_t>> GetInputDims();

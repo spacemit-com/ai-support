@@ -6,14 +6,12 @@
 
 #include "opencv2/opencv.hpp"
 #include "src/core/ort_wrapper.h"
-#include "src/utils/json.hpp"
-using json = nlohmann::json;
 class Engine {
  public:
   Engine() { OrtWrapper ortwrapper_; }
   ~Engine() {}
-  int Init(std::string instanceName, std::string modelFilepath);
-  int Init(json config);
+  int Init(const std::string &instance_name, const std::string &model_file_path,
+           const int intra_threads_num = 2, const int inter_threads_num = 2);
   size_t GetInputCount() { return ortwrapper_.GetInputCount(); }
   size_t GetOutputCount() { return ortwrapper_.GetOutputCount(); }
   std::vector<std::vector<int64_t>> GetInputDims() {

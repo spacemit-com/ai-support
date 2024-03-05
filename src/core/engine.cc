@@ -1,26 +1,26 @@
 #include "src/core/engine.h"
 
-#ifdef _WIN32
-#include <codecvt>
-inline std::wstring to_wstring(const std::string& input) {
-  std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-  return converter.from_bytes(input);
-}
-#endif /* _WIN32 */
+#include "src/utils/utils.h"
+#include "utils/utils.h"
 
-int Engine::Init(std::string instanceName, std::string modelFilepath) {
-  return ortwrapper_.Init(instanceName,
+int Engine::Init(const std::string &instance_name,
+                 const std::string &model_file_path,
+                 const int intra_threads_num, const int inter_threads_num) {
+  if (!checkFileExtension(model_file_path, ".onnx") ||
+      !existsCheck(model_file_path)) {
+    return 1;
+  }
+  return ortwrapper_.Init(instance_name,
 #ifdef _WIN32
-                          to_wstring(modelFilepath)
+                          to_wstring(model_file_path), intra_threads_num,
+                          inter_threads_num
 #else
-                          modelFilepath
+                          model_file_path, intra_threads_num, inter_threads_num
 #endif /* _WIN32 */
   );
 }
 
-int Engine::Init(json config) { return ortwrapper_.Init(config); }
-
 std::vector<Ort::Value> Engine::Interpreter(
-    std::vector<std::vector<float>>& input_values_handler) {
+    std::vector<std::vector<float>> &input_values_handler) {
   return ortwrapper_.Invoke(input_values_handler);
 }

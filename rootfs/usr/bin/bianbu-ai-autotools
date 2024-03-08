@@ -33,21 +33,36 @@ cmd=$1
 shift
 
 #xdg-user-dirs-update
-test -f ${XDG_CONFIG_HOME:-~/.config}/user-dirs.dirs && . ${XDG_CONFIG_HOME:-~/.config}/user-dirs.dirs
+CONFIG_HOME=${XDG_CONFIG_HOME:-~/.config}
+test -f ${CONFIG_HOME}/user-dirs.dirs && . ${CONFIG_HOME}/user-dirs.dirs
 
-function auto_desktop() {
-  desktop=$1
-  shortcut=$(basename $desktop)
-  if [[ ! -f ${XDG_CONFIG_HOME:-~/.config}/${entry_point}/applications/${shortcut%.desktop}-initial-setup-done ]]; then
+function auto_config_desktop() {
+  # desktop dir not exist or missing shortcut parameter
+  if [ ! -d "${XDG_DESKTOP_DIR}" ] || [ $# -ne 1 ]; then return; fi
+  if [ ! $HOME ]; then return; fi
+
+  local desktop=$1
+  local shortcut=$(basename $desktop)
+  local desktop_name="${XDG_DESKTOP_DIR//${HOME}\//}"
+  local init_setup=${CONFIG_HOME}/${entry_point}/applications/${shortcut%.desktop}-initial-setup-done
+
+  if [ -f ${init_setup} ] && [ "$(cat ${init_setup} | grep ${desktop_name})" ]; then
+    return # desktop is already configured
+  fi
+
+  # install icon if not exist
+  if [ ! -f ${XDG_DESKTOP_DIR}/${shortcut} ]; then
     xdg-desktop-icon install --novendor ${desktop}
-    gio set $(xdg-user-dir DESKTOP)/${shortcut} metadata::trusted true
+    if test $? -eq 0; then
+      chmod +x ${XDG_DESKTOP_DIR}/${shortcut}
+      gio set ${XDG_DESKTOP_DIR}/${shortcut} metadata::trusted true
+    fi
   fi
-  if [[ -f $(xdg-user-dir DESKTOP)/${shortcut} ]]; then
-    mkdir -p ${XDG_CONFIG_HOME:-~/.config}/${entry_point}/applications
-    touch ${XDG_CONFIG_HOME:-~/.config}/${entry_point}/applications/${shortcut%.desktop}-initial-setup-done
-  fi
+  # update init setup info
+  mkdir -p ${CONFIG_HOME}/${entry_point}/applications
+  echo ${desktop_name} $(date) >> ${init_setup}
 }
 
 if [[ $cmd =~ "desktop" ]]; then
-  auto_desktop $@
+  auto_config_desktop $@
 fi

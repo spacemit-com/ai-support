@@ -1,1 +1,23 @@
 #!/bin/bash
+
+function preinst_install() {
+  :
+}
+
+function preinst_upgrade() {
+  :
+}
+
+function preinst_main() {
+  if [ $# -eq 0 ]; then
+    return;
+  fi
+
+  case $1 in
+    install )   shift; preinst_install $@;;
+    upgrade )   shift; preinst_upgrade $@;;
+  esac
+}
+
+args="$@"
+preinst_main $@

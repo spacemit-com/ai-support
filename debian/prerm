@@ -1,66 +1,31 @@
 #!/bin/bash
 
-export XDG_DATA_HOME=${XDG_DATA_HOME:-/usr/share/}
-
-function ai_prerm_init() {
+function prerm_init() {
   set -e
+  export APP_NAME=bianbu-ai-support
+  export APP_DATA=/usr/share/applications
 }
 
-aiDesktop=(
-  "object-detection.desktop"
-  "hand-tracker.desktop"
-  "pose-tracker.desktop"
-)
-aiAppName=bianbu-ai-support
-function ai_prerm_uninstall_desktop() {
-  gDesktopName="桌面"
-  if [ -d "/root/桌面" ]; then
-    gDesktopName="桌面"
-  elif [ -d "/root/Desktop" ]; then
-    gDesktopName="Desktop"
-  fi
-
-  #desktop
-  if [ -d "/root/${gDesktopName}" ]; then
-    for desktop in "${aiDesktop[@]}"; do
-      rm -rf /root/${gDesktopName}/${desktop}
-    done
-  fi
-
-  for FILENAME in /home/*; do
-    if [ -f "${FILENAME}/.config/user-dirs.dirs" ]; then
-      source "${FILENAME}/.config/user-dirs.dirs"
-      if [ ! -d "${XDG_DESKTOP_DIR}" ]; then
-        mkdir -p "${XDG_DESKTOP_DIR}" >/dev/null 2>&1 || true
-      fi
-      gDesktopName="${XDG_DESKTOP_DIR//${HOME}\//}"
-    else
-      if [ -d "${FILENAME}/桌面" ]; then
-        gDesktopName="桌面"
-      elif [ -d "${FILENAME}/Desktop" ]; then
-        gDesktopName="Desktop"
-      fi
-    fi
-
-    for desktop in "${aiDesktop[@]}"; do
-      rm -rf "${FILENAME}/${gDesktopName}/${desktop}"
-    done
-    rm -rf ${FILENAME}/.config/${aiAppName}
-  done
+function prerm_remove() {
+  :
 }
 
-function ai_prerm_main() {
+function prerm_upgrade() {
+  :
+}
+
+function prerm_main() {
   if [ $# -eq 0 ]; then
     return;
   fi
 
-  ai_prerm_init
+  prerm_init
   case $1 in
-    remove )            shift; ai_prerm_uninstall_desktop $@;;
-    upgrade )           shift;;
+    remove )            shift; prerm_remove $@;;
+    upgrade )           shift; prerm_upgrade $@;;
     failed-upgrade )    ;;
   esac
 }
 
 args="$@"
-ai_prerm_main $@
+prerm_main $@

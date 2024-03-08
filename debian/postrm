@@ -1,35 +1,82 @@
 #!/bin/bash
 
-ai_xdg_dirs=/usr/share
-ai_xdg_dir=
-
-function ai_demo_init() {
+function postrm_init() {
   set -e
+  export APP_NAME=bianbu-ai-support
+  export APP_DATA=/usr/share/applications
 }
 
-function ai_demo_remove() {
-  if [ -x /usr/bin/update-mime-database ] ; then
-    : #update-mime-database "${ai_xdg_dir}/mime"
+aiDesktop=(
+  "object-detection.desktop"
+  "hand-tracker.desktop"
+  "pose-tracker.desktop"
+)
+function remove_config() {
+  gDesktopName="桌面"
+  if [ -d "/root/桌面" ]; then
+    gDesktopName="桌面"
+  elif [ -d "/root/Desktop" ]; then
+    gDesktopName="Desktop"
   fi
 
-  if [ -x /usr/bin/update-desktop-database ] ; then
-    : #update-desktop-database -q "${ai_xdg_dir}/applications"
+  #desktop
+  if [ -d "/root/${gDesktopName}" ]; then
+    for desktop in "${aiDesktop[@]}"; do
+      rm -rf /root/${gDesktopName}/${desktop}
+    done
   fi
 
-  for HOMEDIR in /home/*; do
-    :
+  for FILENAME in /home/*; do
+
+    if [ -f "${FILENAME}/.config/user-dirs.dirs" ]; then
+      if [ ! $HOME ]; then HOME=${FILENAME}; fi
+      # Import user dir config
+      source "${FILENAME}/.config/user-dirs.dirs"
+      if [ ! -d "${XDG_DESKTOP_DIR}" ]; then
+        mkdir -p "${XDG_DESKTOP_DIR}" >/dev/null 2>&1 || true
+      fi
+      # Replace(Remove) "${HOME}/" by "" in ${XDG_DESKTOP_DIR} with greedy mode
+      gDesktopName="${XDG_DESKTOP_DIR//${HOME}\//}"
+    else
+      if [ -d "${FILENAME}/桌面" ]; then
+        gDesktopName="桌面"
+      elif [ -d "${FILENAME}/Desktop" ]; then
+        gDesktopName="Desktop"
+      fi
+    fi
+
+    for desktop in "${aiDesktop[@]}"; do
+      rm -rf "${FILENAME}/${gDesktopName}/${desktop}"
+    done
+    rm -rf ${FILENAME}/.config/${APP_NAME}
   done
 }
 
-function ai_demo_main() {
+## ------------------------- ##
+
+function postrm_remove_upgrade() {
+  if [ -x /usr/bin/update-mime-database ] ; then
+    : #update-mime-database "/usr/share/mime"
+  fi
+
+  if [ -x /usr/bin/update-desktop-database ] ; then
+    : #update-desktop-database -q "/usr/share/applications"
+  fi
+}
+
+function postrm_purge() {
+  remove_config
+}
+
+function postrm_main() {
   if [ $# -eq 0 ] ; then
     return;
   fi
 
-  ai_demo_init
+  postrm_init
   case $1 in
-    remove | upgrade )  shift; ai_demo_remove $@;;
-    purge )             ;;
+    remove | upgrade )  shift; postrm_remove_upgrade $@;;
+    purge )             shift; postrm_purge $@;;
     abort-install )     ;;
     abort-upgrade )     ;;
     failed-upgrade )    ;;
@@ -37,4 +84,4 @@ function ai_demo_main() {
 }
 
 args="$@"
-ai_demo_main $@
+postrm_main $@

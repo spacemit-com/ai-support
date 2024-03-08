@@ -3,20 +3,22 @@
 set -e
 #set -x
 
-export XDG_DATA_HOME=${XDG_DATA_HOME:-/usr/share/}
-
 function copy_install_to_desktop() {
-  if [ $# -ne 3 ]; then
+  if [ $# -ne 4 ]; then
     return;
   fi
   local curFileName=$1
   local aiDesktopName=$2
   local curUserName=$3
-  if [ -e "/usr/share/applications/${aiDesktopName}" ]; then
-    cp -f /usr/share/applications/${aiDesktopName} "${curFileName}/${gDesktopName}/"
+  local initSetup=$4
+  if [ -e "${APP_DATA}/${aiDesktopName}" ]; then
+    cp -f ${APP_DATA}/${aiDesktopName} "${curFileName}/${gDesktopName}/"
     if test $? -eq 0; then
       chmod +x "${curFileName}/${gDesktopName}/${aiDesktopName}"
       chown ${curUserName} "${curFileName}/${gDesktopName}/${aiDesktopName}"
+      # update init setup info
+      mkdir -p $(dirname ${initSetup})
+      echo ${gDesktopName} >> ${initSetup}
     fi
   fi
 }
@@ -26,7 +28,7 @@ aiDesktop=(
   #"hand-tracker.desktop"
   "pose-tracker.desktop"
 )
-function ai_config_desktop() {
+function config_desktop() {
   gDesktopName="桌面"
   if [ -d "/root/桌面" ]; then
     gDesktopName="桌面"
@@ -38,10 +40,12 @@ function ai_config_desktop() {
 
     if [ -f "${FILENAME}/.config/user-dirs.dirs" ]; then
       if [ ! $HOME ]; then HOME=${FILENAME}; fi
+      # Import user dir config
       source "${FILENAME}/.config/user-dirs.dirs"
       if [ ! -d "${XDG_DESKTOP_DIR}" ]; then
         mkdir -p "${XDG_DESKTOP_DIR}" >/dev/null 2>&1 || true
       fi
+      # Replace(Remove) "${HOME}/" by "" in ${XDG_DESKTOP_DIR} with greedy mode
       gDesktopName="${XDG_DESKTOP_DIR//${HOME}\//}"
     else
       if [ -d "${FILENAME}/桌面" ]; then
@@ -54,11 +58,49 @@ function ai_config_desktop() {
     if [ -d "${FILENAME}/${gDesktopName}" ]; then
       local curUserName=$(echo ${FILENAME} | awk '{print substr($FILENAME, 7, 32)}')
       for desktop in "${aiDesktop[@]}"; do
-        rm -rf ${FILENAME}/${gDesktopName}/${desktop}
-        copy_install_to_desktop ${FILENAME} ${desktop} ${curUserName}
+        local initSetup="${FILENAME}/.config/${APP_NAME}/applications/${desktop%.desktop}-initial-setup-done"
+        if [ -f ${initSetup} ] && [ "$(cat ${initSetup} | grep ${gDesktopName})" ]; then
+          continue # desktop is already configured
+        fi
+        copy_install_to_desktop ${FILENAME} ${desktop} ${curUserName} ${initSetup}
       done
     fi
   done
 }
 
-ai_config_desktop
+## ------------------------- ##
+
+function postinst_init() {
+  export APP_NAME=bianbu-ai-support
+  export APP_DATA=/usr/share/applications
+}
+
+function postinst_configure() {
+  config_desktop
+}
+
+function postinst_triggered() {
+  for triggername in $1; do
+    case "$triggername" in
+    *)
+      echo "unhandled/unknown trigger!" $triggername
+      exit 1
+      ;;
+    esac
+  done
+}
+
+function postinst_main() {
+  if [ $# -eq 0 ]; then
+    return;
+  fi
+
+  postinst_init
+  case $1 in
+    configure )   shift; postinst_configure $@;;
+    triggered )   shift; postinst_triggered $@;;
+  esac
+}
+
+args="$@"
+postinst_main $@

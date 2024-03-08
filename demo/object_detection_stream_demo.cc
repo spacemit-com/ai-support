@@ -1,5 +1,7 @@
-﻿#include <pthread.h>
-#include <stdlib.h>
+﻿#include <stdlib.h>
+#ifndef _WIN32
+#include <sys/prctl.h>  // for: prctl
+#endif
 #include <unistd.h>  // for: getopt
 
 #include <algorithm>  // for: swap
@@ -20,6 +22,12 @@
 #endif
 
 #include "utils/utils.h"
+
+void setThreadName(const char* name) {
+#ifndef _WIN32
+  prctl(PR_SET_NAME, name);
+#endif
+}
 
 class Detector {
  public:
@@ -78,6 +86,7 @@ class Detector {
 
 // 检测线程
 void Detection(DataLoader& dataloader, Detector& detector) {
+  setThreadName("DetectionThread");
   if (detector.init() != 0) {
     std::cout << "[ ERROR ] Detector init error" << std::endl;
     dataloader.set_disable();
@@ -215,12 +224,6 @@ void Preview(DataLoader& dataloader, Detector& detector) {
   }
 }
 
-#ifndef _WIN32
-void setThreadName(std::thread& thread, const char* name) {
-  pthread_setname_np(thread.native_handle(), name);
-}
-#endif
-
 int main(int argc, char* argv[]) {
   std::string config_file_path, input, input_type;
   ObjectDetectionOption option;
@@ -270,14 +273,9 @@ int main(int argc, char* argv[]) {
     return -1;
   }
 
-  std::thread t1(Preview, std::ref(dataloader), std::ref(*detector));
-  // std::this_thread::sleep_for(std::chrono::seconds(5));
-  std::thread t2(Detection, std::ref(dataloader), std::ref(*detector));
-#ifndef _WIN32
-  setThreadName(t1, "PreviewThread");
-  setThreadName(t2, "DetectionThread");
-#endif
-  t1.join();
-  t2.join();
+  std::thread t(Detection, std::ref(dataloader), std::ref(*detector));
+  setThreadName("PreviewThread");
+  Preview(dataloader, *detector);
+  t.join();
   return 0;
 }

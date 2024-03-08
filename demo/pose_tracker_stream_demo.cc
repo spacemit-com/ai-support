@@ -1,5 +1,7 @@
-﻿#include <pthread.h>
-#include <stdlib.h>
+﻿#include <stdlib.h>
+#ifndef _WIN32
+#include <sys/prctl.h>  // for: prctl
+#endif
 #include <unistd.h>  // for: getopt
 
 #include <algorithm>  // for: swap
@@ -21,6 +23,12 @@
 #endif
 
 #include "utils/utils.h"
+
+void setThreadName(const char* name) {
+#ifndef _WIN32
+  prctl(PR_SET_NAME, name);
+#endif
+}
 
 class Tracker {
  public:
@@ -110,6 +118,7 @@ class Tracker {
 
 // 检测线程
 void Track(DataLoader& dataloader, Tracker& tracker) {
+  setThreadName("TrackerThread");
   if (tracker.init() != 0) {
     std::cout << "[ ERROR ] Tracker init error" << std::endl;
     return;
@@ -227,12 +236,6 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
   }
 }
 
-#ifndef _WIN32
-void setThreadName(std::thread& thread, const char* name) {
-  pthread_setname_np(thread.native_handle(), name);
-}
-#endif
-
 int main(int argc, char* argv[]) {
   std::string det_file_path, pose_file_path, input, input_type;
   int resize_height{320}, resize_width{320};
@@ -288,14 +291,9 @@ int main(int argc, char* argv[]) {
     return -1;
   }
 
-  std::thread t1(Preview, std::ref(dataloader), std::ref(*tracker));
-  // std::this_thread::sleep_for(std::chrono::seconds(5));
-  std::thread t2(Track, std::ref(dataloader), std::ref(*tracker));
-#ifndef _WIN32
-  setThreadName(t1, "PreviewThread");
-  setThreadName(t2, "TrackerThread");
-#endif
-  t1.join();
-  t2.join();
+  std::thread t(Track, std::ref(dataloader), std::ref(*tracker));
+  setThreadName("PreviewThread");
+  Preview(dataloader, *tracker);
+  t.join();
   return 0;
 }

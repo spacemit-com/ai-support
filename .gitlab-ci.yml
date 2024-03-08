@@ -100,7 +100,7 @@ build-job-riscv64:  # This job runs in the build stage, which runs second.
     #- echo "CI_BUILDS_DIR  ${CI_BUILDS_DIR}"
     #- echo "CI_PROJECT_DIR ${CI_PROJECT_DIR}"
     - echo "Downloading latest spacemit-ort ..."
-    - wget $(curl -X GET ${CI_NEXUS_URL} | grep -oP 'https:[^>]*.rv64.v[\d\.]*tar.gz' | tail -n 1) -O spacemit-ort.latest.tar.gz --no-check-certificate
+    - wget $(curl -X GET ${CI_NEXUS_URL} | grep -oP 'https:[^>]*.riscv64.[\d\.]*tar.gz' | tail -n 1) -O spacemit-ort.latest.tar.gz --no-check-certificate
     - |
       mkdir spacemit-ort
       tar xzf spacemit-ort.latest.tar.gz -C spacemit-ort --strip-components 1

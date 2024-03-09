@@ -25,9 +25,10 @@
 # Brief:  Bianbu AI Auto Toolkit.
 #
 
-#set -e
+set -e
 #set -x
 entry_point=bianbu-ai-support # $(basename ${BASH_SOURCE[0]})
+app_data_dir=/usr/share/applications
 
 cmd=$1
 shift
@@ -43,26 +44,47 @@ function auto_config_desktop() {
 
   local desktop=$1
   local shortcut=$(basename $desktop)
-  local desktop_name="${XDG_DESKTOP_DIR//${HOME}\//}"
   local init_setup=${CONFIG_HOME}/${entry_point}/applications/${shortcut%.desktop}-initial-setup-done
+  local action="create" # "update"
 
-  if [ -f ${init_setup} ] && [ "$(cat ${init_setup} | grep ${desktop_name})" ]; then
-    return # desktop is already configured
+  if [ -f ${init_setup} ] && [ "$(cat ${init_setup} | grep ${XDG_DESKTOP_DIR})" ]; then
+    # i.e. desktop is already configured(initial-setup-done)
+    #return
+    if [ -e ${XDG_DESKTOP_DIR}/${shortcut} ]; then
+      if cmp -s "${XDG_DESKTOP_DIR}/${shortcut}" "${app_data_dir}/${shortcut}"; then
+        # desktop exist and exactly same
+        if [ ! "$(gio info ${XDG_DESKTOP_DIR}/${shortcut} | grep 'metadata::trusted: true')" ]; then
+          gio set ${XDG_DESKTOP_DIR}/${shortcut} metadata::trusted true
+        fi
+        return
+      fi
+      # i.e. desktop exist but need to be updated
+      action="update"
+    else
+      # desktop has been removed
+      return
+    fi
   fi
 
-  # install icon if not exist
-  if [ ! -f ${XDG_DESKTOP_DIR}/${shortcut} ]; then
+  # install icon if not exist or need update
+  if [ ! -f ${XDG_DESKTOP_DIR}/${shortcut} ] || [ "${action}" = "update" ]; then
     xdg-desktop-icon install --novendor ${desktop}
     if test $? -eq 0; then
       chmod +x ${XDG_DESKTOP_DIR}/${shortcut}
+    else
+      action="${action} failed"
+    fi
+  fi
+  if [ -f ${XDG_DESKTOP_DIR}/${shortcut} ]; then
+    if [ ! "$(gio info ${XDG_DESKTOP_DIR}/${shortcut} | grep 'metadata::trusted: true')" ]; then
       gio set ${XDG_DESKTOP_DIR}/${shortcut} metadata::trusted true
     fi
   fi
   # update init setup info
   mkdir -p ${CONFIG_HOME}/${entry_point}/applications
-  echo ${desktop_name} $(date) >> ${init_setup}
+  echo ${XDG_DESKTOP_DIR}/${shortcut} "auto" ${action} $(date) >> ${init_setup}
 }
 
-if [[ $cmd =~ "desktop" ]]; then
+if [[ $cmd == "desktop" ]]; then
   auto_config_desktop $@
 fi

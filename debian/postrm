@@ -1,16 +1,58 @@
 #!/bin/bash
 
-function postrm_init() {
-  set -e
-  export APP_NAME=bianbu-ai-support
-  export APP_DATA=/usr/share/applications
-}
+set -e
+#set -x
 
 aiDesktop=(
   "object-detection.desktop"
   "hand-tracker.desktop"
   "pose-tracker.desktop"
 )
+
+function update_desktop_name() {
+  if [ $# -ne 1 ]; then
+    return;
+  fi
+  local curFileName=$1
+
+  if [ -f "${curFileName}/.config/user-dirs.dirs" ]; then
+    if [ ! $HOME ]; then HOME=${curFileName}; fi
+    # Import user dir config
+    source "${curFileName}/.config/user-dirs.dirs"
+    if [ ! -d "${XDG_DESKTOP_DIR}" ]; then
+      mkdir -p "${XDG_DESKTOP_DIR}" >/dev/null 2>&1 || true
+    fi
+    # Replace(Remove) "${HOME}/" by "" in ${XDG_DESKTOP_DIR} with greedy mode
+    gDesktopName="${XDG_DESKTOP_DIR//${HOME}\//}"
+  else
+    if [ -d "${curFileName}/桌面" ]; then
+        gDesktopName="桌面"
+    elif [ -d "${curFileName}/Desktop" ]; then
+      gDesktopName="Desktop"
+    fi
+  fi
+}
+
+function remove_desktop_shortcut() {
+  if [ $# -ne 1 ]; then
+    return;
+  fi
+  local curFileName=$1
+
+  for desktop in "${aiDesktop[@]}"; do
+    local initSetup="${curFileName}/.config/${APP_NAME}/applications/${desktop%.desktop}-initial-setup-done"
+    if [ ! -f ${initSetup} ]; then
+      echo "[WARN] ${APP_NAME}: setup file for ${desktop} not found!"
+    else
+      # remove all desktop shortcuts of different languages
+      while IFS= read -r line; do
+        # line format: </path/to/desktop/shortcut> [date]
+        rm -rf $(echo $line | awk '{print $1}')
+      done < ${initSetup}
+    fi
+  done
+}
+
 function remove_config() {
   gDesktopName="桌面"
   if [ -d "/root/桌面" ]; then
@@ -18,41 +60,23 @@ function remove_config() {
   elif [ -d "/root/Desktop" ]; then
     gDesktopName="Desktop"
   fi
-
-  #desktop
-  if [ -d "/root/${gDesktopName}" ]; then
-    for desktop in "${aiDesktop[@]}"; do
-      rm -rf /root/${gDesktopName}/${desktop}
-    done
-  fi
+  remove_desktop_shortcut "/root"
+  rm -rf /root/.config/${APP_NAME}
 
   for FILENAME in /home/*; do
-
-    if [ -f "${FILENAME}/.config/user-dirs.dirs" ]; then
-      if [ ! $HOME ]; then HOME=${FILENAME}; fi
-      # Import user dir config
-      source "${FILENAME}/.config/user-dirs.dirs"
-      if [ ! -d "${XDG_DESKTOP_DIR}" ]; then
-        mkdir -p "${XDG_DESKTOP_DIR}" >/dev/null 2>&1 || true
-      fi
-      # Replace(Remove) "${HOME}/" by "" in ${XDG_DESKTOP_DIR} with greedy mode
-      gDesktopName="${XDG_DESKTOP_DIR//${HOME}\//}"
-    else
-      if [ -d "${FILENAME}/桌面" ]; then
-        gDesktopName="桌面"
-      elif [ -d "${FILENAME}/Desktop" ]; then
-        gDesktopName="Desktop"
-      fi
-    fi
-
-    for desktop in "${aiDesktop[@]}"; do
-      rm -rf "${FILENAME}/${gDesktopName}/${desktop}"
-    done
+    update_desktop_name ${FILENAME}
+    remove_desktop_shortcut ${FILENAME}
+    # remove user config of application
     rm -rf ${FILENAME}/.config/${APP_NAME}
   done
 }
 
 ## ------------------------- ##
+
+function postrm_init() {
+  export APP_NAME=bianbu-ai-support
+  export APP_DATA=/usr/share/applications
+}
 
 function postrm_remove_upgrade() {
   if [ -x /usr/bin/update-mime-database ] ; then

@@ -1,7 +1,9 @@
 #!/bin/bash
 
+set -e
+#set -x
+
 function prerm_init() {
-  set -e
   export APP_NAME=bianbu-ai-support
   export APP_DATA=/usr/share/applications
 }

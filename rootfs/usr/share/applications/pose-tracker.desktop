@@ -1,8 +1,10 @@
 [Desktop Entry]
 Type=Application
 #Encoding=UTF-8
-Version=1.0.3
+Version=1.0.9
 Name=pose-tracker
+Name[en]=pose-tracker
+Name[zh_CN]=姿态追踪
 Exec=/usr/bin/tracker_stream_demo /usr/share/ai-support/models/yolov6.json /usr/share/ai-support/models/rtmpose.json 0 cameraId
 Terminal=true
 Icon=/usr/share/icons/bianbu-ai-demo/pose-tracker.png

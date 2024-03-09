@@ -1,8 +1,10 @@
 [Desktop Entry]
 Type=Application
 #Encoding=UTF-8
-Version=1.0.3
+Version=1.0.9
 Name=object-detection
+Name[en]=object-detection
+Name[zh_CN]=目标检测
 Exec=/usr/bin/detection_stream_demo /usr/share/ai-support/models/yolov6.json 0 camera_id
 Terminal=true
 Icon=/usr/share/icons/bianbu-ai-demo/object-detection.png

@@ -9,30 +9,6 @@ aiDesktop=(
   "pose-tracker.desktop"
 )
 
-function update_desktop_name() {
-  if [ $# -ne 1 ]; then
-    return;
-  fi
-  local curFileName=$1
-
-  if [ -f "${curFileName}/.config/user-dirs.dirs" ]; then
-    if [ ! $HOME ]; then HOME=${curFileName}; fi
-    # Import user dir config
-    source "${curFileName}/.config/user-dirs.dirs"
-    if [ ! -d "${XDG_DESKTOP_DIR}" ]; then
-      mkdir -p "${XDG_DESKTOP_DIR}" >/dev/null 2>&1 || true
-    fi
-    # Replace(Remove) "${HOME}/" by "" in ${XDG_DESKTOP_DIR} with greedy mode
-    gDesktopName="${XDG_DESKTOP_DIR//${HOME}\//}"
-  else
-    if [ -d "${curFileName}/桌面" ]; then
-        gDesktopName="桌面"
-    elif [ -d "${curFileName}/Desktop" ]; then
-      gDesktopName="Desktop"
-    fi
-  fi
-}
-
 function remove_desktop_shortcut() {
   if [ $# -ne 1 ]; then
     return;
@@ -54,17 +30,11 @@ function remove_desktop_shortcut() {
 }
 
 function remove_config() {
-  gDesktopName="桌面"
-  if [ -d "/root/桌面" ]; then
-    gDesktopName="桌面"
-  elif [ -d "/root/Desktop" ]; then
-    gDesktopName="Desktop"
-  fi
   remove_desktop_shortcut "/root"
   rm -rf /root/.config/${APP_NAME}
 
   for FILENAME in /home/*; do
-    update_desktop_name ${FILENAME}
+    # remove desktop shortcut
     remove_desktop_shortcut ${FILENAME}
     # remove user config of application
     rm -rf ${FILENAME}/.config/${APP_NAME}

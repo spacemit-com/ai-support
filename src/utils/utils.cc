@@ -68,8 +68,8 @@ bool existsCheck(const std::string& name) {
   }
 }
 
-void resize_unscale(const cv::Mat& mat, cv::Mat& mat_rs, int target_height,
-                    int target_width) {
+void resizeUnscale(const cv::Mat& mat, cv::Mat& mat_rs, int target_height,
+                   int target_width) {
   if (mat.empty()) return;
   int img_height = static_cast<int>(mat.rows);
   int img_width = static_cast<int>(mat.cols);

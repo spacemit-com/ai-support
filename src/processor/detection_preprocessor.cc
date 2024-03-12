@@ -14,7 +14,7 @@ void DetectionPreprocessor::PreprocessNanoDetPlus(
     TimeWatcher t("| |-- Resize unscale");
 #endif
     if (input_height != mat.cols || input_width != mat.rows) {
-      resize_unscale(mat, resizedImage, input_height, input_width);
+      resizeUnscale(mat, resizedImage, input_height, input_width);
     } else {
       resizedImage = mat;
     }
@@ -62,7 +62,7 @@ void DetectionPreprocessor::Preprocess(
       TimeWatcher t("| |-- Resize unscale");
 #endif
       if (input_height != mat.cols || input_width != mat.rows) {
-        resize_unscale(mat, resizedImageBGR, input_height, input_width);
+        resizeUnscale(mat, resizedImageBGR, input_height, input_width);
       } else {
         resizedImageBGR = mat;
       }
@@ -85,7 +85,7 @@ void DetectionPreprocessor::Preprocess(
       TimeWatcher t("| |-- Resize unscale");
 #endif
       if (input_height != mat.cols || input_width != mat.rows) {
-        resize_unscale(mat, resizedImageBGR, input_height, input_width);
+        resizeUnscale(mat, resizedImageBGR, input_height, input_width);
       } else {
         resizedImageBGR = mat;
       }

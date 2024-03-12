@@ -15,8 +15,8 @@ bool checkFileExtension(const std::string &filename, const std::string &ext);
 
 bool existsCheck(const std::string &name);
 
-void resize_unscale(const cv::Mat &mat, cv::Mat &mat_rs, int target_height,
-                    int target_width);
+void resizeUnscale(const cv::Mat &mat, cv::Mat &mat_rs, int target_height,
+                   int target_width);
 
 int configToOption(const std::string &config_file_path,
                    PoseEstimationOption &option);

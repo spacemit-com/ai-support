@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
     TimeWatcher t("|-- Load input data");
 #endif
     img_raw = cv::imread(image_file_path);
-    resize_unscale(img_raw, img, 320, 320);
+    resizeUnscale(img_raw, img, 320, 320);
   }
   if (objectdetectiontask->getInitFlag() != 0) {
     return -1;

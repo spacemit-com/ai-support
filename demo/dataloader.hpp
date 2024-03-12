@@ -15,25 +15,30 @@ class DataLoader {
  public:
   DataLoader(const int& resize_height, const int& resize_width) {
     enable = true;
+    updated = false;
     resize_height_ = resize_height;
     resize_width_ = resize_width;
     preview_fps_ = 0;
     detection_fps_ = 0;
   }
   ~DataLoader() {}
-  bool ifenable() { return enable; }
-  void set_disable() { enable = false; }
-  void set_preview_fps(int preview_fps) { preview_fps_ = preview_fps; }
-  void set_detection_fps(int detection_fps) { detection_fps_ = detection_fps; }
-  int get_preview_fps() { return preview_fps_; }
-  int get_detection_fps() { return detection_fps_; }
-  int get_resize_height() { return resize_height_; }
-  int get_resize_width() { return resize_width_; }
-  virtual cv::Mat fetch_frame() = 0;
-  virtual cv::Mat peek_frame() = 0;
+  bool isUpdated() { return updated; }
+  void setUpdate() { updated = true; }
+  void setNoUpdate() { updated = false; }
+  bool ifEnable() { return enable; }
+  void setDisable() { enable = false; }
+  void setPreviewFps(int preview_fps) { preview_fps_ = preview_fps; }
+  void setDetectionFps(int detection_fps) { detection_fps_ = detection_fps; }
+  int getPreviewFps() { return preview_fps_; }
+  int getDetectionFps() { return detection_fps_; }
+  int getResizeHeight() { return resize_height_; }
+  int getResizeWidth() { return resize_width_; }
+  virtual cv::Mat fetchFrame() = 0;
+  virtual cv::Mat peekFrame() = 0;
 
  private:
   bool enable;
+  bool updated;
   int resize_height_;
   int resize_width_;
   int preview_fps_;
@@ -64,12 +69,12 @@ class ExclusiveDataLoader : public DataLoader {
       return -1;
     }
   }
-  cv::Mat fetch_frame() {
+  cv::Mat fetchFrame() {
     cv::Mat frame;
     capture_.read(frame);
     return frame;
   }
-  cv::Mat peek_frame() { return fetch_frame(); }
+  cv::Mat peekFrame() { return fetchFrame(); }
 
  private:
   cv::VideoCapture capture_;
@@ -82,7 +87,7 @@ class ExclusiveDataLoader : public DataLoader {
 #include <sys/ioctl.h>
 #include <unistd.h>  //for close
 
-static bool is_valid_camera(const std::string& path) {
+static bool isValidCamera(const std::string& path) {
   int fd = open(path.c_str(), O_RDWR);
   if (fd == -1) {
     return false;
@@ -141,7 +146,7 @@ class SharedDataLoader : public DataLoader {
       std::string path = "/dev/video";
       for (int i = 0; i <= 100; ++i) {
         std::string device_path = path + std::to_string(i);
-        if (is_valid_camera(device_path)) {
+        if (isValidCamera(device_path)) {
           capture_.open(i);
           if (capture_.isOpened()) {
             break;
@@ -164,18 +169,21 @@ class SharedDataLoader : public DataLoader {
     }
   }
 
-  cv::Mat fetch_frame() {
+  cv::Mat fetchFrame() {
     cv::Mat frame, temp;
     capture_.read(frame);
     if (!frame.empty()) {
-      resize_unscale(frame, temp, get_resize_height(), get_resize_width());
+      resizeUnscale(frame, temp, getResizeHeight(), getResizeWidth());
+      setUpdate();
+    } else {
+      setNoUpdate();
     }
     frame_mutex_.lock();
     frame_ = temp.clone();
     frame_mutex_.unlock();
     return frame;
   }
-  cv::Mat peek_frame() {
+  cv::Mat peekFrame() {
     cv::Mat frame;
     frame_mutex_.lock();
     frame = frame_.clone();  // 深拷贝

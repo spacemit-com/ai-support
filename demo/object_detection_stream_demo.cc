@@ -45,7 +45,7 @@ class Detector {
       objectdetectiontask_ = std::unique_ptr<ObjectDetectionTask>(
           new ObjectDetectionTask(option_));
     }
-    return get_init_flag();
+    return getInitFlag();
   }
 
   int uninit() { return 0; }
@@ -64,9 +64,9 @@ class Detector {
 
   // 查询检测结果
   int detected() { return objs_array_.size(); }
-  int get_init_flag() { return objectdetectiontask_->getInitFlag(); }
+  int getInitFlag() { return objectdetectiontask_->getInitFlag(); }
   // 移走检测结果
-  ObjectDetectionResult get_object() {
+  ObjectDetectionResult getObject() {
     ObjectDetectionResult objs_moved;
     objs_mutex_.lock();
     objs_moved = objs_array_.back();
@@ -89,21 +89,24 @@ void Detection(DataLoader& dataloader, Detector& detector) {
   setThreadName("DetectionThread");
   if (detector.init() != 0) {
     std::cout << "[ ERROR ] Detector init error" << std::endl;
-    dataloader.set_disable();
+    dataloader.setDisable();
   }
   cv::Mat frame;
-  while (dataloader.ifenable()) {
+  while (dataloader.ifEnable()) {
     auto start = std::chrono::steady_clock::now();
-    frame = dataloader.peek_frame();  // 取(拷贝)一帧数据
+    if (!dataloader.isUpdated()) {
+      continue;
+    }
+    frame = dataloader.peekFrame();  // 取(拷贝)一帧数据
     if ((frame).empty()) {
-      dataloader.set_disable();
+      dataloader.setDisable();
       break;
     }
     int flag = detector.infer(frame);  // 推理并保存检测结果
     auto end = std::chrono::steady_clock::now();
     auto detection_duration =
         std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    dataloader.set_detection_fps(1000 / (detection_duration.count()));
+    dataloader.setDetectionFps(1000 / (detection_duration.count()));
     if (flag == -1) {
       std::cout << "[ ERROR ] Infer frame failed" << std::endl;
       break;  // 摄像头结束拍摄或者故障
@@ -126,21 +129,21 @@ void Preview(DataLoader& dataloader, Detector& detector) {
   if (show && strcmp(show, "-1") == 0) {
     enable_show = -1;
   }
-  while (dataloader.ifenable()) {
+  while (dataloader.ifEnable()) {
     auto start = std::chrono::steady_clock::now();
-    frame = dataloader.fetch_frame();  // 取(搬走)一帧数据
+    frame = dataloader.fetchFrame();  // 取(搬走)一帧数据
     if ((frame).empty()) {
-      dataloader.set_disable();
+      dataloader.setDisable();
       break;
     }
     if (detector.detected())  // 判断原因: detector.detected 不用锁,
                               // detector.get_object 需要锁;
     {
       // 是否有检测结果
-      objs = detector.get_object();  // 取(搬走)检测结果(移动赋值)
+      objs = detector.getObject();  // 取(搬走)检测结果(移动赋值)
       if (objs.result_bboxes.size()) {
-        int input_height = dataloader.get_resize_height();
-        int input_width = dataloader.get_resize_width();
+        int input_height = dataloader.getResizeHeight();
+        int input_width = dataloader.getResizeWidth();
         int img_height = frame.rows;
         int img_width = frame.cols;
         float resize_ratio = std::min(
@@ -187,8 +190,8 @@ void Preview(DataLoader& dataloader, Detector& detector) {
     if (duration.count() < 1000) {
       draw_boxes_inplace((frame), objs.result_bboxes);  // 画框
     }
-    int preview_fps = dataloader.get_preview_fps();
-    int detection_fps = dataloader.get_detection_fps();
+    int preview_fps = dataloader.getPreviewFps();
+    int detection_fps = dataloader.getDetectionFps();
     if (showfps != nullptr) {
       cv::putText(frame, "preview fps: " + std::to_string(preview_fps),
                   cv::Point(0, 15), cv::FONT_HERSHEY_SIMPLEX, 0.5f,
@@ -207,13 +210,13 @@ void Preview(DataLoader& dataloader, Detector& detector) {
     count++;
     dur = dur + preview_duration.count();
     if (dur >= 1000) {
-      dataloader.set_preview_fps(count);
+      dataloader.setPreviewFps(count);
       dur = 0;
       count = 0;
     }
     if (enable_show != -1) {
       if (cv::getWindowProperty("Detection", cv::WND_PROP_VISIBLE) < 1) {
-        dataloader.set_disable();
+        dataloader.setDisable();
         break;
       }
     }

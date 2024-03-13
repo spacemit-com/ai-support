@@ -4,11 +4,14 @@
 # Brief:  Build demos and run smoke test.
 #
 
-set -e
+set -e #u
+#set -x
+
+DEMO_DIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 
 # Note: update the following settings if necessary
-_NAME=bianbu # cuspace
-SDK=$(dirname $(which ${_NAME})) #$(dirname ${BASH_SOURCE[0]})
+_NAME=cuspace
+SDK=$(dirname $(which ${_NAME}))
 
 function config_native() {
   BIANBUAI_HOME=$SDK/bianbu-ai-support
@@ -34,7 +37,7 @@ fi
 
 function build() {
   mkdir build && pushd build
-  cmake .. -DBIANBUAI_HOME=${BIANBUAI_HOME} -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_DIR} -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT}
+  cmake ${DEMO_DIR} -DBIANBUAI_HOME=${BIANBUAI_HOME} -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_DIR} -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT}
   make -j4
   popd
   echo "[INFO] Building demos done."

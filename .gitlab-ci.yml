@@ -64,7 +64,7 @@ build-job-x86_64:   # This job runs in the build stage, which runs first.
     - |
       mkdir ${BUILD_DIR}
       pushd ${BUILD_DIR}
-      cmake .. -DORT_HOME=${ORT_HOME} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=ON
+      cmake .. -DORT_HOME=${ORT_HOME} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=ON -DXDG=OFF
       make install -j`nproc` VERBOSE=1
       popd
     # copy demo and data
@@ -111,7 +111,7 @@ build-job-riscv64:  # This job runs in the build stage, which runs second.
     - |
       mkdir ${BUILD_DIR}
       pushd ${BUILD_DIR}
-      cmake .. -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_STATIC_DIR}/lib/cmake/opencv4 -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=ON
+      cmake .. -DORT_HOME=${ORT_HOME} -DOpenCV_DIR=${OPENCV_STATIC_DIR}/lib/cmake/opencv4 -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=ON -DXDG=OFF
       make install -j`nproc` VERBOSE=1
       popd
     # copy demo and data
@@ -186,7 +186,7 @@ package-daily-dpkg:
   stage: package
   variables:
     CI_PKG_OPTION: "--skip-py" # "--skip-ort --skip-py"
-    CI_PKG_VERSION: "1.0.7"
+    CI_PKG_VERSION: "latest"
   dependencies:
     - build-job-x86_64
     - build-job-riscv64

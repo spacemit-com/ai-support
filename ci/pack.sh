@@ -65,7 +65,9 @@ EOF
     cp -rd ${INSTALL_LOCAL}/lib/3rdparty/onnxruntime/* ${PKG_DIR}/usr/
   fi
   cp -rdf ${INSTALL_LOCAL}/* ${PKG_DIR}/usr/
-  cp -rdf ${INSTALL_LOCAL}/../etc ${PKG_DIR}/
+  if [[ -d ${INSTALL_LOCAL}/../etc ]]; then
+    cp -rdf ${INSTALL_LOCAL}/../etc ${PKG_DIR}/
+  fi
   # post process
   rm -rdf ${PKG_DIR}/usr/lib/3rdparty ${PKG_DIR}/usr/demo
 

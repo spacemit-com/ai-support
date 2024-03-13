@@ -87,4 +87,7 @@ function auto_config_desktop() {
 
 if [[ $cmd == "desktop" ]]; then
   auto_config_desktop $@
+else
+  echo "[ERROR] Unknown command: ${cmd}"
+  exit 1
 fi

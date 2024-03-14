@@ -32,3 +32,8 @@ option(TEST "option for Test" ON)
 if (TEST)
   add_subdirectory(${CMAKE_SOURCE_DIR}/tests)
 endif()
+
+option(PYTHON "option for Pyhon" OFF)
+if (PYTHON)
+  add_subdirectory(${CMAKE_SOURCE_DIR}/python)
+endif()

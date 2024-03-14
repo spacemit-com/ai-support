@@ -145,8 +145,7 @@ void ObjectDetection::ApllyList() {
 int ObjectDetection::InitFromOption(const ObjectDetectionOption &option) {
   init_flag_ = 1;
   option_ = option;
-  if (!checkFileExtension(option_.label_path, ".txt") ||
-      !existsCheck(option_.label_path)) {
+  if (!existsCheck(option_.label_path)) {
     return init_flag_;
   }
   instance_name_ = "object-detection-inference";

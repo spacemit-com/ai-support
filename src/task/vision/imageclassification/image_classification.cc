@@ -9,8 +9,7 @@ int ImageClassification::InitFromOption(
     const ImageClassificationOption &option) {
   option_ = option;
   init_flag_ = 1;
-  if (!checkFileExtension(option_.label_path, ".json") ||
-      !existsCheck(option_.label_path)) {
+  if (!existsCheck(option_.label_path)) {
     return init_flag_;
   }
   instance_name_ = "image-classification-inference";

@@ -12,17 +12,6 @@
 #include "src/utils/utils.h"
 using json = nlohmann::json;
 
-bool startsWith(const std::string& str, const std::string& prefix) {
-  return (str.rfind(prefix, 0) == 0);
-}
-
-bool endsWith(const std::string& str, const std::string& suffix) {
-  if (suffix.length() > str.length()) {
-    return false;
-  }
-  return (str.rfind(suffix) == (str.length() - suffix.length()));
-}
-
 std::vector<std::string> readLabels(const std::string& label_file_path) {
   std::vector<std::string> labels;
   std::string line;
@@ -31,17 +20,6 @@ std::vector<std::string> readLabels(const std::string& label_file_path) {
     labels.push_back(line);
   }
   return labels;
-}
-
-bool checkFileExtension(const std::string& filename, const std::string& ext) {
-  if (endsWith(filename, ext)) {
-    return true;
-  }
-  std::cout << "[ ERROR ] The file path " << filename
-            << " is not correct. Make sure you "
-               "are setting the path to a file ("
-            << ext << ")" << std::endl;
-  return false;
 }
 
 float sigmoid(float x) { return (1 / (1 + exp(-x))); }
@@ -102,8 +80,7 @@ void resizeUnscale(const cv::Mat& mat, cv::Mat& mat_rs, int target_height,
 
 int configToOption(const std::string& config_file_path,
                    ImageClassificationOption& option) {
-  if (!checkFileExtension(config_file_path, ".json") &&
-      !existsCheck(config_file_path)) {
+  if (!existsCheck(config_file_path)) {
     return 1;
   }
   std::ifstream f(config_file_path);
@@ -123,8 +100,7 @@ int configToOption(const std::string& config_file_path,
 
 int configToOption(const std::string& config_file_path,
                    ObjectDetectionOption& option) {
-  if (!checkFileExtension(config_file_path, "json") &&
-      !existsCheck(config_file_path)) {
+  if (!existsCheck(config_file_path)) {
     return 1;
   }
   std::ifstream f(config_file_path);
@@ -158,8 +134,7 @@ int configToOption(const std::string& config_file_path,
 
 int configToOption(const std::string& config_file_path,
                    PoseEstimationOption& option) {
-  if (!checkFileExtension(config_file_path, ".json") &&
-      !existsCheck(config_file_path)) {
+  if (!existsCheck(config_file_path)) {
     return 1;
   }
   std::ifstream f(config_file_path);

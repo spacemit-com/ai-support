@@ -11,9 +11,6 @@ float sigmoid(float x);
 
 float fast_exp(float x);
 
-bool startsWith(const std::string& str, const std::string& prefix);
-
-bool endsWith(const std::string& str, const std::string& suffix);
 #ifdef _WIN32
 #include <codecvt>
 inline std::wstring to_wstring(const std::string& input) {

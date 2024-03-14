@@ -11,8 +11,6 @@
 #include "task/vision/object_detection_types.h"
 #include "task/vision/pose_estimation_types.h"
 
-bool checkFileExtension(const std::string &filename, const std::string &ext);
-
 bool existsCheck(const std::string &name);
 
 void resizeUnscale(const cv::Mat &mat, cv::Mat &mat_rs, int target_height,

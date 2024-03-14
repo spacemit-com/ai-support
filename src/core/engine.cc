@@ -6,8 +6,7 @@
 int Engine::Init(const std::string &instance_name,
                  const std::string &model_file_path,
                  const int intra_threads_num, const int inter_threads_num) {
-  if (!checkFileExtension(model_file_path, ".onnx") ||
-      !existsCheck(model_file_path)) {
+  if (!existsCheck(model_file_path)) {
     return 1;
   }
   return ortwrapper_.Init(instance_name,

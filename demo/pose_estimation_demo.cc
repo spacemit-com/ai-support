@@ -3,7 +3,6 @@
 
 #include "task/vision/object_detection_task.h"
 #include "task/vision/pose_estimation_task.h"
-#include "utils/check_utils.h"
 #include "utils/time.h"
 #include "utils/utils.h"
 
@@ -53,9 +52,7 @@ int main(int argc, char* argv[]) {
               << std::endl;
     return -1;
   }
-  if (!checkImageFileExtension(image_file_path) ||
-      !checkImageFileExtension(save_img_path) ||
-      !existsCheck(image_file_path)) {
+  if (!existsCheck(image_file_path)) {
     return -1;
   }
   {

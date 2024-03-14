@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "task/vision/image_classification_task.h"
-#include "utils/check_utils.h"
 #include "utils/time.h"
 #include "utils/utils.h"
 
@@ -27,9 +26,11 @@ int main(int argc, char* argv[]) {
               << std::endl;
     return -1;
   }
+  if (imageclassificationtask->getInitFlag() != 0) {
+    return -1;
+  }
   cv::Mat img_raw;
-  if (!checkImageFileExtension(image_file_path) ||
-      !existsCheck(image_file_path)) {
+  if (!existsCheck(image_file_path)) {
     return -1;
   }
 #ifdef DEBUG

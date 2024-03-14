@@ -167,6 +167,13 @@ x86_64-test-job:    # This job runs in the test stage.
     - demo/build.x86_64/classification_demo $DATA/models/squeezenet1.1-7.onnx $DATA/labels/synset.txt $DATA/imgs/dog.jpg
     - demo/build.x86_64/detection_demo $DATA/models/nanodet-plus-m_320.onnx $DATA/labels/coco.txt $DATA/imgs/person0.jpg result0.jpg
     - $([[ "3aeb3a152ce55a94c0c7bac303534b8d" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
+    - demo/build.x86_64/detection_video_demo rootfs/usr/share/ai-support/models/yolov6p5_n.q.onnx $DATA/labels/coco.txt rootfs/usr/share/ai-support/videos/test.mp4 test.avi
+    - $([[ "cb14e961ccf99d11481f312def71dd67" == "$(md5sum test.avi | awk '{print $1}')" ]])
+    - export SUPPORT_SHOW=-1
+    - demo/build.x86_64/detection_stream_demo rootfs/usr/share/ai-support/models/yolov6p5_n.q.onnx $DATA/labels/coco.txt rootfs/usr/share/ai-support/videos/test.mp4 video
+    - demo/build.x86_64/estimation_demo rootfs/usr/share/ai-support/models/yolov6p5_n.q.onnx $DATA/labels/coco.txt rootfs/usr/share/ai-support/models/rtmpose-t.q.onnx $DATA/imgs/person0.jpg result1.jpg
+    - $([[ "b822c9f7f4ff5d31b63328be50a08d82" == "$(md5sum result1.jpg | awk '{print $1}')" ]])
+    - demo/build.x86_64/tracker_stream_demo rootfs/usr/share/ai-support/models/yolov6p5_n.q.onnx $DATA/labels/coco.txt rootfs/usr/share/ai-support/models/rtmpose-t.q.onnx rootfs/usr/share/ai-support/videos/test.mp4 video
     - echo "Running x86_64 tests done!"
   <<: *only-defaults
 
@@ -179,6 +186,8 @@ riscv64-test-job:   # This job runs in the test stage.
     - ${QEMU_CMD} demo/build.riscv64/classification_demo $DATA/models/squeezenet1.1-7.onnx $DATA/labels/synset.txt $DATA/imgs/dog.jpg
     - ${QEMU_CMD} demo/build.riscv64/detection_demo $DATA/models/nanodet-plus-m_320.onnx $DATA/labels/coco.txt $DATA/imgs/person0.jpg result0.jpg
     - $([[ "3aeb3a152ce55a94c0c7bac303534b8d" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
+    - ${QEMU_CMD} demo/build.riscv64/estimation_demo rootfs/usr/share/ai-support/models/yolov6p5_n.q.onnx $DATA/labels/coco.txt rootfs/usr/share/ai-support/models/rtmpose-t.q.onnx $DATA/imgs/person0.jpg result1.jpg
+    - $([[ "448c89b2bb5425577cfd0225be50d176" == "$(md5sum result1.jpg | awk '{print $1}')" ]])
     - echo "Running riscv64 tests done!"
   <<: *only-defaults
 

@@ -70,3 +70,10 @@ or
 | SUPPORT_GRAPH_OPTIMIZATION_LEVEL  | Graph optimization level (ort_disable_all, ort_enable_basic, ort_enable_extended, ort_enable_all)   |
 | SUPPORT_OPT_MODEL_PATH            |                                    Optimized model path                                             |
 | SUPPORT_DISABLE_SPACEMIT_EP       |                                  1 means to disable spacemit-ep                                     |
+
+### Description of formats related to label files, configuration files, and model files
+Model files format: [ONNX(Open Neural Network Exchange)](https://github.com/onnx/onnx)
+
+label files format: using text document, [here](https://github.com/microsoft/onnxruntime-inference-examples/blob/main/c_cxx/OpenVINO_EP/Linux/squeezenet_classification/synset.txt) is a recommended example
+
+configuration files format: using [json](https://github.com/nlohmann/json), the recommended configuration file content is as [here](https://gitlab.dc.com:8443/bianbu/ai/support/-/blob/main/rootfs/usr/share/ai-support/models/yolov6.json)

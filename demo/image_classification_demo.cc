@@ -30,9 +30,6 @@ int main(int argc, char* argv[]) {
     return -1;
   }
   cv::Mat img_raw;
-  if (!existsCheck(image_file_path)) {
-    return -1;
-  }
 #ifdef DEBUG
   std::cout << "." << std::endl;
 #endif
@@ -41,6 +38,10 @@ int main(int argc, char* argv[]) {
     TimeWatcher t("|-- Load input data");
 #endif
     img_raw = cv::imread(image_file_path);
+  }
+  if (img_raw.empty()) {
+    std::cout << "[ ERROR ] Read image failed" << std::endl;
+    return -1;
   }
   ImageClassificationResult result = imageclassificationtask->Classify(img_raw);
   std::cout << "Classify result: " << result.label_text << std::endl;

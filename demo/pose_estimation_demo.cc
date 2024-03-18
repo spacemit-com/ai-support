@@ -52,14 +52,15 @@ int main(int argc, char* argv[]) {
               << std::endl;
     return -1;
   }
-  if (!existsCheck(image_file_path)) {
-    return -1;
-  }
   {
 #ifdef DEBUG
     TimeWatcher t("|-- Load input data");
 #endif
     img_raw = cv::imread(image_file_path);
+    if (img_raw.empty()) {
+      std::cout << "[ ERROR ] Read image failed" << std::endl;
+      return -1;
+    }
     resizeUnscale(img_raw, img, 320, 320);
   }
   if (objectdetectiontask->getInitFlag() != 0) {

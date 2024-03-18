@@ -2,6 +2,7 @@
 
 #include <stdlib.h>  // for: getenv atoi
 
+#include <memory>
 #include <utility>  // for move
 
 #ifdef _WIN32
@@ -79,9 +80,16 @@ int OrtWrapper::Init(const std::string &instance_name,
       sessionOptions_.SetLogSeverityLevel(log_level);
     }
   }
-
-  std::unique_ptr<Ort::Session> session(
-      new Ort::Session(*env_, model_file_path.c_str(), sessionOptions_));
+  std::unique_ptr<Ort::Session> session;
+  try {
+    session = std::make_unique<Ort::Session>(*env_, model_file_path.c_str(),
+                                             sessionOptions_);
+  } catch (Ort::Exception &e) {
+    std::cout << "[ ERROR ] Init failed, onnxruntime error code = "
+              << e.GetOrtErrorCode() << ", error message: " << e.what()
+              << std::endl;
+    return -1;
+  }
   session_ = std::move(session);
   return 0;
 }

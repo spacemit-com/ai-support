@@ -145,11 +145,12 @@ void ObjectDetection::ApllyList() {
 int ObjectDetection::InitFromOption(const ObjectDetectionOption &option) {
   init_flag_ = 1;
   option_ = option;
-  if (!existsCheck(option_.label_path)) {
-    return init_flag_;
-  }
   instance_name_ = "object-detection-inference";
   labels_ = readLabels(option_.label_path);
+  if (labels_.empty()) {
+    std::cout << "[ ERROR ] label file is empty, init fail" << std::endl;
+    return init_flag_;
+  }
   int label_size = labels_.size();
   if (!option_.class_name_whitelist.empty()) {
     std::vector<int> list(label_size, 0);

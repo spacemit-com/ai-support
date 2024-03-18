@@ -1,8 +1,6 @@
 #ifndef SUPPORT_INCLUDE_UTILS_UTILS_H_
 #define SUPPORT_INCLUDE_UTILS_UTILS_H_
 
-#include <sys/stat.h>
-
 #include <algorithm>
 #include <string>
 
@@ -10,8 +8,6 @@
 #include "task/vision/image_classification_types.h"
 #include "task/vision/object_detection_types.h"
 #include "task/vision/pose_estimation_types.h"
-
-bool existsCheck(const std::string &name);
 
 void resizeUnscale(const cv::Mat &mat, cv::Mat &mat_rs, int target_height,
                    int target_width);

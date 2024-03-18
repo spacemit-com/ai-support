@@ -33,19 +33,6 @@ float fast_exp(float x) {
   return v.f;
 }
 
-bool existsCheck(const std::string& name) {
-  struct stat buffer;
-  if (stat(name.c_str(), &buffer) == 0) {
-    return true;
-  } else {
-    std::cout << "[ ERROR ] The file " << name
-              << " does not exist. Make sure you are "
-                 "setting the correct path to the file"
-              << std::endl;
-    return false;
-  }
-}
-
 void resizeUnscale(const cv::Mat& mat, cv::Mat& mat_rs, int target_height,
                    int target_width) {
   if (mat.empty()) return;
@@ -78,13 +65,24 @@ void resizeUnscale(const cv::Mat& mat, cv::Mat& mat_rs, int target_height,
   new_unpad_mat.copyTo(mat_rs(cv::Rect(dw, dh, new_unpad_w, new_unpad_h)));
 }
 
+int getConfig(const std::string& config_file_path, json& config) {
+  std::ifstream f(config_file_path);
+  try {
+    config = json::parse(f);
+  } catch (json::parse_error& ex) {
+    std::cout << "[ ERROR ]  Init fail, parse json config file fail"
+              << std::endl;
+    return 0;
+  }
+  return 1;
+}
+
 int configToOption(const std::string& config_file_path,
                    ImageClassificationOption& option) {
-  if (!existsCheck(config_file_path)) {
-    return 1;
+  json config;
+  if (!getConfig(config_file_path, config)) {
+    return -1;
   }
-  std::ifstream f(config_file_path);
-  json config = json::parse(f);
   std::string model_path = config["model_path"];
   option.model_path = model_path;
   std::string label_path = config["label_path"];
@@ -100,11 +98,10 @@ int configToOption(const std::string& config_file_path,
 
 int configToOption(const std::string& config_file_path,
                    ObjectDetectionOption& option) {
-  if (!existsCheck(config_file_path)) {
-    return 1;
+  json config;
+  if (!getConfig(config_file_path, config)) {
+    return -1;
   }
-  std::ifstream f(config_file_path);
-  json config = json::parse(f);
   std::string model_path = config["model_path"];
   option.model_path = model_path;
   std::string label_path = config["label_path"];
@@ -134,11 +131,10 @@ int configToOption(const std::string& config_file_path,
 
 int configToOption(const std::string& config_file_path,
                    PoseEstimationOption& option) {
-  if (!existsCheck(config_file_path)) {
-    return 1;
+  json config;
+  if (!getConfig(config_file_path, config)) {
+    return -1;
   }
-  std::ifstream f(config_file_path);
-  json config = json::parse(f);
   std::string model_path = config["model_path"];
   option.model_path = model_path;
   if (config.contains("intra_threads_num")) {

@@ -9,11 +9,12 @@ int ImageClassification::InitFromOption(
     const ImageClassificationOption &option) {
   option_ = option;
   init_flag_ = 1;
-  if (!existsCheck(option_.label_path)) {
-    return init_flag_;
-  }
   instance_name_ = "image-classification-inference";
   labels_ = readLabels(option_.label_path);
+  if (labels_.empty()) {
+    std::cout << "[ ERROR ] label file is empty, init fail" << std::endl;
+    return init_flag_;
+  }
   init_flag_ =
       GetEngine()->Init(instance_name_, option_.model_path,
                         option.intra_threads_num, option.inter_threads_num);

@@ -106,6 +106,12 @@ int main(int argc, char* argv[]) {
           cv::Scalar{0, 255, 0}, 2, cv::LINE_AA);
     }
   }
-  cv::imwrite(save_img_path, img_raw);
+  try {
+    cv::imwrite(save_img_path, img_raw);
+  } catch (cv::Exception& e) {
+    std::cout << "[ ERROR ] Write result image failed : " << e.what()
+              << std::endl;
+    return -1;
+  }
   return 0;
 }

@@ -74,8 +74,13 @@ int main(int argc, char* argv[]) {
 #endif
     draw_boxes_inplace(img_raw, bboxes);
   }
-
-  cv::imwrite(save_img_path, img_raw);
+  try {
+    cv::imwrite(save_img_path, img_raw);
+  } catch (cv::Exception& e) {
+    std::cout << "[ ERROR ] Write result image failed : " << e.what()
+              << std::endl;
+    return -1;
+  }
   // cv::imshow("detected.jpg",img_raw);
   // cv::waitKey(0);
   return 0;

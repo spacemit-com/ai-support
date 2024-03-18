@@ -131,7 +131,7 @@ class SharedDataLoader : public DataLoader {
       capture_.set(cv::CAP_PROP_FRAME_HEIGHT, height);
       return 0;
     } else {
-      std::cout << "Open video capture failed" << std::endl;
+      std::cout << "[ ERROR ] Open video capture failed" << std::endl;
       return -1;
     }
   }

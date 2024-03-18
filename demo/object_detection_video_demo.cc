@@ -42,9 +42,6 @@ int main(int argc, char *argv[]) {
   if (objectdetectiontask->getInitFlag() != 0) {
     return -1;
   }
-  if (!existsCheck(video_file_path)) {
-    return -1;
-  }
   cv::VideoCapture capture(video_file_path);
   if (!capture.isOpened()) {
     std::cout << "[ ERROR ] Open video capture failed" << std::endl;

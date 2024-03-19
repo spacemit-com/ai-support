@@ -5,5 +5,5 @@
     "label_path": "/usr/share/ai-support/models/coco.txt",
     "intra_threads_num": 2,
     "graph_optimization_level": "",
-    "score_threshold": 0.3
+    "score_threshold": 0.39
 }

@@ -109,7 +109,7 @@ void DetectionPostprocessor::PostprocessYolov6(
   TimeWatcher t("|-- Postprocess");
 #endif
   if (score_threshold == -1.f) {
-    score_threshold = 0.59f;
+    score_threshold = 0.39f;
   }
   std::vector<Boxf> bbox_collection;
   bbox_collection.clear();

@@ -164,7 +164,8 @@ x86_64-test-job:    # This job runs in the test stage.
   script:
     - echo "Running unit tests ... (This will take several seconds.)"
     - export LD_LIBRARY_PATH=${ORT_HOME_X86}/lib:$LD_LIBRARY_PATH
-    - demo/build.x86_64/classification_demo $DATA/models/squeezenet1.1-7.onnx $DATA/labels/synset.txt $DATA/imgs/dog.jpg
+    - result=`demo/build.x86_64/classification_demo $DATA/models/squeezenet1.1-7.onnx $DATA/labels/synset.txt $DATA/imgs/dog.jpg`
+    - $([[ ${result:0-30:8} == "Pembroke" ]])
     - demo/build.x86_64/detection_demo $DATA/models/nanodet-plus-m_320.onnx $DATA/labels/coco.txt $DATA/imgs/person0.jpg result0.jpg
     - $([[ "3aeb3a152ce55a94c0c7bac303534b8d" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
     - demo/build.x86_64/detection_video_demo rootfs/usr/share/ai-support/models/yolov6p5_n.q.onnx $DATA/labels/coco.txt rootfs/usr/share/ai-support/videos/test.mp4 test.avi
@@ -183,7 +184,8 @@ riscv64-test-job:   # This job runs in the test stage.
     - build-job-riscv64
   script:
     - echo "Running unit tests ... (This will take several seconds.)"
-    - ${QEMU_CMD} demo/build.riscv64/classification_demo $DATA/models/squeezenet1.1-7.onnx $DATA/labels/synset.txt $DATA/imgs/dog.jpg
+    - result=`${QEMU_CMD} demo/build.riscv64/classification_demo $DATA/models/squeezenet1.1-7.onnx $DATA/labels/synset.txt $DATA/imgs/dog.jpg`
+    - $([[ ${result:0-30:8} == "Pembroke" ]])
     - ${QEMU_CMD} demo/build.riscv64/detection_demo $DATA/models/nanodet-plus-m_320.onnx $DATA/labels/coco.txt $DATA/imgs/person0.jpg result0.jpg
     - $([[ "3aeb3a152ce55a94c0c7bac303534b8d" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
     - ${QEMU_CMD} demo/build.riscv64/estimation_demo rootfs/usr/share/ai-support/models/yolov6p5_n.q.onnx $DATA/labels/coco.txt rootfs/usr/share/ai-support/models/rtmpose-t.q.onnx $DATA/imgs/person0.jpg result1.jpg

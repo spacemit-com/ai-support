@@ -5,7 +5,7 @@ set -e
 
 aiDesktop=(
   "object-detection.desktop"
-  "hand-tracker.desktop"
+  #"hand-tracker.desktop"
   "pose-tracker.desktop"
 )
 
@@ -30,12 +30,8 @@ function remove_desktop_shortcut() {
 }
 
 function remove_config() {
-  remove_desktop_shortcut "/root"
   rm -rf /root/.config/${APP_NAME}
-
   for FILENAME in /home/*; do
-    # remove desktop shortcut
-    remove_desktop_shortcut ${FILENAME}
     # remove user config of application
     rm -rf ${FILENAME}/.config/${APP_NAME}
   done
@@ -48,7 +44,7 @@ function postrm_init() {
   export APP_DATA=/usr/share/applications
 }
 
-function postrm_remove_upgrade() {
+function postrm_upgrade() {
   if [ -x /usr/bin/update-mime-database ] ; then
     : #update-mime-database "/usr/share/mime"
   fi
@@ -56,6 +52,16 @@ function postrm_remove_upgrade() {
   if [ -x /usr/bin/update-desktop-database ] ; then
     : #update-desktop-database -q "/usr/share/applications"
   fi
+}
+
+function postrm_remove() {
+  # remove desktop shortcut
+  remove_desktop_shortcut "/root"
+  for FILENAME in /home/*; do
+    remove_desktop_shortcut ${FILENAME}
+  done
+
+  postrm_upgrade
 }
 
 function postrm_purge() {
@@ -69,7 +75,8 @@ function postrm_main() {
 
   postrm_init
   case $1 in
-    remove | upgrade )  shift; postrm_remove_upgrade $@;;
+    remove )            shift; postrm_remove $@;;
+    upgrade )           shift; postrm_upgrade $@;;
     purge )             shift; postrm_purge $@;;
     abort-install )     ;;
     abort-upgrade )     ;;

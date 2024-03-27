@@ -50,6 +50,7 @@ function copy_install_to_desktop() {
       # update init setup info
       mkdir -p $(dirname ${initSetup})
       echo ${curFileName}/${gDesktopName}/${aiDesktopName} "postinst ${action}" $(date) >> ${initSetup}
+      chown ${curUserName} ${initSetup}
     fi
   fi
 }
@@ -74,8 +75,8 @@ function config_desktop_shortcut() {
         # i.e. desktop exist but need to be updated
         action="update"
       else
-        # desktop has been removed
-        continue
+        # TODO: distinguish shortcut removed by user or `postrm remove`
+        : #continue
       fi
     fi
     copy_install_to_desktop ${curFileName} ${desktop} ${curUserName} ${initSetup} ${action}

@@ -169,6 +169,23 @@ struct ObjectDetectionOption {
   float nms_threshold = -1.f;
   std::vector<int> class_name_whitelist;
   std::vector<int> class_name_blacklist;
+  ObjectDetectionOption()
+      : model_path(""),
+        label_path(""),
+        intra_threads_num(2),
+        inter_threads_num(2) {}
+  ObjectDetectionOption(const std::string mp, const std::string lp,
+                        const int atm, const int etm, const float st,
+                        const float nt, const std::vector<int>& cnw,
+                        const std::vector<int>& cnb)
+      : model_path(mp),
+        label_path(lp),
+        intra_threads_num(atm),
+        inter_threads_num(etm),
+        score_threshold(st),
+        nms_threshold(nt),
+        class_name_whitelist(cnw),
+        class_name_blacklist(cnb) {}
 };
 
 #endif  // SUPPORT_INCLUDE_TASK_VISION_OBJECT_DETECTION_TYPES_H_

@@ -78,3 +78,9 @@ Model files format: [ONNX(Open Neural Network Exchange)](https://github.com/onnx
 label files format: using text document, [here](https://github.com/microsoft/onnxruntime-inference-examples/blob/main/c_cxx/OpenVINO_EP/Linux/squeezenet_classification/synset.txt) is a recommended example
 
 configuration files format: using [json](https://github.com/nlohmann/json), the recommended configuration file content is as [here](https://gitlab.dc.com:8443/bianbu/ai/support/-/blob/main/rootfs/usr/share/ai-support/models/yolov6.json)
+
+### python module
+```bash
+./ci_build.sh --ort_dir=$PATH_TO_ONNXRUNTIME  --python=1
+```
+Improve cmake minimum required vesrion to 3.11 for FetchContent

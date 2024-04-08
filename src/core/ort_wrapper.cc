@@ -21,9 +21,7 @@ int OrtWrapper::Init(const std::string &instance_name,
   // Creation: The Ort::Session is created here
   env_ = std::move(env);
   sessionOptions_.SetIntraOpNumThreads(intra_threads_num);
-  sessionOptions_.AddConfigEntry("session.intra_op.allow_spinning", "0");
   sessionOptions_.SetInterOpNumThreads(inter_threads_num);
-  sessionOptions_.AddConfigEntry("session.inter_op.allow_spinning", "0");
 #ifdef HAS_SPACEMIT_EP
   const char *disable_spacemit_ep = getenv("SUPPORT_DISABLE_SPACEMIT_EP");
   if (disable_spacemit_ep != nullptr && strcmp(disable_spacemit_ep, "1") == 0) {

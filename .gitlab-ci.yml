@@ -42,6 +42,7 @@ image: harbor.bianbu.xyz/spacemit-ai/bianbu-ai-support:v1.1.1
 variables:
   SDK: "/opt"
   DATA: "$SDK/bianbu-ai-support/data"
+  ROOTFS: "rootfs/usr/share/ai-support"
   CROSS_TOOL: "$SDK/spacemit-gcc/bin/riscv64-unknown-linux-gnu-"
   SYSROOT: "$SDK/spacemit-gcc/sysroot"
   QEMU_CMD: "$SDK/qemu/bin/qemu-riscv64 -L $SYSROOT"
@@ -68,7 +69,7 @@ build-job-x86_64:   # This job runs in the build stage, which runs first.
       make install -j`nproc` VERBOSE=1
       popd
     # copy demo and data
-    - if [[ "${CI_INSTALL_OPTION}" =~ "--with-demo" ]]; then cp -rdf demo ${BUILD_DIR}/${INSTALL_PREFIX} && cp -rdf data ${BUILD_DIR}/${INSTALL_PREFIX}/demo; fi
+    - if [[ "${CI_INSTALL_OPTION}" =~ "--with-demo" ]]; then cp -rdf demo ${BUILD_DIR}/${INSTALL_PREFIX}; fi
     # copy onnxruntime
     - if [[ "${CI_INSTALL_OPTION}" =~ "--with-ort" ]]; then mkdir -p ${BUILD_DIR}/${INSTALL_PREFIX}/lib/3rdparty/onnxruntime && cp -rdf ${ORT_HOME}/* ${BUILD_DIR}/${INSTALL_PREFIX}/lib/3rdparty/onnxruntime; fi
     - |
@@ -115,7 +116,7 @@ build-job-riscv64:  # This job runs in the build stage, which runs second.
       make install -j`nproc` VERBOSE=1
       popd
     # copy demo and data
-    - if [[ "${CI_INSTALL_OPTION}" =~ "--with-demo" ]]; then cp -rdf demo ${BUILD_DIR}/${INSTALL_PREFIX} && cp -rdf data ${BUILD_DIR}/${INSTALL_PREFIX}/demo; fi
+    - if [[ "${CI_INSTALL_OPTION}" =~ "--with-demo" ]]; then cp -rdf demo ${BUILD_DIR}/${INSTALL_PREFIX}; fi
     # copy onnxruntime
     - if [[ "${CI_INSTALL_OPTION}" =~ "--with-ort" ]]; then mkdir -p ${BUILD_DIR}/${INSTALL_PREFIX}/lib/3rdparty/onnxruntime && cp -rdf ${ORT_HOME}/* ${BUILD_DIR}/${INSTALL_PREFIX}/lib/3rdparty/onnxruntime; fi
   #  - mkdir ${BUILD_DIR} && pushd ${BUILD_DIR} && cmake .. -DORT_HOME=${ORT_HOME} -DOPENCV_INC=${OPENCV_SHARED_DIR}/include/opencv4 -DOPENCV_LIB=${OPENCV_SHARED_DIR}/lib -DCMAKE_C_COMPILER=${CROSS_TOOL}gcc -DCMAKE_CXX_COMPILER=${CROSS_TOOL}g++ -DCMAKE_SYSROOT=${SYSROOT} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DDEMO=ON -DUSE_OPENCV_SHARED_LIBS=ON && make install -j`nproc` VERBOSE=1 && popd
@@ -164,17 +165,17 @@ x86_64-test-job:    # This job runs in the test stage.
   script:
     - echo "Running unit tests ... (This will take several seconds.)"
     - export LD_LIBRARY_PATH=${ORT_HOME_X86}/lib:$LD_LIBRARY_PATH
-    - result=`demo/build.x86_64/classification_demo $DATA/models/squeezenet1.1-7.onnx $DATA/labels/synset.txt $DATA/imgs/dog.jpg`
+    - result=`demo/build.x86_64/classification_demo $DATA/models/squeezenet1.1-7.onnx $ROOTFS/models/synset.txt $ROOTFS/imgs/dog.jpg`
     - $([[ ${result:0-30:8} == "Pembroke" ]])
-    - demo/build.x86_64/detection_demo $DATA/models/nanodet-plus-m_320.onnx $DATA/labels/coco.txt $DATA/imgs/person0.jpg result0.jpg
+    - demo/build.x86_64/detection_demo $DATA/models/nanodet-plus-m_320.onnx $ROOTFS/models/coco.txt $ROOTFS/imgs/person.jpg result0.jpg
     - $([[ "3aeb3a152ce55a94c0c7bac303534b8d" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
-    - demo/build.x86_64/detection_video_demo rootfs/usr/share/ai-support/models/yolov6p5_n.q.onnx $DATA/labels/coco.txt rootfs/usr/share/ai-support/videos/test.mp4 test.avi
-    - $([[ "c427e3575f4369522dabc7af46ecf0d2" == "$(md5sum test.avi | awk '{print $1}')" ]])
+    - demo/build.x86_64/detection_video_demo $ROOTFS/models/yolov6p5_n.q.onnx $ROOTFS/models/coco.txt $ROOTFS/videos/test.mp4 test.avi
+    - $([[ "760c5bb692fe302621265126f70bd7e9" == "$(md5sum test.avi | awk '{print $1}')" ]])
     - export SUPPORT_SHOW=-1
-    - demo/build.x86_64/detection_stream_demo rootfs/usr/share/ai-support/models/yolov6p5_n.q.onnx $DATA/labels/coco.txt rootfs/usr/share/ai-support/videos/test.mp4 video
-    - demo/build.x86_64/estimation_demo rootfs/usr/share/ai-support/models/yolov6p5_n.q.onnx $DATA/labels/coco.txt rootfs/usr/share/ai-support/models/rtmpose-t.q.onnx $DATA/imgs/person0.jpg result1.jpg
+    - demo/build.x86_64/detection_stream_demo $ROOTFS/models/yolov6p5_n.q.onnx $ROOTFS/models/coco.txt $ROOTFS/videos/test.mp4 video
+    - demo/build.x86_64/estimation_demo $ROOTFS/models/yolov6p5_n.q.onnx $ROOTFS/models/coco.txt $ROOTFS/models/rtmpose-t.q.onnx $ROOTFS/imgs/person.jpg result1.jpg
     - $([[ "dc531ec076418357e8478a0a2823285d" == "$(md5sum result1.jpg | awk '{print $1}')" ]])
-    - demo/build.x86_64/tracker_stream_demo rootfs/usr/share/ai-support/models/yolov6p5_n.q.onnx $DATA/labels/coco.txt rootfs/usr/share/ai-support/models/rtmpose-t.q.onnx rootfs/usr/share/ai-support/videos/test.mp4 video
+    - demo/build.x86_64/tracker_stream_demo $ROOTFS/models/yolov6p5_n.q.onnx $ROOTFS/models/coco.txt $ROOTFS/models/rtmpose-t.q.onnx $ROOTFS/videos/test.mp4 video
     - echo "Running x86_64 tests done!"
   <<: *only-defaults
 
@@ -184,11 +185,11 @@ riscv64-test-job:   # This job runs in the test stage.
     - build-job-riscv64
   script:
     - echo "Running unit tests ... (This will take several seconds.)"
-    - result=`${QEMU_CMD} demo/build.riscv64/classification_demo $DATA/models/squeezenet1.1-7.onnx $DATA/labels/synset.txt $DATA/imgs/dog.jpg`
+    - result=`${QEMU_CMD} demo/build.riscv64/classification_demo $DATA/models/squeezenet1.1-7.onnx $ROOTFS/models/synset.txt $ROOTFS/imgs/dog.jpg`
     - $([[ ${result:0-30:8} == "Pembroke" ]])
-    - ${QEMU_CMD} demo/build.riscv64/detection_demo $DATA/models/nanodet-plus-m_320.onnx $DATA/labels/coco.txt $DATA/imgs/person0.jpg result0.jpg
+    - ${QEMU_CMD} demo/build.riscv64/detection_demo $DATA/models/nanodet-plus-m_320.onnx $ROOTFS/models/coco.txt $ROOTFS/imgs/person.jpg result0.jpg
     - $([[ "3aeb3a152ce55a94c0c7bac303534b8d" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
-    - ${QEMU_CMD} demo/build.riscv64/estimation_demo rootfs/usr/share/ai-support/models/yolov6p5_n.q.onnx $DATA/labels/coco.txt rootfs/usr/share/ai-support/models/rtmpose-t.q.onnx $DATA/imgs/person0.jpg result1.jpg
+    - ${QEMU_CMD} demo/build.riscv64/estimation_demo $ROOTFS/models/yolov6p5_n.q.onnx $ROOTFS/models/coco.txt $ROOTFS/models/rtmpose-t.q.onnx $ROOTFS/imgs/person.jpg result1.jpg
     - $([[ "e2cb2b8d9e216d68ff653415f92be86c" == "$(md5sum result1.jpg | awk '{print $1}')" ]])
     - echo "Running riscv64 tests done!"
   <<: *only-defaults

@@ -84,13 +84,8 @@ class Detector {
   ObjectDetectionOption option_;
 };
 
-// 检测线程
-void Detection(DataLoader& dataloader, Detector& detector) {
+void Inference(DataLoader& dataloader, Detector& detector) {
   setThreadName("DetectionThread");
-  if (detector.init() != 0) {
-    std::cout << "[ ERROR ] Detector init error" << std::endl;
-    dataloader.setDisable();
-  }
   cv::Mat frame;
   while (dataloader.ifEnable()) {
     auto start = std::chrono::steady_clock::now();
@@ -112,6 +107,17 @@ void Detection(DataLoader& dataloader, Detector& detector) {
       break;  // 摄像头结束拍摄或者故障
     }
   }
+}
+
+// 检测线程
+void Detection(DataLoader& dataloader, Detector& detector) {
+  setThreadName("OnnxruntimeThread");
+  if (detector.init() != 0) {
+    std::cout << "[ ERROR ] Detector init error" << std::endl;
+    dataloader.setDisable();
+  }
+  std::thread t1(Inference, std::ref(dataloader), std::ref(detector));
+  t1.join();
   std::cout << "Detection thread quit" << std::endl;
 }
 

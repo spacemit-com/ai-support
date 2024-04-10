@@ -116,13 +116,8 @@ class Tracker {
   PoseEstimationOption estimation_option_;
 };
 
-// 检测线程
-void Track(DataLoader& dataloader, Tracker& tracker) {
+void Inference(DataLoader& dataloader, Tracker& tracker) {
   setThreadName("TrackerThread");
-  if (tracker.init() != 0) {
-    std::cout << "[ ERROR ] Tracker init error" << std::endl;
-    return;
-  }
   cv::Mat frame;
   while (dataloader.ifEnable()) {
     auto start = std::chrono::steady_clock::now();
@@ -147,6 +142,17 @@ void Track(DataLoader& dataloader, Tracker& tracker) {
       break;  // 摄像头结束拍摄或者故障
     }
   }
+}
+
+// 检测线程
+void Track(DataLoader& dataloader, Tracker& tracker) {
+  setThreadName("OnnxruntimeThread");
+  if (tracker.init() != 0) {
+    std::cout << "[ ERROR ] Tracker init error" << std::endl;
+    return;
+  }
+  std::thread t1(Inference, std::ref(dataloader), std::ref(tracker));
+  t1.join();
   std::cout << "Track thread quit" << std::endl;
 }
 

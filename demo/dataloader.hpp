@@ -124,21 +124,12 @@ class SharedDataLoader : public DataLoader {
       return init(std::stoi(path));
     }
     capture_.open(path);
-    if (capture_.isOpened()) {
-      int width = 1280;
-      int height = 720;
-      capture_.set(cv::CAP_PROP_FRAME_WIDTH, width);
-      capture_.set(cv::CAP_PROP_FRAME_HEIGHT, height);
-      return 0;
-    } else {
-      std::cout << "[ ERROR ] Open video capture failed" << std::endl;
-      return -1;
-    }
+    return setCapture();
   }
 
   int init(int camera_id) {
 #ifndef _WIN32
-    capture_.open(camera_id);
+    capture_.open(camera_id, cv::CAP_V4L2);
     if (!capture_.isOpened()) {
       std::cout
           << "Open camera capture failed, try to figure out right camera id"
@@ -147,7 +138,7 @@ class SharedDataLoader : public DataLoader {
       for (int i = 0; i <= 100; ++i) {
         std::string device_path = path + std::to_string(i);
         if (isValidCamera(device_path)) {
-          capture_.open(i);
+          capture_.open(i, cv::CAP_V4L2);
           if (capture_.isOpened()) {
             break;
           }
@@ -157,16 +148,7 @@ class SharedDataLoader : public DataLoader {
 #else
     capture_.open(camera_id);
 #endif
-    if (capture_.isOpened()) {
-      int width = 640;
-      int height = 480;
-      capture_.set(cv::CAP_PROP_FRAME_WIDTH, width);
-      capture_.set(cv::CAP_PROP_FRAME_HEIGHT, height);
-      return 0;
-    } else {
-      std::cout << "Open camera capture failed" << std::endl;
-      return -1;
-    }
+    return setCapture();
   }
 
   cv::Mat fetchFrame() {
@@ -189,6 +171,40 @@ class SharedDataLoader : public DataLoader {
     frame = frame_.clone();  // 深拷贝
     frame_mutex_.unlock();
     return frame;
+  }
+
+  int setCapture() {
+    if (capture_.isOpened()) {
+      int width = 640;  // Because of k1x performance reasons, the resolution is
+                        // set to 640*480
+      if (capture_.get(cv::CAP_PROP_FRAME_WIDTH) > 640) {
+        if (capture_.set(cv::CAP_PROP_FRAME_WIDTH, width) &&
+            capture_.get(cv::CAP_PROP_FRAME_WIDTH) == width) {
+          std::cout << "The video capture width is set to " << width
+                    << " successfully" << std::endl;
+        } else {
+          std::cout << "[ WARNING ] Video capture width set to " << width
+                    << " failed, the resolution is "
+                    << capture_.get(cv::CAP_PROP_FRAME_WIDTH) << "*"
+                    << capture_.get(cv::CAP_PROP_FRAME_HEIGHT) << std::endl;
+        }
+      }
+      if (capture_.set(cv::CAP_PROP_FOURCC,
+                       cv::VideoWriter::fourcc('M', 'J', 'P', 'G')) &&
+          capture_.get(cv::CAP_PROP_FOURCC) ==
+              cv::VideoWriter::fourcc('M', 'J', 'P', 'G')) {
+        std::cout << "Video capture format has been set to MJPG successfully"
+                  << std::endl;
+      } else {
+        std::cout << "[ WARNING ] Video capture format set to MJPG failed, "
+                     "using default format"
+                  << std::endl;
+      }
+      return 0;
+    } else {
+      std::cout << "Open camera capture failed" << std::endl;
+      return -1;
+    }
   }
 
  private:

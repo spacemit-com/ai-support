@@ -49,7 +49,7 @@ else
 fi
 
 task_prepare=(
-  "if [[ ! -d data && -d ../data ]]; then ln -sf ../data .; fi"
+  "if [[ ! -d data && -d ../share/ai-support ]]; then ln -sf ../share/ai-support data; fi"
   "if [[ ! -d data ]]; then echo '[Error] Can not find data directory!'; exit 0; fi"
   "mkdir -p data/models"
   # TODO: add md5sum checking
@@ -57,10 +57,10 @@ task_prepare=(
   "if [[ ! -f data/models/nanodet-plus-m_320.onnx ]]; then wget https://bj.bcebos.com/paddlehub/fastdeploy/nanodet-plus-m_320.onnx -O data/models/nanodet-plus-m_320.onnx; fi"
 )
 task_classification=(
-  "build/classification_demo data/models/squeezenet1.1-7.onnx data/labels/synset.txt data/imgs/dog.jpg"
+  "build/classification_demo data/models/squeezenet1.1-7.onnx data/models/synset.txt data/imgs/dog.jpg"
 )
 task_detection=(
-  "build/detection_demo data/models/nanodet-plus-m_320.onnx data/labels/coco.txt data/imgs/person0.jpg result0.jpg"
+  "build/detection_demo data/models/nanodet-plus-m_320.onnx data/models/coco.txt data/imgs/person.jpg result0.jpg"
 )
 function smoke_test() {
   # preparation(e.g. download models)

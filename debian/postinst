@@ -26,7 +26,7 @@ function update_desktop_name() {
     gDesktopName="${XDG_DESKTOP_DIR//${HOME}\//}"
   else
     if [ -d "${curFileName}/桌面" ]; then
-        gDesktopName="桌面"
+      gDesktopName="桌面"
     elif [ -d "${curFileName}/Desktop" ]; then
       gDesktopName="Desktop"
     fi
@@ -48,7 +48,6 @@ function copy_install_to_desktop() {
       chmod +x "${curFileName}/${gDesktopName}/${aiDesktopName}"
       chown ${curUserName} "${curFileName}/${gDesktopName}/${aiDesktopName}"
       # update init setup info
-      mkdir -p $(dirname ${initSetup})
       echo ${curFileName}/${gDesktopName}/${aiDesktopName} "postinst ${action}" $(date) >> ${initSetup}
       chown ${curUserName} ${initSetup}
     fi
@@ -62,6 +61,11 @@ function config_desktop_shortcut() {
   local curFileName=$1
   local curUserName=$2
   local action="copy" # "update"
+  # prepare config dir for application
+  local cfgAppDir=${curFileName}/.config/${APP_NAME}/applications
+  mkdir -p ${cfgAppDir}
+  chown -R ${curUserName} $(dirname ${cfgAppDir})
+  # config desktop shortcut
   for desktop in "${aiDesktop[@]}"; do
     local initSetup="${curFileName}/.config/${APP_NAME}/applications/${desktop%.desktop}-initial-setup-done"
     if [ -f ${initSetup} ] && [ "$(cat ${initSetup} | grep ${gDesktopName})" ]; then

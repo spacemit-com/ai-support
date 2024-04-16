@@ -128,8 +128,8 @@ class SharedDataLoader : public DataLoader {
   }
 
   int init(int camera_id) {
+    capture_.open(camera_id);
 #ifndef _WIN32
-    capture_.open(camera_id, cv::CAP_V4L2);
     if (!capture_.isOpened()) {
       std::cout
           << "Open camera capture failed, try to figure out right camera id"
@@ -138,15 +138,13 @@ class SharedDataLoader : public DataLoader {
       for (int i = 0; i <= 100; ++i) {
         std::string device_path = path + std::to_string(i);
         if (isValidCamera(device_path)) {
-          capture_.open(i, cv::CAP_V4L2);
+          capture_.open(i);
           if (capture_.isOpened()) {
             break;
           }
         }
       }
     }
-#else
-    capture_.open(camera_id);
 #endif
     return setCapture();
   }
@@ -189,6 +187,9 @@ class SharedDataLoader : public DataLoader {
                     << capture_.get(cv::CAP_PROP_FRAME_HEIGHT) << std::endl;
         }
       }
+      // If you set and check the mjpeg format you need to use the following
+      // code
+      /*
       if (capture_.set(cv::CAP_PROP_FOURCC,
                        cv::VideoWriter::fourcc('M', 'J', 'P', 'G')) &&
           capture_.get(cv::CAP_PROP_FOURCC) ==
@@ -200,6 +201,7 @@ class SharedDataLoader : public DataLoader {
                      "using default format"
                   << std::endl;
       }
+      */
       return 0;
     } else {
       std::cout << "Open camera capture failed" << std::endl;

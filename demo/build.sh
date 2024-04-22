@@ -9,17 +9,17 @@ set -e #u
 
 DEMO_DIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 
-# Note: update the following settings if necessary
-_NAME=cuspace
-SDK=$(dirname $(which ${_NAME}))
-
 function config_native() {
-  BIANBUAI_HOME=$SDK/bianbu-ai-support
+  BIANBUAI_HOME=${DEMO_DIR}/..
   # Plz update the following settings !!!
-  ORT_HOME=${PATH_TO_OFFICIAL_ONNXRUNTIME_RELEASE}
+  ORT_HOME=${PATH_TO_ONNXRUNTIME_RELEASE} # e.g. /usr
 }
 
 function config_x86_riscv64() {
+  # Note: update the following settings if necessary
+  _NAME=cuspace
+  SDK=$(dirname $(which ${_NAME}))
+
   CROSS_TOOL=$SDK/spacemit-gcc/bin/riscv64-unknown-linux-gnu-
   SYSROOT=$SDK/spacemit-gcc/sysroot
   BIANBUAI_HOME=$SDK/bianbu-ai-support
@@ -49,7 +49,7 @@ else
 fi
 
 task_prepare=(
-  "if [[ ! -d data && -d ../share/ai-support ]]; then ln -sf ../share/ai-support data; fi"
+  "if [[ ! -d data && -d ${BIANBUAI_HOME}/share/ai-support ]]; then ln -sf ${BIANBUAI_HOME}/share/ai-support data; fi"
   "if [[ ! -d data ]]; then echo '[Error] Can not find data directory!'; exit 0; fi"
   "mkdir -p data/models"
   # TODO: add md5sum checking

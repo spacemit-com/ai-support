@@ -41,11 +41,10 @@ image: harbor.bianbu.xyz/spacemit-ai/bianbu-ai-support:v1.1.1
 
 variables:
   SDK: "/opt"
-  DATA: "$SDK/bianbu-ai-support/data"
-  ROOTFS: "rootfs/usr/share/ai-support"
+  DATA: "rootfs/usr/share/ai-support"
   CROSS_TOOL: "$SDK/spacemit-gcc/bin/riscv64-unknown-linux-gnu-"
   SYSROOT: "$SDK/spacemit-gcc/sysroot"
-  QEMU_CMD: "$SDK/qemu/bin/qemu-riscv64 -L $SYSROOT"
+  QEMU_CMD: "$SDK/qemu/bin/qemu-riscv64 -L $SYSROOT" # TODO: update with lastest spacemit-ai-sdk
   ORT_HOME_X86: "/home/workspace/onnxruntime-linux-x64-1.15.1"
   CI_NEXUS_URL: "https://nexus.bianbu.xyz/service/rest/repository/browse/bianbu-ai/onnxruntime/"
   CI_INSTALL_OPTION: "--with-demo --with-ort"
@@ -165,17 +164,17 @@ x86_64-test-job:    # This job runs in the test stage.
   script:
     - echo "Running unit tests ... (This will take several seconds.)"
     - export LD_LIBRARY_PATH=${ORT_HOME_X86}/lib:$LD_LIBRARY_PATH
-    - result=`demo/build.x86_64/classification_demo $DATA/models/squeezenet1.1-7.onnx $ROOTFS/models/synset.txt $ROOTFS/imgs/dog.jpg`
+    - result=`demo/build.x86_64/classification_demo $DATA/models/squeezenet1.1-7.onnx $DATA/models/synset.txt $DATA/imgs/dog.jpg`
     - $([[ ${result:0-30:8} == "Pembroke" ]])
-    - demo/build.x86_64/detection_demo $DATA/models/nanodet-plus-m_320.onnx $ROOTFS/models/coco.txt $ROOTFS/imgs/person.jpg result0.jpg
-    - $([[ "3aeb3a152ce55a94c0c7bac303534b8d" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
-    - demo/build.x86_64/detection_video_demo $ROOTFS/models/yolov6p5_n.q.onnx $ROOTFS/models/coco.txt $ROOTFS/videos/test.mp4 test.avi
+    - demo/build.x86_64/detection_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/imgs/person.jpg result0.jpg
+    - $([[ "b604ad08d6283995ec8dcdbddc2482c2" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
+    - demo/build.x86_64/detection_video_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/videos/test.mp4 test.avi
     - $([[ "760c5bb692fe302621265126f70bd7e9" == "$(md5sum test.avi | awk '{print $1}')" ]])
     - export SUPPORT_SHOW=-1
-    - demo/build.x86_64/detection_stream_demo $ROOTFS/models/yolov6p5_n.q.onnx $ROOTFS/models/coco.txt $ROOTFS/videos/test.mp4 video
-    - demo/build.x86_64/estimation_demo $ROOTFS/models/yolov6p5_n.q.onnx $ROOTFS/models/coco.txt $ROOTFS/models/rtmpose-t.q.onnx $ROOTFS/imgs/person.jpg result1.jpg
+    - demo/build.x86_64/detection_stream_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/videos/test.mp4 video
+    - demo/build.x86_64/estimation_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/models/rtmpose-t.q.onnx $DATA/imgs/person.jpg result1.jpg
     - $([[ "dc531ec076418357e8478a0a2823285d" == "$(md5sum result1.jpg | awk '{print $1}')" ]])
-    - demo/build.x86_64/tracker_stream_demo $ROOTFS/models/yolov6p5_n.q.onnx $ROOTFS/models/coco.txt $ROOTFS/models/rtmpose-t.q.onnx $ROOTFS/videos/test.mp4 video
+    - demo/build.x86_64/tracker_stream_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/models/rtmpose-t.q.onnx $DATA/videos/test.mp4 video
     - echo "Running x86_64 tests done!"
   <<: *only-defaults
 
@@ -185,11 +184,11 @@ riscv64-test-job:   # This job runs in the test stage.
     - build-job-riscv64
   script:
     - echo "Running unit tests ... (This will take several seconds.)"
-    - result=`${QEMU_CMD} demo/build.riscv64/classification_demo $DATA/models/squeezenet1.1-7.onnx $ROOTFS/models/synset.txt $ROOTFS/imgs/dog.jpg`
+    - result=`${QEMU_CMD} demo/build.riscv64/classification_demo $DATA/models/squeezenet1.1-7.onnx $DATA/models/synset.txt $DATA/imgs/dog.jpg`
     - $([[ ${result:0-30:8} == "Pembroke" ]])
-    - ${QEMU_CMD} demo/build.riscv64/detection_demo $DATA/models/nanodet-plus-m_320.onnx $ROOTFS/models/coco.txt $ROOTFS/imgs/person.jpg result0.jpg
-    - $([[ "3aeb3a152ce55a94c0c7bac303534b8d" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
-    - ${QEMU_CMD} demo/build.riscv64/estimation_demo $ROOTFS/models/yolov6p5_n.q.onnx $ROOTFS/models/coco.txt $ROOTFS/models/rtmpose-t.q.onnx $ROOTFS/imgs/person.jpg result1.jpg
+    - ${QEMU_CMD} demo/build.riscv64/detection_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/imgs/person.jpg result0.jpg
+    - $([[ "81d50314ee64d46c9d4c9941711820ba" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
+    - ${QEMU_CMD} demo/build.riscv64/estimation_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/models/rtmpose-t.q.onnx $DATA/imgs/person.jpg result1.jpg
     - $([[ "e2cb2b8d9e216d68ff653415f92be86c" == "$(md5sum result1.jpg | awk '{print $1}')" ]])
     - echo "Running riscv64 tests done!"
   <<: *only-defaults

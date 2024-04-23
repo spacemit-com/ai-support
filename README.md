@@ -70,6 +70,7 @@ or
 | SUPPORT_GRAPH_OPTIMIZATION_LEVEL  | Graph optimization level (ort_disable_all, ort_enable_basic, ort_enable_extended, ort_enable_all)   |
 | SUPPORT_OPT_MODEL_PATH            |                                    Optimized model path                                             |
 | SUPPORT_DISABLE_SPACEMIT_EP       |                                  1 means to disable spacemit-ep                                     |
+| SUPPORT_OPENCV_THREAD_NUM         |                              The number of threads used by opencv(>= 4.x)                           |
 
 ### Description of formats related to label files, configuration files, and model files
 Model files format: [ONNX(Open Neural Network Exchange)](https://github.com/onnx/onnx)

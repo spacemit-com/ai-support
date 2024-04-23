@@ -1,7 +1,4 @@
 ﻿#include <stdlib.h>
-#ifndef _WIN32
-#include <sys/prctl.h>  // for: prctl
-#endif
 #include <unistd.h>  // for: getopt
 
 #include <algorithm>  // for: swap
@@ -17,17 +14,12 @@
 #include "object_detection.hpp"
 #include "opencv2/opencv.hpp"
 #include "task/vision/object_detection_task.h"
+#include "utils/cv_helper.hpp"
 #ifdef DEBUG
 #include "utils/time.h"
 #endif
 
 #include "utils/utils.h"
-
-void setThreadName(const char* name) {
-#ifndef _WIN32
-  prctl(PR_SET_NAME, name);
-#endif
-}
 
 class Detector {
  public:
@@ -228,6 +220,8 @@ void Preview(DataLoader& dataloader, Detector& detector) {
 }
 
 int main(int argc, char* argv[]) {
+  cvConfig();
+
   std::string config_file_path, input, input_type;
   ObjectDetectionOption option;
   int resize_height{320}, resize_width{320};

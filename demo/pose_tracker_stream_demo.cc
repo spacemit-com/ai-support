@@ -1,7 +1,4 @@
 ﻿#include <stdlib.h>
-#ifndef _WIN32
-#include <sys/prctl.h>  // for: prctl
-#endif
 #include <unistd.h>  // for: getopt
 
 #include <algorithm>  // for: swap
@@ -18,17 +15,12 @@
 #include "pose_estimation.hpp"
 #include "task/vision/object_detection_task.h"
 #include "task/vision/pose_estimation_task.h"
+#include "utils/cv_helper.hpp"
 #ifdef DEBUG
 #include "utils/time.h"
 #endif
 
 #include "utils/utils.h"
-
-void setThreadName(const char* name) {
-#ifndef _WIN32
-  prctl(PR_SET_NAME, name);
-#endif
-}
 
 class Tracker {
  public:
@@ -240,6 +232,8 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
 }
 
 int main(int argc, char* argv[]) {
+  cvConfig();
+
   std::string det_file_path, pose_file_path, input, input_type;
   int resize_height{320}, resize_width{320};
   ObjectDetectionOption detection_option;

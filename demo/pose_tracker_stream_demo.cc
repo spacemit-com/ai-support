@@ -116,21 +116,26 @@ void Track(DataLoader& dataloader, Tracker& tracker) {
     return;
   }
   cv::Mat frame;
+  int total_dur = 0;
+  int count = 0;
+  auto start = std::chrono::steady_clock::now();
   while (dataloader.ifEnable()) {
-    auto start = std::chrono::steady_clock::now();
-    if (!dataloader.isUpdated()) {
-      continue;
-    }
     frame = dataloader.peekFrame();  // 取(拷贝)一帧数据
-    if ((frame).empty()) {
-      dataloader.setDisable();
-      break;
+    if (frame.empty()) {
+      continue;
     }
     int flag = tracker.infer(frame);  // 推理并保存检测结果
     auto end = std::chrono::steady_clock::now();
     auto detection_duration =
         std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    dataloader.setDetectionFps(1000 / (detection_duration.count()));
+    total_dur = detection_duration.count();
+    count++;
+    if (total_dur > 1000) {
+      dataloader.setDetectionFps(count);
+      start = std::chrono::steady_clock::now();
+      count = 0;
+      total_dur = 0;
+    }
     if (flag == 0) {
       std::cout << "[ WARNING ] Unable to catch person" << std::endl;  // 无人
     }

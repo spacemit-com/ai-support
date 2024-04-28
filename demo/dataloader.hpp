@@ -15,16 +15,12 @@ class DataLoader {
  public:
   DataLoader(const int& resize_height, const int& resize_width) {
     enable = true;
-    updated = false;
     resize_height_ = resize_height;
     resize_width_ = resize_width;
     preview_fps_ = 0;
     detection_fps_ = 0;
   }
   ~DataLoader() {}
-  bool isUpdated() { return updated; }
-  void setUpdate() { updated = true; }
-  void setNoUpdate() { updated = false; }
   bool ifEnable() { return enable; }
   void setDisable() { enable = false; }
   void setPreviewFps(int preview_fps) { preview_fps_ = preview_fps; }
@@ -38,7 +34,6 @@ class DataLoader {
 
  private:
   bool enable;
-  bool updated;
   int resize_height_;
   int resize_width_;
   int preview_fps_;
@@ -152,23 +147,20 @@ class SharedDataLoader : public DataLoader {
   }
 
   cv::Mat fetchFrame() {
-    cv::Mat frame, temp;
+    cv::Mat frame;
     capture_.read(frame);
     if (!frame.empty()) {
-      resizeUnscale(frame, temp, getResizeHeight(), getResizeWidth());
-      setUpdate();
-    } else {
-      setNoUpdate();
+      frame_mutex_.lock();
+      resizeUnscale(frame, frame_, getResizeHeight(), getResizeWidth());
+      frame_mutex_.unlock();
     }
-    frame_mutex_.lock();
-    frame_ = temp.clone();
-    frame_mutex_.unlock();
     return frame;
   }
+
   cv::Mat peekFrame() {
     cv::Mat frame;
     frame_mutex_.lock();
-    frame = frame_.clone();  // 深拷贝
+    std::swap(frame, frame_);
     frame_mutex_.unlock();
     return frame;
   }

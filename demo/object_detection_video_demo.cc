@@ -21,8 +21,7 @@ int main(int argc, char *argv[]) {
     dst_file_path = argv[3];
     objectdetectiontask = std::unique_ptr<ObjectDetectionTask>(
         new ObjectDetectionTask(config_file_path));
-  }
-  if (argc == 5) {
+  } else if (argc == 5) {
     option.model_path = argv[1];
     option.label_path = argv[2];
     video_file_path = argv[3];

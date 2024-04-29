@@ -49,7 +49,7 @@ tree gnome-shell -L 1
 # quick import: with bianbu-ai-support
 cd bianbu-ai-support && git checkout main
 # Note: version number must start with digit(required by dpkg-buildpackage)
-bianbu-dev import . --suite mantic-spacemit --new-version 1.0.1
+bianbu-dev import . --suite mantic-porting --new-version 1.0.1 # change from spacemit to porting from v1.0.13
 
 # -------------------------------------------------------------
 
@@ -76,7 +76,7 @@ dpkg-buildpackage -us -b -uc --no-pre-clean --no-post-clean # -tc
 
 # check https://archive.bianbu.xyz/bianbu-ports/logs/ for upload events
 bianbu-dev upload onnxruntime_1.15.1_amd64.deb --suite mantic-porting
-bianbu-dev upload onnxruntime_1.15.1_riscv64.deb --suite mantic-spacemit
+bianbu-dev upload onnxruntime_1.15.1_riscv64.deb --suite mantic-porting
 
 apt update
 apt show onnxruntime

@@ -1,7 +1,3 @@
-file(READ ${CMAKE_SOURCE_DIR}/VERSION_NUMBER VERSION_CONTENT)
-string(STRIP "${VERSION_CONTENT}" VERSION_CONTENT)
-project(bianbuai-support-library VERSION ${VERSION_CONTENT})
-
 set(CMAKE_CXX_STANDARD 14)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 
@@ -46,8 +42,8 @@ endif()
 link_directories(${OPENCV_LIB})
 link_directories(${ORT_HOME}/lib)
 
-file(GLOB_RECURSE SRC_FILES "./*.cpp" "./*.c" "./*.cc")
-add_library(bianbuai SHARED ${SRC_FILES})
+file(GLOB_RECURSE BIANBU_SRC_FILES "${CMAKE_SOURCE_DIR}/src/*.cc")
+add_library(bianbuai SHARED ${BIANBU_SRC_FILES})
 set_target_properties(bianbuai PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
 
 if (EXISTS "${ORT_HOME}/lib/libspacemit_ep.so")
@@ -57,7 +53,7 @@ endif()
 
 target_include_directories(bianbuai PUBLIC  ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(bianbuai PRIVATE ${CMAKE_SOURCE_DIR})
-target_include_directories(bianbuai SYSTEM PUBLIC  ${OPENCV_INC})
+target_include_directories(bianbuai SYSTEM PUBLIC  ${OPENCV_INC}) # for demo
 target_include_directories(bianbuai SYSTEM PRIVATE ${ORT_HOME}/include ${ORT_HOME}/include/onnxruntime)
 
 set(HIDE_SYMBOLS_LINKER_FLAGS "-Wl,--exclude-libs,ALL")
@@ -82,10 +78,3 @@ install(TARGETS bianbuai
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/task ${CMAKE_SOURCE_DIR}/include/utils
         DESTINATION include/bianbuai
         FILES_MATCHING PATTERN "*.h")
-
-#install(DIRECTORY ${ORT_HOME}/include ${ORT_HOME}/lib
-#        DESTINATION lib/3rdparty/onnxruntime
-#        FILES_MATCHING PATTERN "*.h" PATTERN "*onnxruntime*.so*" PATTERN "*spacemit*.so*")
-#if (EXISTS "${ORT_HOME}/bin")
-#  install(DIRECTORY ${ORT_HOME}/bin DESTINATION lib/3rdparty/onnxruntime)
-#endif()

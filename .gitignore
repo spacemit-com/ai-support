@@ -1,8 +1,11 @@
 .vs
 .vscode
 
+*.rc
+
 out
 build*
 CMakeSettings.json
 
 /data
+/third_parties

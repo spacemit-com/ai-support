@@ -83,7 +83,7 @@ struct PYPoseEstimationTask {
   std::shared_ptr<PoseEstimationTask> task_;
 };
 
-PYBIND11_MODULE(support, m) {
+PYBIND11_MODULE(bianbuai_pybind11_state, m) {
   py::class_<ImageClassificationOption>(m, "ImageClassificationOption")
       .def(py::init())
       .def(py::init<const std::string &, const std::string &, const int &,

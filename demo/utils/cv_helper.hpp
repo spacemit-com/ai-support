@@ -28,9 +28,9 @@ void cvConfig() {
   }
   // smoke test to init opencv internal threads
   cv::parallel_for_(cv::Range(0, 16), [&](const cv::Range range) {
-#if 0
     std::ostringstream out;
     out << "Thread " << cv::getThreadNum() << "(opencv=" << cv::utils::getThreadID() << "): range " << range.start << "-" << range.end << std::endl;
+#if 0
     std::cout << out.str() << std::flush;
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 #endif

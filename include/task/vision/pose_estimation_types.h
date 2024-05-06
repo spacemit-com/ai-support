@@ -10,11 +10,8 @@ struct PosePoint {
   int y;
   float score;
 
-  PosePoint() {
-    x = 0;
-    y = 0;
-    score = 0.0;
-  }
+  PosePoint() : x(0), y(0), score(0.f) {}
+  PosePoint(int x, int y, float score) : x(x), y(y), score(score) {}
 };
 
 typedef PosePoint Vector2D;

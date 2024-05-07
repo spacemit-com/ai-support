@@ -20,8 +20,16 @@ make -j`nproc` bianbuai_pybind11_state VERBOSE=1
 cmake --build . --config Release --verbose
 ```
 
-## smoke test
+## smoke unittest
 
-```python
-import bianbuai_pybind11_state as bianbuai
+```shell
+# prepare env, e.g. with ubuntu22.04
+sudo apt install python3-pip && python3 -m pip install opencv-python
+# or just
+sudo apt install python3-opencv
+
+# run unittest under build diretctory
+ln -sf ../rootfs/usr/share/ai-support data
+cp ../tests/python/test_python_task.py .
+python3 test_python_task.py
 ```

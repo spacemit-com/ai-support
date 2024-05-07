@@ -61,12 +61,11 @@ int main(int argc, char* argv[]) {
       std::cout << "[ ERROR ] Read image failed" << std::endl;
       return -1;
     }
-    resizeUnscale(img_raw, img, 320, 320);
   }
   if (objectdetectiontask->getInitFlag() != 0) {
     return -1;
   }
-  bboxes = objectdetectiontask->Detect(img).result_bboxes;
+  bboxes = objectdetectiontask->Detect(img_raw).result_bboxes;
   if (poseestimationtask->getInitFlag() != 0) {
     return -1;
   }
@@ -76,22 +75,7 @@ int main(int argc, char* argv[]) {
     if (box.label != 0) {
       continue;
     }
-    points = poseestimationtask->Estimate(img, box).result_points;
-    if (points.size()) {
-      int input_height = 320;
-      int input_width = 320;
-      int img_height = img_raw.rows;
-      int img_width = img_raw.cols;
-      float resize_ratio = std::min(
-          static_cast<float>(input_height) / static_cast<float>(img_height),
-          static_cast<float>(input_width) / static_cast<float>(img_width));
-      float dw = (input_width - resize_ratio * img_width) / 2;
-      float dh = (input_height - resize_ratio * img_height) / 2;
-      for (size_t i = 0; i < points.size(); i++) {
-        points[i].x = (points[i].x - dw) / resize_ratio;
-        points[i].y = (points[i].y - dh) / resize_ratio;
-      }
-    }
+    points = poseestimationtask->Estimate(img_raw, box).result_points;
     for (size_t i = 0; i < points.size(); ++i) {
       cv::circle(img_raw, cv::Point(points[i].x, points[i].y), 2,
                  cv::Scalar{0, 0, 255}, 2, cv::LINE_AA);

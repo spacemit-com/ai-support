@@ -31,5 +31,13 @@ class OrtWrapper {
   std::unique_ptr<Ort::Env> env_;
   Ort::SessionOptions sessionOptions_;
   std::unique_ptr<Ort::Session> session_;
+  std::vector<const char*> input_node_names_;
+  std::vector<std::string> input_names_;
+  std::vector<const char*> output_node_names_;
+  std::vector<std::string> output_names_;
+  size_t num_inputs_;
+  size_t num_outputs_;
+  std::vector<size_t> input_tensor_size_;
+  std::vector<std::vector<int64_t>> input_node_dims_;
 };
 #endif  // SUPPORT_SRC_CORE_ORT_WRAPPER_H_

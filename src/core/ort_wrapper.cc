@@ -89,6 +89,43 @@ int OrtWrapper::Init(const std::string &instance_name,
     return -1;
   }
   session_ = std::move(session);
+
+  // init onnxruntime allocator.
+  Ort::AllocatorWithDefaultOptions allocator;
+
+  // input names initial and build
+  num_inputs_ = session_->GetInputCount();
+  input_node_names_.resize(num_inputs_);
+  input_names_.resize(num_inputs_, "");
+
+  for (size_t i = 0; i < num_inputs_; ++i) {
+    auto input_name = session_->GetInputNameAllocated(i, allocator);
+    input_names_[i].append(input_name.get());
+    input_node_names_[i] = input_names_[i].c_str();
+  }
+
+  // input node dims and input dims
+  input_node_dims_ = GetInputDims();
+
+  // input tensor size
+  input_tensor_size_.resize(input_node_dims_.size());
+  for (size_t i = 0; i < num_inputs_; ++i) {
+    input_tensor_size_[i] = 1;
+    for (size_t j = 0; j < input_node_dims_[i].size(); ++j) {
+      input_tensor_size_[i] *= input_node_dims_[i][j];
+    }
+  }
+
+  // output names initial and build
+  num_outputs_ = session_->GetOutputCount();
+  output_node_names_.resize(num_outputs_);
+  output_names_.resize(num_outputs_, "");
+
+  for (size_t i = 0; i < num_outputs_; ++i) {
+    auto output_name = session_->GetOutputNameAllocated(i, allocator);
+    output_names_[i].append(output_name.get());
+    output_node_names_[i] = output_names_[i].c_str();
+  }
   return 0;
 }
 
@@ -125,66 +162,20 @@ std::vector<Ort::Value> OrtWrapper::Invoke(
 #ifdef DEBUG
   TimeWatcher t("|-- Infer tensor");
 #endif
-  // init onnxruntime allocator.
-  Ort::AllocatorWithDefaultOptions allocator;
-
-  // input names initial and build
-  std::vector<const char *> input_node_names;
-  std::vector<std::string> input_names;
-  size_t num_inputs = session_->GetInputCount();
-  input_node_names.resize(num_inputs);
-  for (size_t i = 0; i < num_inputs; i++) {
-    input_names.push_back(std::string(""));
-  }
-
-  for (size_t i = 0; i < num_inputs; ++i) {
-    auto input_name = session_->GetInputNameAllocated(i, allocator);
-    input_names[i].append(input_name.get());
-    input_node_names[i] = input_names[i].c_str();
-  }
-
-  // input node dims and input dims
-  auto input_node_dims = GetInputDims();
-
-  // input tensor size
-  std::vector<size_t> input_tensor_size;
-  input_tensor_size.resize(input_node_dims.size());
-  for (size_t i = 0; i < num_inputs; ++i) {
-    input_tensor_size[i] = 1;
-    for (size_t j = 0; j < input_node_dims[i].size(); ++j) {
-      input_tensor_size[i] *= input_node_dims[i][j];
-    }
-  }
-
-  // output names initial and build
-  std::vector<const char *> output_node_names;
-  std::vector<std::string> output_names;
-  size_t num_outputs = session_->GetOutputCount();
-  output_node_names.resize(num_outputs);
-  for (size_t i = 0; i < num_outputs; i++) {
-    output_names.push_back(std::string(""));
-  }
-
-  for (size_t i = 0; i < num_outputs; ++i) {
-    auto output_name = session_->GetOutputNameAllocated(i, allocator);
-    output_names[i].append(output_name.get());
-    output_node_names[i] = output_names[i].c_str();
-  }
-
   // init and build input tensors
   std::vector<Ort::Value> input_tensors;
   Ort::MemoryInfo memoryInfo = Ort::MemoryInfo::CreateCpu(
       OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
 
-  for (size_t i = 0; i < num_inputs; i++) {
+  for (size_t i = 0; i < num_inputs_; i++) {
     input_tensors.push_back(Ort::Value::CreateTensor<float>(
-        memoryInfo, input_tensor_values[i].data(), input_tensor_size[i],
-        input_node_dims[i].data(), input_node_dims[i].size()));
+        memoryInfo, input_tensor_values[i].data(), input_tensor_size_[i],
+        input_node_dims_[i].data(), input_node_dims_[i].size()));
   }
 
   // run model
   auto outputTensors = session_->Run(
-      Ort::RunOptions{nullptr}, input_node_names.data(), input_tensors.data(),
-      num_inputs, output_node_names.data(), num_outputs);
+      Ort::RunOptions{nullptr}, input_node_names_.data(), input_tensors.data(),
+      num_inputs_, output_node_names_.data(), num_outputs_);
   return outputTensors;
 }

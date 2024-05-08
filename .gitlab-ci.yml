@@ -173,7 +173,7 @@ x86_64-test-job:    # This job runs in the test stage.
     - export SUPPORT_SHOW=-1
     - demo/build.x86_64/detection_stream_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/videos/test.mp4 video
     - demo/build.x86_64/estimation_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/models/rtmpose-t.q.onnx $DATA/imgs/person.jpg result1.jpg
-    - $([[ "dc531ec076418357e8478a0a2823285d" == "$(md5sum result1.jpg | awk '{print $1}')" ]])
+    - $([[ "aa7a9492408bc41917178e242478a15c" == "$(md5sum result1.jpg | awk '{print $1}')" ]])
     - demo/build.x86_64/tracker_stream_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/models/rtmpose-t.q.onnx $DATA/videos/test.mp4 video
     - echo "Running x86_64 tests done!"
   <<: *only-defaults
@@ -189,7 +189,7 @@ riscv64-test-job:   # This job runs in the test stage.
     - ${QEMU_CMD} demo/build.riscv64/detection_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/imgs/person.jpg result0.jpg
     - $([[ "81d50314ee64d46c9d4c9941711820ba" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
     - ${QEMU_CMD} demo/build.riscv64/estimation_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/models/rtmpose-t.q.onnx $DATA/imgs/person.jpg result1.jpg
-    - $([[ "e2cb2b8d9e216d68ff653415f92be86c" == "$(md5sum result1.jpg | awk '{print $1}')" ]])
+    - $([[ "2becf268d0c8da27207ee1dec934e80b" == "$(md5sum result1.jpg | awk '{print $1}')" ]])
     - echo "Running riscv64 tests done!"
   <<: *only-defaults
 

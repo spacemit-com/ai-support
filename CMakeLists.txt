@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11) # minimum version for FetchContent
+cmake_minimum_required(VERSION 3.10)
 
 file(READ ${CMAKE_SOURCE_DIR}/VERSION_NUMBER VERSION_CONTENT)
 string(STRIP "${VERSION_CONTENT}" VERSION_CONTENT)

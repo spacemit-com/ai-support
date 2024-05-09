@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.11) # minimum version for FetchContent
+
 if (NOT DEFINED OpenCV_SHARED OR OpenCV_SHARED STREQUAL "ON")
   message(WARNING "Python binding suggests to link static OpenCV libraries")
 endif()

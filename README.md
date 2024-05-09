@@ -79,8 +79,10 @@ label files format: using text document, [here](https://github.com/microsoft/onn
 
 configuration files format: using [json](https://github.com/nlohmann/json), the recommended configuration file content is as [here](https://gitlab.dc.com:8443/bianbu/ai/support/-/blob/main/rootfs/usr/share/ai-support/models/yolov6.json)
 
-### python module
-```bash
-./ci_build.sh --ort_dir=$PATH_TO_ONNXRUNTIME  --python=1
-```
-Improve cmake minimum required vesrion to 3.11 for FetchContent
+### Python Support
+
+See [README.md](./python/README.md) for more details.
+
+## TODO
+
+1. Add pybind11 resources to MANIFEST.in for `python setup.py sdist`;

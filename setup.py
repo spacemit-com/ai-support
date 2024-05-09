@@ -1,14 +1,13 @@
-import os
+import os, sys
 import subprocess
-import sys
 from collections import namedtuple
 from pathlib import Path
 import shutil
 
-from setuptools import Extension, setup
+from setuptools import Extension, setup, find_packages
 from setuptools.command.build_ext import build_ext
-from setuptools.command.install import install as InstallCommandBase
-from setuptools.command.install_lib import install_lib as InstallLibCommandBase
+#from setuptools.command.install import install as InstallCommandBase
+#from setuptools.command.install_lib import install_lib as InstallLibCommandBase
 
 package_name = "bianbuai"
 
@@ -34,7 +33,7 @@ class CMakeBuild(build_ext):
     def build_extension(self, ext: CMakeExtension) -> None:
         # Must be in this form due to bug in .resolve() only fixed in Python 3.10+
         ext_fullpath = Path.cwd() / self.get_ext_fullpath(ext.name)
-        extdir = ext_fullpath.parent.resolve()
+        extdir = ext_fullpath.parent.resolve() / package_name / "capi"
 
         # Using this requires trailing slash for auto-detection & inclusion of
         # auxiliary "native" libs
@@ -138,20 +137,6 @@ class CMakeBuild(build_ext):
         shutil.copytree(os.path.join(build_temp, "lib"), f"{extdir}", dirs_exist_ok=True,)
 
 
-class InstallLibCommand(InstallLibCommandBase):
-    def run(self):
-        self.build()
-        if os.path.isdir(self.build_dir):
-            outfiles = self.copy_tree(
-                self.build_dir, os.path.join(self.install_dir, package_name, "capi"))
-            if outfiles is not None:
-                # always compile, in case we have any extension stubs to deal with
-                self.byte_compile(outfiles)
-        else:
-            self.warn("'%s' does not exist -- no Python modules to install" %
-                      self.build_dir)
-
-
 # Get Git Version
 try:
     git_version = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=TOP_DIR).decode('ascii').strip()
@@ -204,8 +189,9 @@ if __name__ == "__main__":
         long_description_content_type="text/markdown",
         setup_requires=[],
         tests_require=[],
-        cmdclass={"build_ext": CMakeBuild, "install_lib": InstallLibCommand},
-        #packages=find_packages(exclude=["setup*.py"]),
+        cmdclass={"build_ext": CMakeBuild},
+        packages=find_packages("python", exclude=[]),
+        package_dir={"":"python"}, # tell distutils packages are under "python/"
         ext_modules=[CMakeExtension(package_name)],
         #package_data={},
         include_package_data=True,

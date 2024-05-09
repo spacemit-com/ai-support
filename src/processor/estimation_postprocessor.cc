@@ -21,8 +21,8 @@ void EstimationPostprocessor::Postprocess(
   int extend_width = simcc_x_dims[2];
   int extend_height = simcc_y_dims[2];
 
-  float *simcc_x_result = output_tensors[0].GetTensorMutableData<float>();
-  float *simcc_y_result = output_tensors[1].GetTensorMutableData<float>();
+  const float *simcc_x_result = output_tensors[0].GetTensorData<float>();
+  const float *simcc_y_result = output_tensors[1].GetTensorData<float>();
 
   for (int i = 0; i < joint_num; ++i) {
     // find the maximum and maximum indexes in the value of each Extend_width

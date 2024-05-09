@@ -28,7 +28,7 @@ cmake --install . --config Release --verbose --component pybind11 # --strip
 ```shell
 export ORT_HOME=${PATH_TO_ONNXRUNTIME}
 export OPENCV_DIR=${PATH_TO_OPENCV_CMAKE_DIR}
-python setup.py sdist bdist_wheel
+python python/setup.py sdist bdist_wheel
 ```
 
 ## smoke unittest

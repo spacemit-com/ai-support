@@ -11,8 +11,8 @@ from setuptools.command.build_ext import build_ext
 
 package_name = "bianbuai"
 
-SCRIPT_DIR = os.path.realpath(os.path.dirname(__file__))
-TOP_DIR = SCRIPT_DIR
+SCRIPT_DIR = os.path.dirname(__file__)
+TOP_DIR = os.path.realpath(os.path.join(SCRIPT_DIR, ".."))
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
 PLAT_TO_CMAKE = {
@@ -26,7 +26,7 @@ PLAT_TO_CMAKE = {
 class CMakeExtension(Extension):
     def __init__(self, name: str, sourcedir: str = "") -> None:
         super().__init__(name, sources=[])
-        self.sourcedir = os.fspath(Path(sourcedir).resolve())
+        self.sourcedir = TOP_DIR # os.fspath(Path(sourcedir).resolve())
 
 
 class CMakeBuild(build_ext):

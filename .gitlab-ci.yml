@@ -163,18 +163,29 @@ x86_64-test-job:    # This job runs in the test stage.
     - build-job-x86_64
   script:
     - echo "Running unit tests ... (This will take several seconds.)"
+    - export SUPPORT_SHOW=-1
+    # smoke test for image classification
     - export LD_LIBRARY_PATH=${ORT_HOME_X86}/lib:$LD_LIBRARY_PATH
     - result=`demo/build.x86_64/classification_demo $DATA/models/squeezenet1.1-7.onnx $DATA/models/synset.txt $DATA/imgs/dog.jpg`
     - $([[ ${result:0-30:8} == "Pembroke" ]])
+    # smoke test for object detection
     - demo/build.x86_64/detection_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/imgs/person.jpg result0.jpg
+    - $([[ "b604ad08d6283995ec8dcdbddc2482c2" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
+    - sed -i 's/\/usr/rootfs\/usr/g' $DATA/models/yolov6.json
+    - demo/build.x86_64/detection_demo $DATA/models/yolov6.json $DATA/imgs/person.jpg result0.jpg
     - $([[ "b604ad08d6283995ec8dcdbddc2482c2" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
     - demo/build.x86_64/detection_video_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/videos/test.mp4 test.avi
     - $([[ "760c5bb692fe302621265126f70bd7e9" == "$(md5sum test.avi | awk '{print $1}')" ]])
-    - export SUPPORT_SHOW=-1
     - demo/build.x86_64/detection_stream_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/videos/test.mp4
+    - demo/build.x86_64/detection_stream_demo $DATA/models/yolov6.json $DATA/videos/test.mp4
+    # smoke test for human pose estimation
     - demo/build.x86_64/estimation_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/models/rtmpose-t.q.onnx $DATA/imgs/person.jpg result1.jpg
     - $([[ "aa7a9492408bc41917178e242478a15c" == "$(md5sum result1.jpg | awk '{print $1}')" ]])
+    - sed -i 's/\/usr/rootfs\/usr/g' $DATA/models/rtmpose.json
+    - demo/build.x86_64/estimation_demo $DATA/models/yolov6.json $DATA/models/rtmpose.json $DATA/imgs/person.jpg result1.jpg
+    - $([[ "aa7a9492408bc41917178e242478a15c" == "$(md5sum result1.jpg | awk '{print $1}')" ]])
     - demo/build.x86_64/tracker_stream_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/models/rtmpose-t.q.onnx $DATA/videos/test.mp4
+    - demo/build.x86_64/tracker_stream_demo $DATA/models/yolov6.json $DATA/models/rtmpose.json $DATA/videos/test.mp4
     - echo "Running x86_64 tests done!"
   <<: *only-defaults
 
@@ -184,12 +195,21 @@ riscv64-test-job:   # This job runs in the test stage.
     - build-job-riscv64
   script:
     - echo "Running unit tests ... (This will take several seconds.)"
+    # smoke test for image classification
     - result=`${QEMU_CMD} demo/build.riscv64/classification_demo $DATA/models/squeezenet1.1-7.onnx $DATA/models/synset.txt $DATA/imgs/dog.jpg`
     - $([[ ${result:0-30:8} == "Pembroke" ]])
+    # smoke test for object detection
     - ${QEMU_CMD} demo/build.riscv64/detection_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/imgs/person.jpg result0.jpg
     - $([[ "81d50314ee64d46c9d4c9941711820ba" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
+    - sed -i 's/\/usr/rootfs\/usr/g' $DATA/models/yolov6.json
+    - ${QEMU_CMD} demo/build.riscv64/detection_demo $DATA/models/yolov6.json $DATA/imgs/person.jpg result0.jpg
+    - $([[ "81d50314ee64d46c9d4c9941711820ba" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
+    # smoke test for human pose estimation
     - ${QEMU_CMD} demo/build.riscv64/estimation_demo $DATA/models/yolov6p5_n.q.onnx $DATA/models/coco.txt $DATA/models/rtmpose-t.q.onnx $DATA/imgs/person.jpg result1.jpg
     - $([[ "2becf268d0c8da27207ee1dec934e80b" == "$(md5sum result1.jpg | awk '{print $1}')" ]])
+    - sed -i 's/\/usr/rootfs\/usr/g' $DATA/models/rtmpose.json
+    - ${QEMU_CMD} demo/build.riscv64/estimation_demo $DATA/models/yolov6.json $DATA/models/rtmpose.json $DATA/imgs/person.jpg result0.jpg
+    - $([[ "2becf268d0c8da27207ee1dec934e80b" == "$(md5sum result0.jpg | awk '{print $1}')" ]])
     - echo "Running riscv64 tests done!"
   <<: *only-defaults
 

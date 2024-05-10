@@ -5,6 +5,6 @@ Version=1.0.14
 Name=object-detection
 Name[en]=object-detection
 Name[zh_CN]=目标检测
-Exec=/usr/bin/detection_stream_demo /usr/share/ai-support/models/yolov6.json 0 camera_id
+Exec=/usr/bin/detection_stream_demo /usr/share/ai-support/models/yolov6.json 0
 Terminal=true
 Icon=/usr/share/icons/bianbu-ai-demo/object-detection.png

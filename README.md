@@ -46,18 +46,18 @@ or
 ./detection_demo <model_file_path> <label_file_path> <image_file_path> <save_img_path> 
 or 
 ./detection_demo <config_file_path> <image_file_path> <save_img_path>
-./detection_stream_demo <model_file_path> <label_file_path> <input> <input_type> (video or camera_id) option(-h <resize_height>) option(-w <resize_width>)
+./detection_stream_demo <model_file_path> <label_file_path> <input> option(-h <resize_height>) option(-w <resize_width>)
 or
-./detection_stream_demo <config_file_path> <input> <input_type> (video or camera_id) option(-h <resize_height>) option(-w <resize_width>)
+./detection_stream_demo <config_file_path> <input> option(-h <resize_height>) option(-w <resize_width>)
 ./detection_video_demo <model_file_path> <label_file_path> <video_file_path> <dst_file_path> (end with .avi)
 or
 ./detection_video_demo <config_file_path> <video_file_path> <dst_file_path> (end with .avi)
 ./estimation_demo <det_model_file_path> <det_label_file_path> <pose_model_file_path> <image_file_path> <save_img_path> 
 or
 ./estimation_demo <det_config_file_path> <pose_config_file_path> <image_file_path> <save_img_path> 
-./tracker_stream_demo <det_model_file_path> <det_label_file_path> <pose_model_file_path> <input> <input_type> (video or cameraId) option(-h <resize_height>) option(-w <resize_width>)
+./tracker_stream_demo <det_model_file_path> <det_label_file_path> <pose_model_file_path> <input> option(-h <resize_height>) option(-w <resize_width>)
 or
-./tracker_stream_demo <det_config_file_path> <pose_config_file_path> <input> <input_type> (video or cameraId) option(-h <resize_height>) option(-w <resize_width>)
+./tracker_stream_demo <det_config_file_path> <pose_config_file_path> <input> option(-h <resize_height>) option(-w <resize_width>)
 ```
 
 ### Using environment variables to implement functions

@@ -239,7 +239,7 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
 int main(int argc, char* argv[]) {
   cvConfig();
 
-  std::string det_file_path, pose_file_path, input, input_type;
+  std::string det_file_path, pose_file_path, input;
   int resize_height{320}, resize_width{320};
   ObjectDetectionOption detection_option;
   PoseEstimationOption estimation_option;
@@ -259,32 +259,28 @@ int main(int argc, char* argv[]) {
         break;
     }
   }
-  if (argc - optind == 4) {
+  if (argc - optind == 3) {
     det_file_path = argv[optind];
     pose_file_path = argv[optind + 1];
     input = argv[optind + 2];
-    input_type = argv[optind + 3];
     tracker =
         std::unique_ptr<Tracker>(new Tracker(det_file_path, pose_file_path));
-  } else if (argc - optind == 5) {
+  } else if (argc - optind == 4) {
     detection_option.model_path = argv[optind];
     detection_option.label_path = argv[optind + 1];
     estimation_option.model_path = argv[optind + 2];
     input = argv[optind + 3];
-    input_type = argv[optind + 4];
     tracker = std::unique_ptr<Tracker>(
         new Tracker(detection_option, estimation_option));
   } else {
-    std::cout
-        << "Please run with " << argv[0]
-        << " <det_model_file_path> <det_label_file_path> "
-           "<pose_model_file_path> <input> <input_type> (video or cameraId "
-           "option(-h <resize_height>) option(-w <resize_width>) or "
-        << argv[0]
-        << " <det_config_file_path> <pose_config_file_path> <input> "
-           "<input_type> (video or cameraId option(-h <resize_height>) "
-           "option(-w <resize_width>)"
-        << std::endl;
+    std::cout << "Please run with " << argv[0]
+              << " <det_model_file_path> <det_label_file_path> "
+                 "<pose_model_file_path> <input> option(-h <resize_height>) "
+                 "option(-w <resize_width>) or "
+              << argv[0]
+              << " <det_config_file_path> <pose_config_file_path> <input> "
+                 "option(-h <resize_height>) option(-w <resize_width>)"
+              << std::endl;
     return -1;
   }
   SharedDataLoader dataloader{resize_height, resize_width};

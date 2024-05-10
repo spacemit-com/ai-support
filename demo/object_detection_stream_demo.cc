@@ -227,7 +227,7 @@ void Preview(DataLoader& dataloader, Detector& detector) {
 int main(int argc, char* argv[]) {
   cvConfig();
 
-  std::string config_file_path, input, input_type;
+  std::string config_file_path, input;
   ObjectDetectionOption option;
   int resize_height{320}, resize_width{320};
   std::unique_ptr<Detector> detector;
@@ -246,26 +246,22 @@ int main(int argc, char* argv[]) {
         break;
     }
   }
-  if (argc - optind == 3) {
+  if (argc - optind == 2) {
     config_file_path = argv[optind];
     input = argv[optind + 1];
-    input_type = argv[optind + 2];
     detector = std::unique_ptr<Detector>(new Detector(config_file_path));
-  } else if (argc - optind == 4) {
+  } else if (argc - optind == 3) {
     option.model_path = argv[optind];
     option.label_path = argv[optind + 1];
     input = argv[optind + 2];
-    input_type = argv[optind + 3];
     detector = std::unique_ptr<Detector>(new Detector(option));
   } else {
     std::cout << "Please run with " << argv[0]
-              << " <model_file_path> <label_file_path> <input> <input_type> "
-                 "(video or camera_id) option(-h <resize_height>) option(-w "
-                 "<resize_width>) or "
+              << " <model_file_path> <label_file_path> <input> option(-h "
+                 "<resize_height>) option(-w <resize_width>) or "
               << argv[0]
-              << " <config_file_path> <input> <input_type> (video "
-                 "or camera_id) option(-h <resize_height>) option(-w "
-                 "<resize_width>)"
+              << " <config_file_path> <input> option(-h <resize_height>) "
+                 "option(-w <resize_width>)"
               << std::endl;
     return -1;
   }

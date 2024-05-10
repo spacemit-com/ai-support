@@ -77,8 +77,8 @@ task_detection=(
   "${BIN_DIR}/detection_demo data/models/nanodet-plus-m_320.onnx data/imgs/person0.jpg result0.jpg data/labels/coco.txt"
   "${BIN_DIR}/detection_demo data/models/nanodet-plus-m_320.int8.onnx data/imgs/person0.jpg result0.int8.jpg data/labels/coco.txt"
   "${BIN_DIR}/detection_video_demo data/models/nanodet-plus-m_320.int8.onnx data/labels/coco.txt data/videos/test.mp4 test.avi"
-  "${BIN_DIR}/detection_stream_demo data/models/nanodet-plus-m_320.int8.onnx data/labels/coco.txt data/videos/test.mp4 video"
-  "${BIN_DIR}/detection_stream_demo data/models/nanodet-plus-m_320.int8.onnx data/labels/coco.txt 0 cameraId"
+  "${BIN_DIR}/detection_stream_demo data/models/nanodet-plus-m_320.int8.onnx data/labels/coco.txt data/videos/test.mp4"
+  "${BIN_DIR}/detection_stream_demo data/models/nanodet-plus-m_320.int8.onnx data/labels/coco.txt 0"
 )
 function smoke_test() {
   # preparation(e.g. download models)

@@ -14,6 +14,8 @@ python3 -m pip install wheel setuptools
 * cmake project
 
 ```shell
+git submodule update --init --recursive
+
 mkdir build && cd build
 # Note: static opencv libraries is required
 cmake .. -DORT_HOME=${PATH_TO_ONNXRUNTIME} -DOpenCV_DIR=${PATH_TO_OPENCV_CMAKE_DIR} -DPYTHON=ON

@@ -3,3 +3,9 @@ graft include
 graft python
 graft src
 graft tests
+recursive-include pybind11/include/pybind11 *.h
+recursive-include pybind11 *.py
+recursive-include pybind11 py.typed
+recursive-include pybind11 *.pyi
+include pybind11/share/cmake/pybind11/*.cmake
+include CMakeLists.txt

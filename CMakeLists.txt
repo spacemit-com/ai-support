@@ -4,15 +4,15 @@ file(READ ${CMAKE_SOURCE_DIR}/VERSION_NUMBER VERSION_CONTENT)
 string(STRIP "${VERSION_CONTENT}" VERSION_CONTENT)
 project(bianbuai-support-library VERSION ${VERSION_CONTENT})
 
-include(${CMAKE_SOURCE_DIR}/src/CMakeLists.txt)
-
 option(PYTHON "Option for Python" OFF)
 option(DEMO   "Option for Demo"   OFF)
 option(XDG    "Option for XDG autostart support"  OFF)
 
 if (PYTHON)
-  include(${CMAKE_SOURCE_DIR}/python/CMakeLists.txt)
+  add_subdirectory(${CMAKE_SOURCE_DIR}/pybind11)
 endif()
+
+add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 
 if (DEMO)
   set(BIANBUAI_HOME ${CMAKE_SOURCE_DIR})  # useless but necessary

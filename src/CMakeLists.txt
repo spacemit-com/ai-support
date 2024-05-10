@@ -78,3 +78,7 @@ install(TARGETS bianbuai
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/task ${CMAKE_SOURCE_DIR}/include/utils
         DESTINATION include/bianbuai
         FILES_MATCHING PATTERN "*.h")
+
+if (PYTHON)
+  include(${CMAKE_SOURCE_DIR}/python/bianbuai_pybind11_state.cmake)
+endif()

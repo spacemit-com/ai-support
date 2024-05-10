@@ -1,9 +1,6 @@
 #ifndef _BASE_VISION_TASK_API_H_
 #define _BASE_VISION_TASK_API_H_
 
-#include <string>
-#include <vector>
-
 #include "opencv2/opencv.hpp"
 #include "src/task/core/base_task_api.h"
 #include "task/vision/object_detection_types.h"

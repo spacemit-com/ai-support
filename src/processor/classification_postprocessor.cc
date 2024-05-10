@@ -1,6 +1,8 @@
-#include "src/processor/classification_postprocessor.h"
+#include "classification_postprocessor.h"
 
-#include <limits>  // for numeric_limits<>
+#include <cmath>      // for: std::exp
+#include <limits>     // for: numeric_limits<>
+#include <stdexcept>  // for: runtime_error
 
 #include "utils/time.h"
 

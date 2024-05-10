@@ -1,11 +1,9 @@
-#include "src/task/vision/poseestimation/pose_estimation.h"
+#include "pose_estimation.h"
 
 #include <chrono>
 
-#include "src/utils/json.hpp"
+#include "src/utils/cv2_utils.h"  // for: CHW
 #include "utils/time.h"
-
-using json = nlohmann::json;
 
 PoseEstimationResult PoseEstimation::Estimate(const cv::Mat &img_raw,
                                               const Boxi &box) {

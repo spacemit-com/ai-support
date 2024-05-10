@@ -1,9 +1,8 @@
-#include "src/processor/estimation_preprocessor.h"
+#include "estimation_preprocessor.h"
 
 #include "src/utils/cv2_utils.h"
 #include "src/utils/nms_utils.h"
 #include "utils/time.h"
-#include "utils/utils.h"
 
 void EstimationPreprocessor::Preprocess(
     const cv::Mat& mat, const Boxi& box,

@@ -1,4 +1,4 @@
-#include "src/processor/detection_preprocessor.h"
+#include "detection_preprocessor.h"
 
 #include "utils/time.h"
 #include "utils/utils.h"

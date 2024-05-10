@@ -1,9 +1,9 @@
-#include "src/core/ort_wrapper.h"
+#include "ort_wrapper.h"
 
 #include <stdlib.h>  // for: getenv atoi
 
 #include <memory>
-#include <utility>  // for move
+#include <utility>  // for: move
 
 #ifdef _WIN32
 #include "src/utils/utils.h"

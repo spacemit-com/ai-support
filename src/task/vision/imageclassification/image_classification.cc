@@ -1,9 +1,9 @@
-#include "src/task/vision/imageclassification/image_classification.h"
+#include "image_classification.h"
 
 #include <iostream>
 
+#include "src/utils/utils.h"
 #include "utils/time.h"
-#include "utils/utils.h"
 
 int ImageClassification::InitFromOption(
     const ImageClassificationOption &option) {

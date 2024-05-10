@@ -2,7 +2,6 @@
 #define SUPPORT_SRC_PROCESSOR_ESTIMATION_PREPROCESSOR_H_
 
 #include <chrono>
-#include <string>
 #include <utility>
 #include <vector>
 

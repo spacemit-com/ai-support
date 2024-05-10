@@ -2,14 +2,12 @@
 #define SUPPORT_INCLUDE_TASK_VISION_IMAGE_CLASSIFICATION_TASK_H_
 
 #include <memory>  // for: shared_ptr
-#include <string>
 
 #include "opencv2/opencv.hpp"
 #include "task/vision/image_classification_types.h"
 
 class ImageClassificationTask {
  public:
-  explicit ImageClassificationTask(const std::string& config_file_path);
   explicit ImageClassificationTask(const ImageClassificationOption& option);
   ~ImageClassificationTask() = default;
   ImageClassificationResult Classify(const cv::Mat& img_raw);

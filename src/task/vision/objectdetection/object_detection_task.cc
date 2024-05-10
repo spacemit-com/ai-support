@@ -1,8 +1,6 @@
 #include "task/vision/object_detection_task.h"
 
-#include "include/utils/utils.h"
-#include "src/task/vision/objectdetection/object_detection.h"
-#include "src/utils/utils.h"
+#include "object_detection.h"
 
 class ObjectDetectionTask::impl {
  public:
@@ -15,17 +13,6 @@ ObjectDetectionTask::ObjectDetectionTask(const ObjectDetectionOption &option)
   pimpl_->objectdetection_ =
       std::unique_ptr<ObjectDetection>(new ObjectDetection());
   init_flag_ = pimpl_->objectdetection_->InitFromOption(option);
-}
-
-ObjectDetectionTask::ObjectDetectionTask(const std::string &config_file_path)
-    : pimpl_(std::make_unique<impl>()) {
-  init_flag_ = -1;
-  pimpl_->objectdetection_ =
-      std::unique_ptr<ObjectDetection>(new ObjectDetection());
-  ObjectDetectionOption option;
-  if (!configToOption(config_file_path, option)) {
-    init_flag_ = pimpl_->objectdetection_->InitFromOption(option);
-  }
 }
 
 int ObjectDetectionTask::getInitFlag() { return init_flag_; }

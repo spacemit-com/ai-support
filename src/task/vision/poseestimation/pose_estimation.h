@@ -1,17 +1,14 @@
 #ifndef SUPPORT_SRC_TASK_VISION_POSEESTIMATION_POSE_ESTIMATION_H_
 #define SUPPORT_SRC_TASK_VISION_POSEESTIMATION_POSE_ESTIMATION_H_
 
-#include <iostream>
 #include <string>
 #include <utility>  // for pair<>
 #include <vector>
 
 #include "opencv2/opencv.hpp"
-#include "src/core/engine.h"
 #include "src/processor/estimation_postprocessor.h"
 #include "src/processor/estimation_preprocessor.h"
 #include "src/task/vision/base_vision_task_api.h"
-#include "src/utils/cv2_utils.h"
 #include "task/vision/pose_estimation_types.h"
 
 class PoseEstimation : public BaseVisionTaskApi<PoseEstimationResult> {

@@ -1,4 +1,4 @@
-#include "src/processor/classification_preprocessor.h"
+#include "classification_preprocessor.h"
 
 #include "utils/time.h"
 

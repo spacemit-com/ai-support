@@ -1,15 +1,12 @@
 #ifndef SUPPORT_SRC_PROCESSOR_ESTIMATION_POSTPROCESSOR_H_
 #define SUPPORT_SRC_PROCESSOR_ESTIMATION_POSTPROCESSOR_H_
 
-#include <algorithm>
-#include <iostream>
-#include <string>
+#include <utility>  // for std::pair
 #include <vector>
 
+#include "opencv2/opencv.hpp"
 #include "onnxruntime_cxx_api.h"
 #include "src/processor/processor.h"
-#include "src/utils/nms_utils.h"
-#include "src/utils/utils.h"
 #include "task/vision/pose_estimation_types.h"
 
 class EstimationPostprocessor : public Postprocessor {

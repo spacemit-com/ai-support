@@ -2,15 +2,13 @@
 #define SUPPORT_INCLUDE_TASK_VISION_OBJECT_DETECTION_TASK_H_
 
 #include <memory>  // for: shared_ptr
-#include <string>
-#include <vector>  //for: vector
+#include <vector>  // for: vector
 
 #include "opencv2/opencv.hpp"
 #include "task/vision/object_detection_types.h"
 
 class ObjectDetectionTask {
  public:
-  explicit ObjectDetectionTask(const std::string &config_file_path);
   explicit ObjectDetectionTask(const ObjectDetectionOption &option);
   ~ObjectDetectionTask() = default;
   ObjectDetectionResult Detect(const cv::Mat &img_raw);

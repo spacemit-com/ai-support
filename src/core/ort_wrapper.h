@@ -1,10 +1,7 @@
 #ifndef SUPPORT_SRC_CORE_ORT_WRAPPER_H_
 #define SUPPORT_SRC_CORE_ORT_WRAPPER_H_
 
-#include <cmath>
-#include <iostream>
 #include <memory>
-#include <numeric>
 #include <string>
 #include <vector>
 

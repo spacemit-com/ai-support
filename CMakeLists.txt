@@ -7,16 +7,11 @@ project(bianbuai-support-library VERSION ${VERSION_CONTENT})
 include(${CMAKE_SOURCE_DIR}/src/CMakeLists.txt)
 
 option(PYTHON "Option for Python" OFF)
-option(TEST   "Option for Test"   ON)
 option(DEMO   "Option for Demo"   OFF)
 option(XDG    "Option for XDG autostart support"  OFF)
 
 if (PYTHON)
   include(${CMAKE_SOURCE_DIR}/python/CMakeLists.txt)
-endif()
-
-if (TEST)
-  add_subdirectory(${CMAKE_SOURCE_DIR}/tests)
 endif()
 
 if (DEMO)

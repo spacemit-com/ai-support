@@ -1,22 +1,13 @@
 #ifndef SUPPORT_SRC_TASK_VISION_ImageClassification_IMAGE_CLASSIFICATION_H_
 #define SUPPORT_SRC_TASK_VISION_ImageClassification_IMAGE_CLASSIFICATION_H_
 
-#include <cmath>
-#include <exception>
-#include <fstream>
-#include <iostream>
-#include <limits>
-#include <memory>
-#include <numeric>
 #include <string>
 #include <vector>
 
 #include "opencv2/opencv.hpp"
-#include "src/core/engine.h"
 #include "src/processor/classification_postprocessor.h"
 #include "src/processor/classification_preprocessor.h"
 #include "src/task/vision/base_vision_task_api.h"
-#include "src/utils/utils.h"
 #include "task/vision/image_classification_types.h"
 
 class ImageClassification

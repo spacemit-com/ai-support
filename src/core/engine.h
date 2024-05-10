@@ -5,7 +5,8 @@
 #include <vector>
 
 #include "opencv2/opencv.hpp"
-#include "src/core/ort_wrapper.h"
+#include "ort_wrapper.h"
+
 class Engine {
  public:
   Engine() { OrtWrapper ortwrapper_; }

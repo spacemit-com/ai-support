@@ -1,8 +1,7 @@
-#ifndef SUPPORT_SRC_UTILS_NMS_UTILS_H_
-#define SUPPORT_SRC_UTILS_NMS_UTILS_H_
-#include "src/utils/nms_utils.h"
+#include "nms_utils.h"
 
 #include <algorithm>
+#include <cmath>  // for: std::exp
 #include <vector>
 
 #include "task/vision/object_detection_types.h"
@@ -147,5 +146,3 @@ void offset_nms(std::vector<Boxf> &input, std::vector<Boxf> &output,
     }
   }
 }
-
-#endif  // SUPPORT_SRC_UTILS_NMS_UTILS_H_

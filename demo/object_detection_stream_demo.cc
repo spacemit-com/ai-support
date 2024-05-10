@@ -15,28 +15,19 @@
 #include "opencv2/opencv.hpp"
 #include "task/vision/object_detection_task.h"
 #include "utils/cv_helper.hpp"
+#include "utils/json_helper.hpp"
 #ifdef DEBUG
 #include "utils/time.h"
 #endif
 
-#include "utils/utils.h"
-
 class Detector {
  public:
-  explicit Detector(const std::string& config_file_path) {
-    config_file_path_ = config_file_path;
-  }
   explicit Detector(ObjectDetectionOption& option) { option_ = option; }
   ~Detector() {}
   // 初始化/反初始化
   int init() {
-    if (!config_file_path_.empty()) {
-      objectdetectiontask_ = std::unique_ptr<ObjectDetectionTask>(
-          new ObjectDetectionTask(config_file_path_));
-    } else {
-      objectdetectiontask_ = std::unique_ptr<ObjectDetectionTask>(
-          new ObjectDetectionTask(option_));
-    }
+    objectdetectiontask_ =
+        std::unique_ptr<ObjectDetectionTask>(new ObjectDetectionTask(option_));
     return getInitFlag();
   }
 
@@ -72,7 +63,6 @@ class Detector {
   std::mutex objs_mutex_;
   std::queue<struct ObjectDetectionResult> objs_array_;
   std::unique_ptr<ObjectDetectionTask> objectdetectiontask_;
-  std::string config_file_path_;
   ObjectDetectionOption option_;
 };
 
@@ -159,24 +149,16 @@ void Preview(DataLoader& dataloader, Detector& detector) {
               (objs.result_bboxes[i].y2 - dh) / resize_ratio;
         }
       }
-      {
-#ifdef DEBUG
-        TimeWatcher t("|-- Output result");
-#endif
-        for (size_t i = 0; i < objs.result_bboxes.size(); i++) {
-          std::cout << "bbox[" << std::setw(2) << i << "]"
-                    << " "
-                    << "x1y1x2y2: "
-                    << "(" << std::setw(4) << objs.result_bboxes[i].x1 << ","
-                    << std::setw(4) << objs.result_bboxes[i].y1 << ","
-                    << std::setw(4) << objs.result_bboxes[i].x2 << ","
-                    << std::setw(4) << objs.result_bboxes[i].y2 << ")"
-                    << ", "
-                    << "score: " << std::fixed << std::setprecision(3)
-                    << std::setw(4) << objs.result_bboxes[i].score << ", "
-                    << "label_text: " << objs.result_bboxes[i].label_text
-                    << std::endl;
-        }
+      for (size_t i = 0; i < objs.result_bboxes.size(); i++) {
+        std::cout << "bbox[" << std::setw(2) << i << "] x1y1x2y2: ("
+                  << std::setw(4) << objs.result_bboxes[i].x1 << ","
+                  << std::setw(4) << objs.result_bboxes[i].y1 << ","
+                  << std::setw(4) << objs.result_bboxes[i].x2 << ","
+                  << std::setw(4) << objs.result_bboxes[i].y2 << "), "
+                  << "score: " << std::fixed << std::setprecision(3)
+                  << std::setw(4) << objs.result_bboxes[i].score << ", "
+                  << "label_text: " << objs.result_bboxes[i].label_text
+                  << std::endl;
       }
     }
     // 调用 detector.detected 和 detector.get_object 期间,
@@ -224,14 +206,22 @@ void Preview(DataLoader& dataloader, Detector& detector) {
   }
 }
 
+static void usage(const char* exe) {
+  std::cout
+      << "Usage: \n"
+      << exe
+      << " <model_path> <label_path> <input> [-h <resize_height>] [-w "
+         "<resize_width>]\n"
+      << exe
+      << " <config_path> <input> [-h <resize_height>] [-w <resize_width>]\n";
+}
+
 int main(int argc, char* argv[]) {
   cvConfig();
 
-  std::string config_file_path, input;
   ObjectDetectionOption option;
-  int resize_height{320}, resize_width{320};
-  std::unique_ptr<Detector> detector;
-  int o;
+  std::string input;
+  int o, resize_height{320}, resize_width{320};
   const char* optstring = "w:h:";
   while ((o = getopt(argc, argv, optstring)) != -1) {
     switch (o) {
@@ -247,24 +237,21 @@ int main(int argc, char* argv[]) {
     }
   }
   if (argc - optind == 2) {
-    config_file_path = argv[optind];
+    if (configToOption(argv[optind], option) != 0) {
+      return -1;
+    }
     input = argv[optind + 1];
-    detector = std::unique_ptr<Detector>(new Detector(config_file_path));
   } else if (argc - optind == 3) {
     option.model_path = argv[optind];
     option.label_path = argv[optind + 1];
     input = argv[optind + 2];
-    detector = std::unique_ptr<Detector>(new Detector(option));
   } else {
-    std::cout << "Please run with " << argv[0]
-              << " <model_file_path> <label_file_path> <input> option(-h "
-                 "<resize_height>) option(-w <resize_width>) or "
-              << argv[0]
-              << " <config_file_path> <input> option(-h <resize_height>) "
-                 "option(-w <resize_width>)"
-              << std::endl;
+    usage(argv[0]);
     return -1;
   }
+
+  std::unique_ptr<Detector> detector =
+      std::unique_ptr<Detector>(new Detector(option));
   SharedDataLoader dataloader{resize_height, resize_width};
   if (dataloader.init(input) != 0) {
     std::cout << "[ ERROR ] Dataloader init error" << std::endl;

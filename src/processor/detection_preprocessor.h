@@ -1,12 +1,10 @@
 #ifndef SUPPORT_SRC_PROCESSOR_DETECTION_PREPROCESSOR_H_
 #define SUPPORT_SRC_PROCESSOR_DETECTION_PREPROCESSOR_H_
 
-#include <chrono>
-#include <string>
 #include <vector>
 
 #include "opencv2/opencv.hpp"
-#include "src/processor/processor.h"
+#include "processor.h"
 #include "src/utils/cv2_utils.h"
 #include "src/utils/nms_utils.h"
 

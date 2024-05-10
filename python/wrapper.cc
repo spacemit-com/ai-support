@@ -14,7 +14,7 @@
 #include "task/vision/pose_estimation_task.h"
 #include "task/vision/pose_estimation_types.h"
 #include "utils.h"
-#include "utils/utils.h"
+
 namespace py = pybind11;
 
 struct PYImageClassificationTask {

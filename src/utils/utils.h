@@ -2,8 +2,7 @@
 #define SUPPORT_SRC_UTILS_UTILS_H_
 
 #include <string>
-
-#include "include/utils/utils.h"
+#include <vector>
 
 std::vector<std::string> readLabels(const std::string& labelFilepath);
 

@@ -1,16 +1,13 @@
 #ifndef SUPPORT_SRC_TASK_VISION_OBJECTDETECTION_OBJECT_DETECTION_H_
 #define SUPPORT_SRC_TASK_VISION_OBJECTDETECTION_OBJECT_DETECTION_H_
 
-#include <iostream>
 #include <string>
 #include <vector>
 
 #include "opencv2/opencv.hpp"
-#include "src/core/engine.h"
 #include "src/processor/detection_postprocessor.h"
 #include "src/processor/detection_preprocessor.h"
 #include "src/task/vision/base_vision_task_api.h"
-#include "src/utils/utils.h"
 #include "task/vision/object_detection_types.h"
 
 class ObjectDetection : public BaseVisionTaskApi<ObjectDetectionResult> {

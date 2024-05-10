@@ -1,15 +1,11 @@
 #ifndef SUPPORT_SRC_PROCESSOR_DETECTION_POSTPROCESSOR_H_
 #define SUPPORT_SRC_PROCESSOR_DETECTION_POSTPROCESSOR_H_
 
-#include <algorithm>
-#include <iostream>
-#include <string>
 #include <vector>
 
 #include "onnxruntime_cxx_api.h"
-#include "src/processor/processor.h"
+#include "processor.h"
 #include "src/utils/nms_utils.h"
-#include "src/utils/utils.h"
 #include "task/vision/object_detection_types.h"
 
 class DetectionPostprocessor : public Postprocessor {

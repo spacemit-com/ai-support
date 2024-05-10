@@ -1,7 +1,6 @@
-#include "src/core/engine.h"
+#include "engine.h"
 
 #include "src/utils/utils.h"
-#include "utils/utils.h"
 
 int Engine::Init(const std::string &instance_name,
                  const std::string &model_file_path,

@@ -209,11 +209,11 @@ void Preview(DataLoader& dataloader, Detector& detector) {
 static void usage(const char* exe) {
   std::cout << "Usage: \n"
             << exe
-            << " <model_path> <label_path> <input> [-h <resize_height>] [-w "
-               "<resize_width>] [-f]\n"
+            << " [-h <resize_height>] [-w <resize_width>] [-f] <model_path> "
+               "<label_path> <input>\n"
             << exe
-            << " <config_path> <input> [-h <resize_height>] [-w "
-               "<resize_width>] [-f]\n";
+            << " [-h <resize_height>] [-w <resize_width>] [-f] <config_path> "
+               "<input>\n";
 }
 
 int main(int argc, char* argv[]) {

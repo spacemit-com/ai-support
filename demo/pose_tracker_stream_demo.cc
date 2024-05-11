@@ -226,12 +226,12 @@ void Preview(DataLoader& dataloader, Tracker& tracker) {
 static void usage(const char* exe) {
   std::cout << "Usage: \n"
             << exe
-            << " <detection_model_path> <detection_label_path> "
-               "<pose_point_model_path> <input> [-h <resize_height>] "
-               "[-w <resize_width>] [-f]\n"
+            << " [-h <resize_height>] [-w <resize_width>] [-f] "
+               "<detection_model_path> <detection_label_path> "
+               "<pose_point_model_path> <input>\n"
             << exe
-            << " <detection_config_path> <pose_point_config_path> <input> [-h "
-               "<resize_height>] [-w <resize_width>] [-f]\n";
+            << " [-h <resize_height>] [-w <resize_width>] [-f] "
+               "<detection_config_path> <pose_point_config_path> <input>\n";
 }
 
 int main(int argc, char* argv[]) {

@@ -207,13 +207,13 @@ void Preview(DataLoader& dataloader, Detector& detector) {
 }
 
 static void usage(const char* exe) {
-  std::cout
-      << "Usage: \n"
-      << exe
-      << " <model_path> <label_path> <input> [-h <resize_height>] [-w "
-         "<resize_width>]\n"
-      << exe
-      << " <config_path> <input> [-h <resize_height>] [-w <resize_width>]\n";
+  std::cout << "Usage: \n"
+            << exe
+            << " <model_path> <label_path> <input> [-h <resize_height>] [-w "
+               "<resize_width>] [-f]\n"
+            << exe
+            << " <config_path> <input> [-h <resize_height>] [-w "
+               "<resize_width>] [-f]\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -221,8 +221,8 @@ int main(int argc, char* argv[]) {
 
   ObjectDetectionOption option;
   std::string input;
-  int o, resize_height{320}, resize_width{320};
-  const char* optstring = "w:h:";
+  int o, resize_height{320}, resize_width{320}, flip{0};
+  const char* optstring = "w:h:f";
   while ((o = getopt(argc, argv, optstring)) != -1) {
     switch (o) {
       case 'w':
@@ -230,6 +230,9 @@ int main(int argc, char* argv[]) {
         break;
       case 'h':
         resize_height = atoi(optarg);
+        break;
+      case 'f':
+        flip = 1;
         break;
       case '?':
         std::cout << "[ ERROR ] Unsupported usage" << std::endl;
@@ -252,7 +255,7 @@ int main(int argc, char* argv[]) {
 
   std::unique_ptr<Detector> detector =
       std::unique_ptr<Detector>(new Detector(option));
-  SharedDataLoader dataloader{resize_height, resize_width};
+  SharedDataLoader dataloader{resize_height, resize_width, flip};
   if (dataloader.init(input) != 0) {
     std::cout << "[ ERROR ] Dataloader init error" << std::endl;
     return -1;

@@ -13,12 +13,13 @@
 
 class DataLoader {
  public:
-  DataLoader(const int& resize_height, const int& resize_width) {
+  DataLoader(const int& resize_height, const int& resize_width, const int& flip = 0) {
     enable = true;
     resize_height_ = resize_height;
     resize_width_ = resize_width;
     preview_fps_ = 0;
     detection_fps_ = 0;
+    flip_ = flip;
   }
   ~DataLoader() {}
   bool ifEnable() { return enable; }
@@ -32,6 +33,9 @@ class DataLoader {
   virtual cv::Mat fetchFrame() = 0;
   virtual cv::Mat peekFrame() = 0;
 
+ protected:
+  int flip_{0};
+
  private:
   bool enable;
   int resize_height_;
@@ -43,8 +47,8 @@ class DataLoader {
 // 独占式
 class ExclusiveDataLoader : public DataLoader {
  public:
-  ExclusiveDataLoader(const int& resize_height, const int& resize_width)
-      : DataLoader(resize_height, resize_width) {}
+  ExclusiveDataLoader(const int& resize_height, const int& resize_width, const int& flip = 0)
+      : DataLoader(resize_height, resize_width, flip) {}
   ~ExclusiveDataLoader() {}
   int init(const std::string& path) {
     capture_.open(path);
@@ -67,6 +71,9 @@ class ExclusiveDataLoader : public DataLoader {
   cv::Mat fetchFrame() {
     cv::Mat frame;
     capture_.read(frame);
+    if (flip_ && !frame.empty()) {
+      cv::flip(frame, frame, 1);
+    }
     return frame;
   }
   cv::Mat peekFrame() { return fetchFrame(); }
@@ -110,8 +117,8 @@ inline bool isNumber(const std::string& str) {
 // 共享式
 class SharedDataLoader : public DataLoader {
  public:
-  SharedDataLoader(const int& resize_height, const int& resize_width)
-      : DataLoader(resize_height, resize_width) {}
+  SharedDataLoader(const int& resize_height, const int& resize_width, const int& flip = 0)
+      : DataLoader(resize_height, resize_width, flip) {}
   ~SharedDataLoader() {}
 
   int init(const std::string& path) {
@@ -151,6 +158,9 @@ class SharedDataLoader : public DataLoader {
     capture_.read(frame);
     if (!frame.empty()) {
       frame_mutex_.lock();
+      if (flip_ && !frame.empty()) {
+        cv::flip(frame, frame, 1);
+      }
       resizeUnscale(frame, frame_, getResizeHeight(), getResizeWidth());
       frame_mutex_.unlock();
     }

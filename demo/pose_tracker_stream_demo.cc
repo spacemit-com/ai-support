@@ -228,10 +228,10 @@ static void usage(const char* exe) {
             << exe
             << " <detection_model_path> <detection_label_path> "
                "<pose_point_model_path> <input> [-h <resize_height>] "
-               "[-w <resize_width>]\n"
+               "[-w <resize_width>] [-f]\n"
             << exe
             << " <detection_config_path> <pose_point_config_path> <input> [-h "
-               "<resize_height>] [-w <resize_width>]\n";
+               "<resize_height>] [-w <resize_width>] [-f]\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -240,8 +240,8 @@ int main(int argc, char* argv[]) {
   ObjectDetectionOption detection_option;
   PoseEstimationOption estimation_option;
   std::string input;
-  int o, resize_height{320}, resize_width{320};
-  const char* optstring = "w:h:";
+  int o, resize_height{320}, resize_width{320}, flip{0};
+  const char* optstring = "w:h:f";
   while ((o = getopt(argc, argv, optstring)) != -1) {
     switch (o) {
       case 'w':
@@ -249,6 +249,9 @@ int main(int argc, char* argv[]) {
         break;
       case 'h':
         resize_height = atoi(optarg);
+        break;
+      case 'f':
+        flip = 1;
         break;
       case '?':
         std::cout << "[ ERROR ] Unsupported usage" << std::endl;
@@ -273,7 +276,7 @@ int main(int argc, char* argv[]) {
 
   std::unique_ptr<Tracker> tracker = std::unique_ptr<Tracker>(
       new Tracker(detection_option, estimation_option));
-  SharedDataLoader dataloader{resize_height, resize_width};
+  SharedDataLoader dataloader{resize_height, resize_width, flip};
   if (dataloader.init(input) != 0) {
     std::cout << "[ ERROR ] dataloader init error" << std::endl;
     return -1;

@@ -9,9 +9,9 @@
 
 static void usage(const char *exe) {
   std::cout << "Usage: \n"
-    << exe
-    << " <model_path> <label_path> <video_path> <save_path>(*.avi)\n"
-    << exe << " <config_path> <video_path> <save_path>(*.avi)\n";
+            << exe
+            << " <model_path> <label_path> <video_path> <save_path>(*.avi)\n"
+            << exe << " <config_path> <video_path> <save_path>(*.avi)\n";
 }
 
 int main(int argc, char *argv[]) {
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
     return -1;
   }
   double rate = capture.get(cv::CAP_PROP_FPS);
-  int delay = 1000 / rate;
+  // int delay = 1000 / rate;
   int fps = rate;
   int frameWidth = frame.rows;
   int frameHeight = frame.cols;
@@ -85,9 +85,8 @@ int main(int argc, char *argv[]) {
 
     draw_boxes_inplace(frame, bboxes);
     writer.write(frame);
-    cv::waitKey(
-        delay);  // 因为图像处理需要消耗一定时间,所以图片展示速度比保存视频要慢
-                 // cv::imshow("Detection", frame);
+    // cv::waitKey(delay);
+    // cv::imshow("Detection", frame);
   }
 
   capture.release();

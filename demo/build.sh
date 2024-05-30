@@ -17,13 +17,13 @@ function config_native() {
 
 function config_x86_riscv64() {
   # Note: update the following settings if necessary
-  _NAME=cuspace
+  _NAME=spine
   SDK=$(dirname $(which ${_NAME}))
 
   CROSS_TOOL=$SDK/spacemit-gcc/bin/riscv64-unknown-linux-gnu-
   SYSROOT=$SDK/spacemit-gcc/sysroot
   BIANBUAI_HOME=$SDK/bianbu-ai-support
-  ORT_HOME=$SDK/spacemit-ort # cuspace-ai
+  ORT_HOME=$SDK/spacemit-ort
   OPENCV_DIR=$SDK/bianbu-ai-support/lib/3rdparty/opencv4/lib/cmake/opencv4
   QEMU_CMD="$SDK/spacemit-qemu/bin/qemu-riscv64 -L $SYSROOT"
 }

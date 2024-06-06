@@ -12,7 +12,7 @@ from setuptools.command.build_ext import build_ext
 package_name = "bianbuai"
 
 SCRIPT_DIR = os.path.dirname(__file__)
-TOP_DIR = os.path.realpath(os.path.join(SCRIPT_DIR, ".."))
+TOP_DIR = os.path.realpath(SCRIPT_DIR) # os.path.join(SCRIPT_DIR, "..")
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
 PLAT_TO_CMAKE = {

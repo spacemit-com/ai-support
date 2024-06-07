@@ -9,6 +9,7 @@
 	dh $@
 
 override_dh_auto_configure:
+	if [ -f setup.py ]; then rm setup.py; fi
 	dh_auto_configure -- -DORT_HOME=/usr -DDEMO=ON -DXDG=ON
 
 override_dh_shlibdeps:

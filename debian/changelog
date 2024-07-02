@@ -1,3 +1,10 @@
+bianbu-ai-support (1.1.0) noble-porting; urgency=medium
+
+  [ bianbu-ci ]
+  * Sync change from bianbu-24.04/1.1.0
+
+ -- qinhongjie <hongjie.qin@spacemit.com>  Tue, 02 Jul 2024 17:40:40 +0800
+
 bianbu-ai-support (1.0.15) mantic-porting; urgency=medium
 
   [ bianbu-ci ]

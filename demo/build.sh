@@ -43,6 +43,11 @@ function build() {
   echo "[INFO] Building demos done."
 }
 if [[ ! -d build ]]; then
+  # check if cmake is installed
+  if ! command -v cmake &> /dev/null; then
+    echo "Error: cmake is not installed! Plz install cmake first."
+    exit 1
+  fi
   build
 else
   cd build && make && cd ..

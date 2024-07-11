@@ -8,4 +8,3 @@ build*
 CMakeSettings.json
 
 /data
-/third_parties

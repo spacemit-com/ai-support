@@ -1,3 +1,9 @@
+bianbu-ai-support (1.1.1) stable; urgency=medium
+
+  * Support bianbu-23.10 and bianbu-24.04 with spacemit-ort v1.2.0 
+
+ -- qinhongjie <hongjie.qin@spacemit.com>  Thu, 11 Jul 2024 12:40:33 +0800
+
 bianbu-ai-support (1.1.0) noble-porting; urgency=medium
 
   [ bianbu-ci ]
